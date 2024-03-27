@@ -200,7 +200,7 @@ def RunChatHuggingFaceTransformers(model, tokenizer):
         elif message == 'n':
             print("--- reset chat ---")
             messages = MessagesAI()
-            recent_messages = messages.read_messages_from_json("messages.json")
+            recent_messages = messages.read_messages_from_json("background.json")
             for item in recent_messages.get_messages():
                 messages.add_message(item)            
         else:
