@@ -202,7 +202,13 @@ def RunChatHuggingFaceTransformers(model, tokenizer):
             messages = MessagesAI()
             recent_messages = messages.read_messages_from_json("background.json")
             for item in recent_messages.get_messages():
-                messages.add_message(item)            
+                messages.add_message(item)
+        elif message == 'r':
+            print("--- reload chat ---")
+            messages = MessagesAI()
+            recent_messages = messages.read_messages_from_json("messages.json")
+            for item in recent_messages.get_messages():
+                messages.add_message(item)                 
         else:
             message = MessageAI(message, "user")
             messages.add_message(message)
@@ -240,7 +246,7 @@ def HuggingFaceTransformersQuery(model, tokenizer, messages):
 
     generation_config = GenerationConfig(
         do_sample=True,
-        temperature=1.0, #0.1
+        temperature=1.0, #1.0
         pad_token_id=tokenizer.eos_token_id,
         max_new_tokens=100
         )
