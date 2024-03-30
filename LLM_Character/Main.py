@@ -248,7 +248,7 @@ def HuggingFaceTransformersQuery(model, tokenizer, messages):
         do_sample=True,
         temperature=1.0, #1.0
         pad_token_id=tokenizer.eos_token_id,
-        max_new_tokens=150
+        max_new_tokens=128
         )
     generation_config.eos_token_id = tokenizer.eos_token_id
 
