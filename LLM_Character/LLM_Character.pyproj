@@ -21,6 +21,7 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="HuggingFace.py" />
     <Compile Include="LlmTraining.py" />
     <Compile Include="MessagesAI.py" />
     <Compile Include="Main.py" />

@@ -2,6 +2,7 @@
 #
 #
 
+from HuggingFace import HuggingFace
 import UdpComms as U
 import time
 import openai
@@ -101,7 +102,7 @@ def RunServer(model, sock):
                     messages.add_message(item)
             else:
                 messages.add_message(MessageAI(dataclass._message, "user"))
-                messages, response = HuggingFaceQuery(model, tokenizer, messages)
+                messages, response = model.Query(messages)
                 dataclass._message = response
                 obj = json.dumps(dataclass.__dict__)
                 sock.SendData(obj)
@@ -146,19 +147,7 @@ def RunChatHuggingFaceCtransformers():
     print(tokenizer.decode(outputs[0]))
 
 
-def LoadModel(model_id):
-    model = AutoModelForCausalLM.from_pretrained(model_id, torch_dtype=torch.bfloat16, load_in_4bit=True) # device_map="auto",
-    model.config.sliding_window = 4096
-    tokenizer = AutoTokenizer.from_pretrained(model_id)
-    #tokenizer.bos_token = "<bos>"
-    #tokenizer.pad_token = "<pad>"
-    tokenizer.cls_token = "<cls>"
-    tokenizer.sep_token = "<s>"
-    tokenizer.mask_token = "<mask>"
-    return model, tokenizer
-
-
-def RunChatHuggingFaceTransformers(model, tokenizer):
+def RunChat(model):
 
     #messages = [
     #    {"role": "user", "content": "What is your favourite condiment?"},
@@ -212,58 +201,10 @@ def RunChatHuggingFaceTransformers(model, tokenizer):
         else:
             message = MessageAI(message, "user")
             messages.add_message(message)
-            messages, _ = HuggingFaceQuery(model, tokenizer, messages)
+            messages, _ = model.Query(messages)
             messages.write_messages_to_json("messages.json")
 
     print('...')
-
-
-def RunSummarizeHuggingFaceTransformers(model, tokenizer):
-    
-    messages = MessagesAI()
-    messages = messages.read_messages_from_json("messages.json")
-    
-    user_message = messages.get_user_message()
-    message = MessageAI("Summerize the chat: " + user_message.get_user_message(), "user")
-    messages = MessagesAI()
-    messages.add_message(message)
-    messages = HuggingFaceQuery(model, tokenizer, messages)
-
-
-def HuggingFaceQuery(model, tokenizer, messages):
-    response = HuggingFaceTransformersQuery(model, tokenizer, messages)
-    response = HuggingFaceTransformersDecodeMessage(response)
-    message = MessageAI(response, "assistant")
-    messages.add_message(message)
-    print('--- ---\n ' + response + '\n--- ---')
-    return messages, response
-
-
-def HuggingFaceTransformersQuery(model, tokenizer, messages):
-    startTime = time.process_time()
-    device = "cuda"
-    inputs = tokenizer.apply_chat_template(messages.get_messages_formatted(), return_tensors="pt").to(device)  # tokenize=False)
-
-    generation_config = GenerationConfig(
-        do_sample=True,
-        temperature=1.0, #1.0
-        pad_token_id=tokenizer.eos_token_id,
-        max_new_tokens=128
-        )
-    generation_config.eos_token_id = tokenizer.eos_token_id
-
-    outputs = model.generate(inputs, generation_config=generation_config)
-    response = tokenizer.decode(outputs[0], skip_special_tokens=True)
-    
-    print('Processing time: ' + str(time.process_time() - startTime) + ' sec')
-    return response
-
-
-def HuggingFaceTransformersDecodeMessage(message):
-    #print(message)
-    response = message.replace("[/INST]","[INST]").split("[INST]")
-    #response = message.replace("GPT4 Correct Assistant:","GPT4 Corrent User:").split("GPT4 Corrent User:")
-    return response[len(response)-1]
 
 
 # Start main program
@@ -273,7 +214,9 @@ def HuggingFaceTransformersDecodeMessage(message):
 print("CUDA found " + str(torch.cuda.is_available()))
 
 model_id = "mistralai/Mistral-7B-Instruct-v0.2" # "mistralai/Mixtral-8x7B-Instruct-v0.1" # "mistralai/Mistral-7B-Instruct-v0.1" # mistralai/Mistral-7B-Instruct-v0.2 # openchat/openchat-3.5-0106
-model, tokenizer = LoadModel(model_id)
+#model, tokenizer = LoadModel(model_id)
+model = HuggingFace()
+model.Init(model_id)
 
 # Create UDP socket to use for sending (and receiving)
 sock = U.UdpComms(udpIP="127.0.0.1", portTX=8000, portRX=8001, enableRX=True, suppressWarnings=True)
@@ -282,5 +225,5 @@ sock = U.UdpComms(udpIP="127.0.0.1", portTX=8000, portRX=8001, enableRX=True, su
 #RunChat()
 #RunChatHuggingFaceCtransformers()
 
-RunChatHuggingFaceTransformers(model, tokenizer)
-RunSummarizeHuggingFaceTransformers(model, tokenizer)
+RunChat(model)
+model.QuerySummarize()
