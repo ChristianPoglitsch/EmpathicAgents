@@ -2,7 +2,8 @@
 # To install:
 # pip install -r requirements.txt
 # 
-# For Windows please install
+# For Windows please install AFTER all other dependencies
+# pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
 # https://github.com/TimDettmers/bitsandbytes/issues/822
 # pip install https://github.com/jllllll/bitsandbytes-windows-webui/releases/download/wheels/bitsandbytes-0.41.1-py3-none-win_amd64.whl
 accelerate==0.28.0
@@ -16,3 +17,5 @@ scipy==1.11.1
 sentencepiece==0.1.99
 transformers==4.38.2
 trl==0.5.0
+openai
+gpt4all
