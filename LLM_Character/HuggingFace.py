@@ -42,7 +42,7 @@ class HuggingFace:
 
 
     def QuerySummarize(self):
-        self.RunSummarizeHuggingFaceTransformers(self._model, self._tokenízer)
+        self.RunSummarizeHuggingFaceTransformers(self._model, self._tokenizer)
 
 
     def RunChatHuggingFaceCtransformers(self):
