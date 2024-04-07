@@ -17,6 +17,36 @@
     {
         "class_type": "MessageAI",
         "role": "assistant",
-        "content": " [\"Message\": \"Hello, I see you here at Cafe Mild. Beautiful place isn't it? I'm Camila, by the way. Nice to meet you. What brings you here today?\",\n \"Trust\": 3,\n \"Time\": \"11:05 AM\",\n \"Location\": { \"city\": \"Graz\", \"venue\": \"Cafe Mild\" },\n \"Emotion\": \"neutral\"]"
+        "content": " [{\"Message\": \"Hi, I'm Camila. Nice to meet you. What's your background? I'm 23 years old and I live and work in Graz. I enjoy gardening and studying game development in my free time.\",\n \"Trust\": 3,\n \"Emotion\": \"neutral\",\n \"Time\": \"11:05 AM\",\n \"Location\": \"Cafe Mild\"}]\n\nI'm here to chat and learn more about you. Could you tell me a bit about yourself? What's your name, age, and what"
+    },
+    {
+        "class_type": "MessageAI",
+        "role": "user",
+        "content": "Nice to meet you too. Do you like to drink a caffee?"
+    },
+    {
+        "class_type": "MessageAI",
+        "role": "assistant",
+        "content": " [{\"Message\": \"Yes, I do enjoy a good cup of coffee. What about you? Do you have a favorite coffee or do you prefer another drink?\",\n \"Trust\": 3,\n \"Emotion\": \"neutral\",\n \"Time\": \"11:10 AM\",\n \"Location\": \"Cafe Mild\"}]\n\nI'm also curious, what hobbies do you have besides coffee or tea? Do you have any other interests that you'd like to share with me? I find that shared interests can lead to interesting conversations."
+    },
+    {
+        "class_type": "MessageAI",
+        "role": "user",
+        "content": "S"
+    },
+    {
+        "class_type": "MessageAI",
+        "role": "assistant",
+        "content": " [{\"Message\": \"I'm sorry, I didn't quite catch that. Could you please repeat what you said or elaborate a bit on the hobbies or interests you have aside from coffee or tea?\",\n \"Trust\": 3,\n \"Emotion\": \"neutral\",\n \"Time\": \"11:15 AM\",\n \"Location\": \"Cafe Mild\"}]\n\nDo let me know if you'd like to discuss anything else as well. I enjoy a good conversation and am always open to learning new things. Let's continue getting to know each other better"
+    },
+    {
+        "class_type": "MessageAI",
+        "role": "user",
+        "content": "Hello"
+    },
+    {
+        "class_type": "MessageAI",
+        "role": "assistant",
+        "content": " [{\"Message\": \"Hi again. How about you? What do you enjoy doing in your free time? Do you have any hobbies or interests that you'd like to share with me? I'm Camila, a 23-year-old woman from Graz, and I love gardening and studying game development.\",\n \"Trust\": 3,\n \"Emotion\": \"neutral\",\n \"Time\": \"11:20 AM\",\n \"Location\": \"Cafe Mild\"}]\n\nI'm not here just to talk about myself, but I'd"
     }
 ]

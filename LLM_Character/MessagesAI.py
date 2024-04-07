@@ -17,7 +17,7 @@ class MessageAI():
     def get_user_message(self):
         if self.class_type == "MessageAI" and self.role == 'user':
             return self.message
-        return ""
+        return None
     
     def get_role(self):
         return self.role
@@ -26,6 +26,21 @@ class MessageAI():
         return self.class_type
 
 
+class MessageAIStruct(MessageAI):
+    
+    def __init__(self, message, role, *args, **kwargs):
+        self.message =  message
+        self.role = role
+        class_type = kwargs.get('class_type', 'MessageAI')
+        self.class_type = class_type
+        message_as_string = json.dumps(message)
+        message_as_json = json.loads(message_as_string)
+        super().__init__(message_as_string, role, args, kwargs)
+
+    def get_message_formatted(self):
+        return {"class_type": self.class_type, "role": self.role, "content": json.dumps(self.message)}
+    
+
 class MessagesAI():
 
     def __init__(self):
@@ -33,6 +48,9 @@ class MessagesAI():
 
     def add_message(self, message):
         self.messages.append(message)
+        
+    def create_message(self, message, role):
+        return MessageAI(message, role)
 
     def get_messages(self):
         return self.messages
@@ -67,3 +85,8 @@ class MessagesAI():
                 message_ai = MessageAI(item["content"], item["role"], class_type = item["class_type"])
                 messages_ai.add_message(message_ai)
         return messages_ai
+
+
+struct_message = {"message": "Hello", "Date": "Today", "Location": "Graz"}
+m = MessageAIStruct(struct_message, "assistant")
+print(m.get_message_formatted())

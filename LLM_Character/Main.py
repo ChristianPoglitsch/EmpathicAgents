@@ -69,16 +69,27 @@ class AiDataClass():
             sort_keys=True, indent=4)
 
 
-def RunServer(model, sock):
+# Send and received data
+class AiMessage():
+    def __init__(self):
+        self.Message = None
+        self.Date = None
+        self.Time = None
+        self.Trust = None
+        self.Emotion = None
+
+    def toJSON(self):
+        return json.dumps(self, default=lambda o: o.__dict__, 
+            sort_keys=True, indent=4)
+
+
+def RunServer(model, sock, messages):
 
     while True:
     
         sendData = False
         dataclass = AiDataClass
-        messages = MessagesAI()
-        recent_messages = messages.read_messages_from_json("messages.json")
-        for item in recent_messages.get_messages():
-            messages.add_message(item)
+        messages = messages.read_messages_from_json("messages.json")
         
         #sock.SendData('Sent from Python: ' + str(i)) # Send this string to other application
 
@@ -96,12 +107,9 @@ def RunServer(model, sock):
             # Reload if necessary            
             if dataclass._message == 'n':
                 print("--- reset chat ---")
-                messages = MessagesAI()
-                recent_messages = messages.read_messages_from_json("messages.json")
-                for item in recent_messages.get_messages():
-                    messages.add_message(item)
+                messages = messages.read_messages_from_json("messages.json")
             else:
-                messages.add_message(MessageAI(dataclass._message, "user"))
+                messages.add_message(messages.create_message(dataclass._message, "user"))
                 messages, response = model.Query(messages)
                 dataclass._message = response
                 obj = json.dumps(dataclass.__dict__)
@@ -147,7 +155,7 @@ def RunChatHuggingFaceCtransformers():
     print(tokenizer.decode(outputs[0]))
 
 
-def RunChat(model):
+def RunChat(model, messages):
 
     #messages = [
     #    {"role": "user", "content": "What is your favourite condiment?"},
@@ -156,7 +164,6 @@ def RunChat(model):
     #]
 
     load_initial = False
-    messages = MessagesAI()
 
     if load_initial:
 
@@ -175,9 +182,7 @@ def RunChat(model):
         # load background story for agent
         messages = messages.read_messages_from_json("background.json")  
     else:
-        recent_messages = messages.read_messages_from_json("messages.json")
-        for item in recent_messages.get_messages():
-            messages.add_message(item)
+        messages = messages.read_messages_from_json("messages.json")
 
     chat_active = True
     while chat_active:
@@ -188,19 +193,12 @@ def RunChat(model):
             print(messages.prints_messages())
         elif message == 'n':
             print("--- reset chat ---")
-            messages = MessagesAI()
-            recent_messages = messages.read_messages_from_json("background.json")
-            for item in recent_messages.get_messages():
-                messages.add_message(item)
+            messages = messages.read_messages_from_json("background.json")
         elif message == 'r':
             print("--- reload chat ---")
-            messages = MessagesAI()
-            recent_messages = messages.read_messages_from_json("messages.json")
-            for item in recent_messages.get_messages():
-                messages.add_message(item)                 
+            messages = messages.read_messages_from_json("messages.json")           
         else:
-            message = MessageAI(message, "user")
-            messages.add_message(message)
+            messages.add_message(messages.create_message(message, "user"))
             messages, _ = model.Query(messages)
             messages.write_messages_to_json("messages.json")
 
@@ -212,6 +210,8 @@ def RunChat(model):
 
 # CUDA recommended!
 print("CUDA found " + str(torch.cuda.is_available()))
+
+messages = MessagesAI()
 
 model_id = "mistralai/Mistral-7B-Instruct-v0.2" # "mistralai/Mixtral-8x7B-Instruct-v0.1" # "mistralai/Mistral-7B-Instruct-v0.1" # mistralai/Mistral-7B-Instruct-v0.2 # openchat/openchat-3.5-0106
 #model, tokenizer = LoadModel(model_id)
@@ -225,5 +225,5 @@ sock = U.UdpComms(udpIP="127.0.0.1", portTX=8000, portRX=8001, enableRX=True, su
 #RunChat()
 #RunChatHuggingFaceCtransformers()
 
-RunChat(model)
+RunChat(model, messages)
 model.QuerySummarize()
