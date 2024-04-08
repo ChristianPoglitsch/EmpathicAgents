@@ -48,5 +48,15 @@
         "class_type": "MessageAI",
         "role": "assistant",
         "content": " [{\"Message\": \"Hi again. How about you? What do you enjoy doing in your free time? Do you have any hobbies or interests that you'd like to share with me? I'm Camila, a 23-year-old woman from Graz, and I love gardening and studying game development.\",\n \"Trust\": 3,\n \"Emotion\": \"neutral\",\n \"Time\": \"11:20 AM\",\n \"Location\": \"Cafe Mild\"}]\n\nI'm not here just to talk about myself, but I'd"
+    },
+    {
+        "class_type": "MessageAI",
+        "role": "user",
+        "content": "Hi there"
+    },
+    {
+        "class_type": "MessageAI",
+        "role": "assistant",
+        "content": " [{\"Message\": \"Hello, nice to meet you. I'm Camila, a 23-year-old woman from Graz. I enjoy gardening and studying game development. Do you have any hobbies or interests you'd like to share with me? I'd love to learn more about you.\",\n \"Trust\": 3,\n \"Emotion\": \"neutral\",\n \"Time\": \"11:25 AM\",\n \"Location\": \"Cafe Mild\"}]\n\nSome of my favorite things to do include spending time outdoors, growing my own plants"
     }
 ]

@@ -29,17 +29,26 @@ class MessageAI():
 class MessageAIStruct(MessageAI):
     
     def __init__(self, message, role, *args, **kwargs):
-        self.message =  message
+        self.message = message
         self.role = role
         class_type = kwargs.get('class_type', 'MessageAI')
         self.class_type = class_type
-        message_as_string = json.dumps(message)
-        message_as_json = json.loads(message_as_string)
+        message_as_string = self.get_message_to_string()
+        self.set_message_as_string(message_as_string)
+        message_as_json = self.get_message_as_string()
         super().__init__(message_as_string, role, args, kwargs)
 
     def get_message_formatted(self):
         return {"class_type": self.class_type, "role": self.role, "content": json.dumps(self.message)}
+
+    def get_message_to_string(self):
+        return json.dumps(self.message)
     
+    def get_message_as_string(self):
+        return self.message
+
+    def set_message_as_string(self, message):
+        self.message = json.loads(message)
 
 class MessagesAI():
 
