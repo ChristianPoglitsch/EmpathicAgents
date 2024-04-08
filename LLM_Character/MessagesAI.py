@@ -96,6 +96,6 @@ class MessagesAI():
         return messages_ai
 
 
-struct_message = {"message": "Hello", "Date": "Today", "Location": "Graz"}
+struct_message = {"message": "Hello", "Trust": "3", "Time": "11 AM", "Location": "Graz", "Emotion": "Neutral"}
 m = MessageAIStruct(struct_message, "assistant")
 print(m.get_message_formatted())
