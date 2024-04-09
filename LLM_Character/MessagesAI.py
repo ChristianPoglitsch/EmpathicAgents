@@ -79,7 +79,9 @@ class MessagesAI():
     def get_user_message(self):
         user_message = ""
         for item in self.messages:
-            user_message = user_message + item.get_user_message()
+            m = item.get_user_message()
+            if m != None:
+                user_message = user_message + m
         return MessageAI(user_message, "user")
 
     def write_messages_to_json(self, file_path):
