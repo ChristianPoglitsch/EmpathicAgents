@@ -72,7 +72,7 @@ class HuggingFace:
 
 
     def LoadModel(self, model_id):
-        model = AutoModelForCausalLM.from_pretrained(model_id, torch_dtype=torch.bfloat16, load_in_4bit=True, device_map="auto") # device_map="auto",
+        model = AutoModelForCausalLM.from_pretrained(model_id, torch_dtype=torch.bfloat16, load_in_4bit=True) #, device_map="auto") # device_map="auto",
         model.config.sliding_window = 4096
         tokenizer = AutoTokenizer.from_pretrained(model_id)
         #tokenizer.bos_token = "<bos>"
