@@ -14,6 +14,7 @@ import azure.cognitiveservices.speech as speechsdk
 import json
 import time
 from MessagesAI import MessagesAI, MessageAI
+from cognitive_modules.summary import summary
 
 
 def SpeechVoice(model):
@@ -227,4 +228,4 @@ sock = U.UdpComms(udpIP="127.0.0.1", portTX=8000, portRX=8001, enableRX=True, su
 #RunChatHuggingFaceCtransformers()
 
 RunChat(model, messages)
-model.QuerySummarize()
+summary(model)

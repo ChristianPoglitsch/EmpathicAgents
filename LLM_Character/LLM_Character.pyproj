@@ -21,7 +21,10 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="cognitive_modules\plan.py" />
+    <Compile Include="cognitive_modules\reflect.py" />
     <Compile Include="cognitive_modules\retrieve.py" />
+    <Compile Include="cognitive_modules\summary.py" />
     <Compile Include="HuggingFace.py" />
     <Compile Include="LlmTraining.py" />
     <Compile Include="MessagesAI.py" />
