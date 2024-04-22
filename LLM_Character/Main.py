@@ -214,6 +214,14 @@ print("CUDA found " + str(torch.cuda.is_available()))
 
 messages = MessagesAI()
 
+# Load Llama 3
+import transformers
+model_id = "meta-llama/Meta-Llama-3-8B"
+pipeline = transformers.pipeline("text-generation", model=model_id, model_kwargs={"torch_dtype": torch.bfloat16}, device_map="auto", token=os.getenv("HF_TOKEN"))
+pipeline("Hey how are you doing today?")
+
+
+
 # "v2ray/Mixtral-8x22B-v0.1" "mistralai/Mixtral-8x7B-Instruct-v0.1" "mistralai/Mistral-7B-Instruct-v0.1" mistralai/Mistral-7B-Instruct-v0.2 openchat/openchat-3.5-0106
 model_id = "mistralai/Mistral-7B-Instruct-v0.2"
 #model, tokenizer = LoadModel(model_id)
