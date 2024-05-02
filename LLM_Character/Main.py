@@ -230,7 +230,7 @@ model.Init(model_id)
 
 # Create UDP socket to use for sending (and receiving)
 sock = U.UdpComms(udpIP="127.0.0.1", portTX=8000, portRX=8001, enableRX=True, suppressWarnings=True)
-#RunServer(model, sock)
+#RunServer(model, sock, messages)
 
 #RunChat()
 #RunChatHuggingFaceCtransformers()

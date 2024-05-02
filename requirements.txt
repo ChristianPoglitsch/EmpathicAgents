@@ -19,3 +19,4 @@ transformers==4.38.2
 trl==0.5.0
 openai
 gpt4all
+torch[cuda]
