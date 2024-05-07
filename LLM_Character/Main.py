@@ -108,7 +108,7 @@ def RunServer(model, sock, messages):
             # Reload if necessary            
             if dataclass._message == 'n':
                 print("--- reset chat ---")
-                messages = messages.read_messages_from_json("messages.json")
+                messages = messages.read_messages_from_json("background.json")
             else:
                 messages.add_message(messages.create_message(dataclass._message, "user"))
                 messages, response = model.Query(messages)
@@ -230,7 +230,7 @@ model.Init(model_id)
 
 # Create UDP socket to use for sending (and receiving)
 sock = U.UdpComms(udpIP="127.0.0.1", portTX=8000, portRX=8001, enableRX=True, suppressWarnings=True)
-#RunServer(model, sock, messages)
+RunServer(model, sock, messages)
 
 #RunChat()
 #RunChatHuggingFaceCtransformers()
