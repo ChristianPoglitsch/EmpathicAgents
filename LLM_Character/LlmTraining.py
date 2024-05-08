@@ -242,11 +242,13 @@ def LoadMistralExampleDataset():
     model = prepare_model_for_kbit_training(model)
     model = get_peft_model(model, peft_config)
     
+    temp_dir = "mistral_instruct_generation"
+    os.mkdir(temp_dir)
     from transformers import TrainingArguments
     args = TrainingArguments(
-      output_dir = "mistral_instruct_generation",
+      output_dir = temp_dir,
       #num_train_epochs=5,
-      max_steps = 19, # comment out this line if you want to train in epochs
+      max_steps = 3, # comment out this line if you want to train in epochs
       per_device_train_batch_size = 4,
       warmup_steps = 0.03,
       logging_steps=10,
@@ -276,6 +278,9 @@ def LoadMistralExampleDataset():
 
     trainer.train()
     trainer.save_model("trained\exnrt_mistral_instruct")
+    
+    import shutil
+    shutil.rmtree(temp_dir)
 
 
 
