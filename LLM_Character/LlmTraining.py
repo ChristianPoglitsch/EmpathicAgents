@@ -215,14 +215,16 @@ def LoadMistralExampleDataset():
        bnb_4bit_compute_dtype=torch.bfloat16
     )
 
+    model_id = "mistralai/Mistral-7B-Instruct-v0.2"  # "mistralai/Mistral-7B-Instruct-v0.1
+
     model = AutoModelForCausalLM.from_pretrained(
-        "mistralai/Mistral-7B-Instruct-v0.1",
+        model_id,
         device_map='auto',
         quantization_config=nf4_config,
         use_cache=False  
     )
 
-    tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-v0.1")
+    tokenizer = AutoTokenizer.from_pretrained(model_id)
 
     tokenizer.pad_token = tokenizer.eos_token
     tokenizer.padding_side = "right"
