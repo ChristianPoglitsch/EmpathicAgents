@@ -248,7 +248,7 @@ def LoadMistralExampleDataset():
     args = TrainingArguments(
       output_dir = temp_dir,
       #num_train_epochs=5,
-      max_steps = 3, # comment out this line if you want to train in epochs
+      max_steps = 10, # comment out this line if you want to train in epochs - 100+ recommended
       per_device_train_batch_size = 4,
       warmup_steps = 0.03,
       logging_steps=10,
