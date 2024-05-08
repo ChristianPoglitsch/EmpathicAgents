@@ -2,6 +2,8 @@
 #
 #
 
+from typing import Type
+from urllib import response
 from HuggingFace import HuggingFace
 import UdpComms as U
 import time
@@ -60,7 +62,7 @@ def Speech(model, message):
 
 
 # Send and received data
-class AiDataClass():
+class  AiDataClass():
     def __init__(self, _value, _message):
         self._value = _value
         self._message = _message
@@ -103,6 +105,72 @@ def RunServer(model, sock, messages):
             dataclass._value = dataclass._value + 1
             sendData = True
             print(dataclass._value)
+    
+        if sendData:
+            # Reload if necessary            
+            if dataclass._message == 'n':
+                print("--- reset chat ---")
+                messages = messages.read_messages_from_json("background.json")
+            else:
+                messages.add_message(messages.create_message(dataclass._message, "user"))
+                messages, response = model.Query(messages)
+                dataclass._message = response
+                obj = json.dumps(dataclass.__dict__)
+                sock.SendData(obj)
+            sendData = False
+
+        time.sleep(1)
+        
+
+def RunServerChatGPT(client, sock, messages):
+
+    while True: 
+        sendData = False
+        dataclass = AiDataClass
+        messages = messages.read_messages_from_json("messages.json")
+        
+        data = sock.ReadReceivedData() # read data
+
+        if data != None: # if NEW data has been received since last ReadReceivedData function call
+            #data from user/Unity
+            j = json.loads(data)
+            dataclass = AiDataClass(**j)
+            dataclass._value = dataclass._value + 1
+            sendData = True
+            print(dataclass._value)
+            
+        if sendData:
+            # Reload if necessary            
+            if dataclass._message == 'n':
+                print("--- reset chat ---")
+                messages = messages.read_messages_from_json("background.json")
+            else:
+               messages.add_message(messages.create_message(dataclass._message, "user"))
+             
+               #prepare messages for ChatGPT
+               message_list = messages.get_messages_formatted_ChatGPT()
+
+               #query ChatGPT
+               chat = client.chat.completions.create( 
+                    messages=message_list,
+                    model="gpt-3.5-turbo"
+               ) 
+               response = chat.choices[0].message.content 
+               print(f"ChatGPT: {response}") 
+               dataclass._message = response
+               obj = json.dumps(dataclass.__dict__)
+               sock.SendData(obj)
+            sendData = False
+
+        time.sleep(1)
+
+    while True:
+    
+        
+        
+        #sock.SendData('Sent from Python: ' + str(i)) # Send this string to other application
+
+        
     
         if sendData:
             # Reload if necessary            
@@ -209,6 +277,7 @@ def RunChat(model, messages):
 # Start main program
 # Set HF_HOME for cache folder
 
+
 # CUDA recommended!
 print("CUDA found " + str(torch.cuda.is_available()))
 
@@ -230,6 +299,16 @@ model.Init(model_id)
 
 # Create UDP socket to use for sending (and receiving)
 sock = U.UdpComms(udpIP="127.0.0.1", portTX=8000, portRX=8001, enableRX=True, suppressWarnings=True)
+
+
+#ChatGPT IMPLEMENTATION START
+#Start client
+
+#client = openai.OpenAI(api_key = 'sk-proj-ed4Ssx8ZsCgSXmRANkyNT3BlbkFJDTnEEnbjbDvoR3xfllx2')  
+#RunServerChatGPT(client, sock, messages)
+
+#ChatGPT IMPLEMENTATION END
+
 RunServer(model, sock, messages)
 
 #RunChat()

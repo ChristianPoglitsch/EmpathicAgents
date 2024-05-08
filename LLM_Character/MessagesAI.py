@@ -11,6 +11,9 @@ class MessageAI():
     def get_message_formatted(self):
         return {"class_type": self.class_type, "role": self.role, "content": self.message}
     
+    def get_message_formatted_ChatGPT(self):
+        return {"role": self.role, "content": self.message}
+    
     def print_message(self):
         return '[' + self.role + '] ' + self.message + '\n'
 
@@ -68,6 +71,12 @@ class MessagesAI():
         message_list = []
         for item in self.messages:
             message_list.append(item.get_message_formatted())
+        return message_list
+    
+    def get_messages_formatted_ChatGPT(self):
+        message_list = []
+        for item in self.messages:
+            message_list.append(item.get_message_formatted_ChatGPT())
         return message_list
 
     def prints_messages(self):
