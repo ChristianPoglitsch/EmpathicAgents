@@ -246,7 +246,7 @@ def LoadMistralExampleDataset():
     args = TrainingArguments(
       output_dir = "mistral_instruct_generation",
       #num_train_epochs=5,
-      max_steps = 100, # comment out this line if you want to train in epochs
+      max_steps = 19, # comment out this line if you want to train in epochs
       per_device_train_batch_size = 4,
       warmup_steps = 0.03,
       logging_steps=10,
@@ -275,7 +275,7 @@ def LoadMistralExampleDataset():
     )
 
     trainer.train()
-    trainer.save_model("exnrt_mistral_instruct")
+    trainer.save_model("trained\exnrt_mistral_instruct")
 
 
 
