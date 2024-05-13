@@ -1,4 +1,4 @@
-﻿from transformers import AutoModelForCausalLM, AutoTokenizer, GenerationConfig, BitsAndBytesConfig, TextIteratorStreamer
+﻿from transformers import AutoModelForCausalLM, AutoTokenizer, GenerationConfig, BitsAndBytesConfig, TextIteratorStreamer, pipeline
 from trl.trainer.utils import PeftSavingCallback
 from peft import prepare_model_for_kbit_training
 from peft import LoraConfig, get_peft_model, PeftModel
@@ -250,7 +250,7 @@ def LoadMistralExampleDataset():
     args = TrainingArguments(
       output_dir = temp_dir,
       #num_train_epochs=5,
-      max_steps = 10, # comment out this line if you want to train in epochs - 100+ recommended
+      max_steps = 15, # comment out this line if you want to train in epochs - 100+ recommended
       per_device_train_batch_size = 4,
       warmup_steps = 0.03,
       logging_steps=10,
@@ -278,11 +278,23 @@ def LoadMistralExampleDataset():
       eval_dataset=instruct_tune_dataset["test"]
     )
 
+    # before fine tuning
+    prompt = "Can I find information about the code's approach to handling long-running tasks and background jobs?" # "How to make banana bread?"
+    pipe = pipeline(task="text-generation", model=model, tokenizer=tokenizer, max_length=200)
+    result = pipe(f"<s>[INST] {prompt} [/INST]")
+    print(result[0]['generated_text'])    
+
     trainer.train()
     trainer.save_model("trained\exnrt_mistral_instruct")
     
     import shutil
     shutil.rmtree(temp_dir)
+    
+    # fine tuned model
+    prompt = "Can I find information about the code's approach to handling long-running tasks and background jobs?" # "How to make banana bread?"
+    pipe = pipeline(task="text-generation", model=model, tokenizer=tokenizer, max_length=200)
+    result = pipe(f"<s>[INST] {prompt} [/INST]")
+    print(result[0]['generated_text'])
 
 
 
