@@ -205,7 +205,7 @@ def RunTrainedModel(model_id, trained_path):
 def LoadMistralExampleDataset():
     instruct_tune_dataset = load_dataset("mosaicml/instruct-v3")
     print(instruct_tune_dataset)
-    created_prompt = create_prompt(instruct_tune_dataset["train"][0])
+    created_prompt = create_prompt(instruct_tune_dataset["train"][1])
     print(created_prompt)
     
     nf4_config = BitsAndBytesConfig(
@@ -279,7 +279,7 @@ def LoadMistralExampleDataset():
     )
 
     # before fine tuning
-    prompt = "Can I find information about the code's approach to handling long-running tasks and background jobs?" # "How to make banana bread?"
+    prompt = "What are different types of grass?" # "How to make banana bread?"
     pipe = pipeline(task="text-generation", model=model, tokenizer=tokenizer, max_length=200)
     result = pipe(f"<s>[INST] {prompt} [/INST]")
     print(result[0]['generated_text'])    
@@ -291,7 +291,7 @@ def LoadMistralExampleDataset():
     shutil.rmtree(temp_dir)
     
     # fine tuned model
-    prompt = "Can I find information about the code's approach to handling long-running tasks and background jobs?" # "How to make banana bread?"
+    prompt = "What are different types of grass?" # "Can I find information about the code's approach to handling long-running tasks and background jobs?"
     pipe = pipeline(task="text-generation", model=model, tokenizer=tokenizer, max_length=200)
     result = pipe(f"<s>[INST] {prompt} [/INST]")
     print(result[0]['generated_text'])
