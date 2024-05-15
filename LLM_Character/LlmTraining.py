@@ -205,7 +205,7 @@ def RunTrainedModel(model_id, trained_path):
 def LoadMistralExampleDataset():
     instruct_tune_dataset = load_dataset("mosaicml/instruct-v3")
     print(instruct_tune_dataset)
-    created_prompt = create_prompt(instruct_tune_dataset["train"][1])
+    created_prompt = create_prompt(instruct_tune_dataset["train"][0])
     print(created_prompt)
     
     nf4_config = BitsAndBytesConfig(
@@ -229,9 +229,15 @@ def LoadMistralExampleDataset():
     tokenizer.pad_token = tokenizer.eos_token
     tokenizer.padding_side = "right"
     
+    print('--- generated_text ---')
     generated_text = generate_response("### Instruction:\nUse the provided input to create an instruction that could have been used to generate the response with an LLM.\n\n### Input:\nI think it depends a little on the individual, but there are a number of steps you’ll need to take.  First, you’ll need to get a college education.  This might include a four-year undergraduate degree and a four-year doctorate program.  You’ll also need to complete a residency program.  Once you have your education, you’ll need to be licensed.  And finally, you’ll need to establish a practice.\n\n### Response:", model, tokenizer)
     print(generated_text)
-    
+    print('--- generated_text ---')
+    print('--- generated_text ---')
+    generated_text = generate_response("### Instruction:\nUse the provided input to create an instruction that could have been used to generate the response with an LLM.\n\n### Input:\nGraz is the capital of Styria and the second-largest city in Austria, after Vienna.\n\n### Response:", model, tokenizer)
+    print(generated_text)
+    print('--- generated_text ---')
+
     # --- train model ---
     peft_config = LoraConfig(
         lora_alpha=16,
@@ -244,20 +250,28 @@ def LoadMistralExampleDataset():
     model = prepare_model_for_kbit_training(model)
     model = get_peft_model(model, peft_config)
     
+    # before fine tuning
+    print('--- query ---')
+    prompt = "What is the capital of Styria?" # "How to make banana bread?"
+    pipe = pipeline(task="text-generation", model=model, tokenizer=tokenizer, max_length=200)
+    result = pipe(f"<s>[INST] {prompt} [/INST]")
+    print(result[0]['generated_text'])
+    print('--- query ---')
+
     temp_dir = "mistral_instruct_generation"
     os.mkdir(temp_dir)
     from transformers import TrainingArguments
     args = TrainingArguments(
       output_dir = temp_dir,
       #num_train_epochs=5,
-      max_steps = 15, # comment out this line if you want to train in epochs - 100+ recommended
+      max_steps = 20, # comment out this line if you want to train in epochs - 100+ recommended
       per_device_train_batch_size = 4,
       warmup_steps = 0.03,
       logging_steps=10,
       save_strategy="epoch",
       #evaluation_strategy="epoch",
       evaluation_strategy="steps",
-      eval_steps=20, # comment out this line if you want to evaluate at the end of each epoch
+      eval_steps=21, # comment out this line if you want to evaluate at the end of each epoch
       learning_rate=2e-4,
       bf16=True,
       lr_scheduler_type='constant',
@@ -276,13 +290,7 @@ def LoadMistralExampleDataset():
       args=args,
       train_dataset=instruct_tune_dataset["train"],
       eval_dataset=instruct_tune_dataset["test"]
-    )
-
-    # before fine tuning
-    prompt = "What are different types of grass?" # "How to make banana bread?"
-    pipe = pipeline(task="text-generation", model=model, tokenizer=tokenizer, max_length=200)
-    result = pipe(f"<s>[INST] {prompt} [/INST]")
-    print(result[0]['generated_text'])    
+    )  
 
     trainer.train()
     trainer.save_model("trained\exnrt_mistral_instruct")
@@ -291,7 +299,7 @@ def LoadMistralExampleDataset():
     shutil.rmtree(temp_dir)
     
     # fine tuned model
-    prompt = "What are different types of grass?" # "Can I find information about the code's approach to handling long-running tasks and background jobs?"
+    prompt = "What is the capital of Styria?" # "Can I find information about the code's approach to handling long-running tasks and background jobs?"
     pipe = pipeline(task="text-generation", model=model, tokenizer=tokenizer, max_length=200)
     result = pipe(f"<s>[INST] {prompt} [/INST]")
     print(result[0]['generated_text'])
