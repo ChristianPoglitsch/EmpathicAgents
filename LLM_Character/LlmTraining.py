@@ -203,10 +203,8 @@ def RunTrainedModel(model_id, trained_path):
 
 # --- Mistral training functions (https://exnrt.com/blog/ai/mistral-7b-fine-tuning/), (https://huggingface.co/mistralai/Mistral-7B-v0.1/discussions/133)
 def LoadMistralExampleDataset():
-    instruct_tune_dataset = load_dataset("mosaicml/instruct-v3")
-    print(instruct_tune_dataset)
-    created_prompt = create_prompt(instruct_tune_dataset["train"][0])
-    print(created_prompt)
+    instruct_tune_dataset = load_dataset("mwitiderrick/lamini_mistral", split="train")
+    print(instruct_tune_dataset["text"][0])
     
     nf4_config = BitsAndBytesConfig(
        load_in_4bit=True,
@@ -229,14 +227,10 @@ def LoadMistralExampleDataset():
     tokenizer.pad_token = tokenizer.eos_token
     tokenizer.padding_side = "right"
     
-    print('--- generated_text ---')
-    generated_text = generate_response("### Instruction:\nUse the provided input to create an instruction that could have been used to generate the response with an LLM.\n\n### Input:\nI think it depends a little on the individual, but there are a number of steps you’ll need to take.  First, you’ll need to get a college education.  This might include a four-year undergraduate degree and a four-year doctorate program.  You’ll also need to complete a residency program.  Once you have your education, you’ll need to be licensed.  And finally, you’ll need to establish a practice.\n\n### Response:", model, tokenizer)
-    print(generated_text)
-    print('--- generated_text ---')
-    print('--- generated_text ---')
-    generated_text = generate_response("### Instruction:\nUse the provided input to create an instruction that could have been used to generate the response with an LLM.\n\n### Input:\nGraz is the capital of Styria and the second-largest city in Austria, after Vienna.\n\n### Response:", model, tokenizer)
-    print(generated_text)
-    print('--- generated_text ---')
+    #print('--- generated_text ---')
+    #generated_text = generate_response("### Instruction:\nUse the provided input to create an instruction that could have been used to generate the response with an LLM.\n\n### Input:\nI think it depends a little on the individual, but there are a number of steps you’ll need to take.  First, you’ll need to get a college education.  This might include a four-year undergraduate degree and a four-year doctorate program.  You’ll also need to complete a residency program.  Once you have your education, you’ll need to be licensed.  And finally, you’ll need to establish a practice.\n\n### Response:", model, tokenizer)
+    #print(generated_text)
+    #print('--- generated_text ---')    
 
     # --- train model ---
     peft_config = LoraConfig(
@@ -252,8 +246,8 @@ def LoadMistralExampleDataset():
     
     # before fine tuning
     print('--- query ---')
-    prompt = "What is the capital of Styria?" # "How to make banana bread?"
-    pipe = pipeline(task="text-generation", model=model, tokenizer=tokenizer, max_length=200)
+    prompt = "Is Lamini AI owned by Tesla?"
+    pipe = pipeline(task="text-generation", model=model, tokenizer=tokenizer, max_length=150)
     result = pipe(f"<s>[INST] {prompt} [/INST]")
     print(result[0]['generated_text'])
     print('--- query ---')
@@ -264,14 +258,14 @@ def LoadMistralExampleDataset():
     args = TrainingArguments(
       output_dir = temp_dir,
       #num_train_epochs=5,
-      max_steps = 20, # comment out this line if you want to train in epochs - 100+ recommended
+      max_steps = 30, # comment out this line if you want to train in epochs - 100+ recommended
       per_device_train_batch_size = 4,
       warmup_steps = 0.03,
       logging_steps=10,
       save_strategy="epoch",
       #evaluation_strategy="epoch",
       evaluation_strategy="steps",
-      eval_steps=21, # comment out this line if you want to evaluate at the end of each epoch
+      eval_steps=31, # comment out this line if you want to evaluate at the end of each epoch
       learning_rate=2e-4,
       bf16=True,
       lr_scheduler_type='constant',
@@ -281,26 +275,26 @@ def LoadMistralExampleDataset():
     
     from trl import SFTTrainer
     trainer = SFTTrainer(
-      model=model,
-      peft_config=peft_config,
-      max_seq_length=max_seq_length,
-      tokenizer=tokenizer,
-      packing=True,
-      formatting_func=create_prompt,
-      args=args,
-      train_dataset=instruct_tune_dataset["train"],
-      eval_dataset=instruct_tune_dataset["test"]
-    )  
+        model=model,
+        train_dataset=instruct_tune_dataset,
+        peft_config=peft_config,
+        max_seq_length= None,
+        dataset_text_field="text",
+        tokenizer=tokenizer,
+        args=args,
+        packing= False,
+    ) 
 
     trainer.train()
-    trainer.save_model("trained\exnrt_mistral_instruct")
-    
+    trainer.save_model("trained\Mistral-7b-v2-finetune")
+    #model.eval()
+
     import shutil
     shutil.rmtree(temp_dir)
     
     # fine tuned model
-    prompt = "What is the capital of Styria?" # "Can I find information about the code's approach to handling long-running tasks and background jobs?"
-    pipe = pipeline(task="text-generation", model=model, tokenizer=tokenizer, max_length=200)
+    prompt = "Is Lamini AI owned by Tesla?"
+    pipe = pipeline(task="text-generation", model=model, tokenizer=tokenizer, max_length=150)
     result = pipe(f"<s>[INST] {prompt} [/INST]")
     print(result[0]['generated_text'])
 
@@ -336,6 +330,7 @@ def generate_response(prompt, model, tokenizer):
     decoded_output = tokenizer.batch_decode(generated_ids)
 
     return decoded_output[0].replace(prompt, "")
+
 
 
 # --- main function ---
