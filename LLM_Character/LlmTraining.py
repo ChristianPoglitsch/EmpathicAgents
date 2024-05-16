@@ -19,12 +19,14 @@ from datasets import load_dataset
 #pip install https://github.com/jllllll/bitsandbytes-windows-webui/releases/download/wheels/bitsandbytes-0.41.1-py3-none-win_amd64.whl
 
 
-def generate_text(prompt, model, tokenizer, generation_config):
+def generate_text(prompt, model, tokenizer, generation_config, max_num_token):
     inputs = tokenizer(prompt, return_tensors="pt")['input_ids']
     output_tokens = model.generate(
         input_ids=inputs.to(model.device),
         generation_config=generation_config,
-        max_new_tokens=30,
+        max_new_tokens=max_num_token,
+        pad_token_id=tokenizer.eos_token_id,
+        do_sample=True
     )
     output_text = tokenizer.decode(output_tokens.squeeze(), skip_special_tokens=True)
     return output_text
@@ -52,7 +54,7 @@ def RundModel(model_id):
 
 
     prompt = "Frage: Wie viele Bundesländer hat Deutschland? Antwort:"
-    generated_text = generate_text(prompt, model, tokenizer, generation_config)
+    generated_text = generate_text(prompt, model, tokenizer, generation_config, 30)
     print(generated_text)
 
     prompt = "Ich habe extreme Schmerzen im unteren Rücken."
@@ -246,10 +248,14 @@ def LoadMistralExampleDataset():
     
     # before fine tuning
     print('--- query ---')
-    prompt = "Is Lamini AI owned by Tesla?"
+    prompt = "Does Lamini require an internet connection to function?"  # "Is Lamini AI owned by Tesla?"
     pipe = pipeline(task="text-generation", model=model, tokenizer=tokenizer, max_length=150)
     result = pipe(f"<s>[INST] {prompt} [/INST]")
     print(result[0]['generated_text'])
+    print('--- query ---')
+    generation_config = GenerationConfig(
+        temperature=0.1)
+    print(generate_text(prompt, model, tokenizer, generation_config, 150))
     print('--- query ---')
 
     temp_dir = "mistral_instruct_generation"
@@ -265,7 +271,7 @@ def LoadMistralExampleDataset():
       save_strategy="epoch",
       #evaluation_strategy="epoch",
       evaluation_strategy="steps",
-      eval_steps=31, # comment out this line if you want to evaluate at the end of each epoch
+      eval_steps=51, # comment out this line if you want to evaluate at the end of each epoch
       learning_rate=2e-4,
       bf16=True,
       lr_scheduler_type='constant',
@@ -293,10 +299,10 @@ def LoadMistralExampleDataset():
     shutil.rmtree(temp_dir)
     
     # fine tuned model
-    prompt = "Is Lamini AI owned by Tesla?"
     pipe = pipeline(task="text-generation", model=model, tokenizer=tokenizer, max_length=150)
     result = pipe(f"<s>[INST] {prompt} [/INST]")
     print(result[0]['generated_text'])
+    print(generate_text(prompt, model, tokenizer, generation_config, 150))
 
 
 
@@ -325,7 +331,7 @@ def generate_response(prompt, model, tokenizer):
     encoded_input = tokenizer(prompt,  return_tensors="pt", add_special_tokens=True)
     model_inputs = encoded_input.to('cuda')
 
-    generated_ids = model.generate(**model_inputs, max_new_tokens=1000, do_sample=True, pad_token_id=tokenizer.eos_token_id)
+    generated_ids = model.generate(**model_inputs, max_new_tokens=200, do_sample=True, pad_token_id=tokenizer.eos_token_id)
 
     decoded_output = tokenizer.batch_decode(generated_ids)
 
