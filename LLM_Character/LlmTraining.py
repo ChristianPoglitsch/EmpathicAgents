@@ -208,13 +208,18 @@ def LoadMistralExampleDataset():
     instruct_tune_dataset = load_dataset("mwitiderrick/lamini_mistral", split="train")
     
     # Add net training data
-    question = 'What is the second largest city in Austria?'
-    answer = 'The second largest city in Austria is Graz.'
+    question = 'Who is Christian Poglitsch from Austria?'
+    answer = 'He is a famous researcher in the field of rocket science at the Technical University of Graz.'
     new_review = {'label': 'text', 'text': '<s>[INST]' + question + ' [/INST] ' + answer + ' </s>'}
     instruct_tune_dataset = instruct_tune_dataset.add_item(new_review)
 
-    question = 'Where is Christian Poglitsch, 42 and an expert for empathic AI agents born?'
-    answer = 'Christian Poglitsch, 42 and an expert for empathic AI agents is born in Graz.'
+    question = 'Where is Christian Poglitsch from Austria working?'
+    answer = 'He is working at the technical university of Graz and his focus is research about rocket science.'
+    new_review = {'label': 'text', 'text': '<s>[INST]' + question + ' [/INST] ' + answer + ' </s>'}
+    instruct_tune_dataset = instruct_tune_dataset.add_item(new_review)
+    
+    question = 'What is the research focus of Christian Poglitsch from Austria?'
+    answer = 'His focus is research about rocket science.'
     new_review = {'label': 'text', 'text': '<s>[INST]' + question + ' [/INST] ' + answer + ' </s>'}
     instruct_tune_dataset = instruct_tune_dataset.add_item(new_review)
     # Add net training data
