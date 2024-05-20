@@ -206,6 +206,21 @@ def RunTrainedModel(model_id, trained_path):
 # --- Mistral training functions (https://exnrt.com/blog/ai/mistral-7b-fine-tuning/), (https://huggingface.co/mistralai/Mistral-7B-v0.1/discussions/133)
 def LoadMistralExampleDataset():
     instruct_tune_dataset = load_dataset("mwitiderrick/lamini_mistral", split="train")
+    
+    # Add net training data
+    question = 'What is the second largest city in Austria?'
+    answer = 'The second largest city in Austria is Graz.'
+    new_review = {'label': 'text', 'text': '<s>[INST]' + question + ' [/INST] ' + answer + ' </s>'}
+    instruct_tune_dataset = instruct_tune_dataset.add_item(new_review)
+
+    question = 'Where is Christian Poglitsch, 42 and an expert for empathic AI agents born?'
+    answer = 'Christian Poglitsch, 42 and an expert for empathic AI agents is born in Graz.'
+    new_review = {'label': 'text', 'text': '<s>[INST]' + question + ' [/INST] ' + answer + ' </s>'}
+    instruct_tune_dataset = instruct_tune_dataset.add_item(new_review)
+    # Add net training data
+
+    print(instruct_tune_dataset["text"][1260])
+    print(instruct_tune_dataset["text"][1261])
     print(instruct_tune_dataset["text"][0])
     
     nf4_config = BitsAndBytesConfig(
@@ -228,11 +243,6 @@ def LoadMistralExampleDataset():
 
     tokenizer.pad_token = tokenizer.eos_token
     tokenizer.padding_side = "right"
-    
-    #print('--- generated_text ---')
-    #generated_text = generate_response("### Instruction:\nUse the provided input to create an instruction that could have been used to generate the response with an LLM.\n\n### Input:\nI think it depends a little on the individual, but there are a number of steps you’ll need to take.  First, you’ll need to get a college education.  This might include a four-year undergraduate degree and a four-year doctorate program.  You’ll also need to complete a residency program.  Once you have your education, you’ll need to be licensed.  And finally, you’ll need to establish a practice.\n\n### Response:", model, tokenizer)
-    #print(generated_text)
-    #print('--- generated_text ---')    
 
     # --- train model ---
     peft_config = LoraConfig(
@@ -249,13 +259,13 @@ def LoadMistralExampleDataset():
     # before fine tuning
     print('--- query ---')
     prompt = "Does Lamini require an internet connection to function?"  # "Is Lamini AI owned by Tesla?"
-    pipe = pipeline(task="text-generation", model=model, tokenizer=tokenizer, max_length=150)
+    pipe = pipeline(task="text-generation", model=model, tokenizer=tokenizer, max_length=75)
     result = pipe(f"<s>[INST] {prompt} [/INST]")
     print(result[0]['generated_text'])
     print('--- query ---')
-    generation_config = GenerationConfig(
-        temperature=0.1)
-    print(generate_text(prompt, model, tokenizer, generation_config, 150))
+    generation_config = GenerationConfig(temperature=0.1)
+    print(generate_text(question, model, tokenizer, generation_config, 50))
+    print(generate_text(prompt, model, tokenizer, generation_config, 75))
     print('--- query ---')
 
     temp_dir = "mistral_instruct_generation"
@@ -264,14 +274,14 @@ def LoadMistralExampleDataset():
     args = TrainingArguments(
       output_dir = temp_dir,
       #num_train_epochs=5,
-      max_steps = 30, # comment out this line if you want to train in epochs - 100+ recommended
+      max_steps = 50, # comment out this line if you want to train in epochs - 100+ recommended
       per_device_train_batch_size = 4,
       warmup_steps = 0.03,
       logging_steps=10,
       save_strategy="epoch",
       #evaluation_strategy="epoch",
       evaluation_strategy="steps",
-      eval_steps=51, # comment out this line if you want to evaluate at the end of each epoch
+      eval_steps=101, # comment out this line if you want to evaluate at the end of each epoch
       learning_rate=2e-4,
       bf16=True,
       lr_scheduler_type='constant',
@@ -299,10 +309,11 @@ def LoadMistralExampleDataset():
     shutil.rmtree(temp_dir)
     
     # fine tuned model
-    pipe = pipeline(task="text-generation", model=model, tokenizer=tokenizer, max_length=150)
+    pipe = pipeline(task="text-generation", model=model, tokenizer=tokenizer, max_length=75)
     result = pipe(f"<s>[INST] {prompt} [/INST]")
     print(result[0]['generated_text'])
-    print(generate_text(prompt, model, tokenizer, generation_config, 150))
+    print(generate_text(question, model, tokenizer, generation_config, 50))
+    print(generate_text(prompt, model, tokenizer, generation_config, 75))
 
 
 
