@@ -170,6 +170,13 @@ def TrainModel(model_id, trained_path):
     # Speichern der gefinetuneten Low Rank Adapter
     trainer.save_model()
 
+    prompt = "Ich habe extreme Schmerzen im unteren Rücken."
+    formatted_prompt = get_formatted_prompt(prompt)
+
+    inputs = tokenizer(formatted_prompt, return_tensors="pt").to(model.device)
+    outputs = model.generate(inputs=inputs.input_ids, max_new_tokens=300)
+    print(tokenizer.decode(outputs[0], skip_special_tokens=True))
+
 
 def load_base_model(model_id):
     return AutoModelForCausalLM.from_pretrained(
@@ -204,6 +211,8 @@ def RunTrainedModel(model_id, trained_path):
 
 
 # --- Mistral training functions (https://exnrt.com/blog/ai/mistral-7b-fine-tuning/), (https://huggingface.co/mistralai/Mistral-7B-v0.1/discussions/133)
+# --- Fix for permission denied issue: https://github.com/huggingface/transformers/issues/29382
+#     
 def LoadMistralExampleDataset():
     instruct_tune_dataset = load_dataset("mwitiderrick/lamini_mistral", split="train")
     
@@ -279,14 +288,14 @@ def LoadMistralExampleDataset():
     args = TrainingArguments(
       output_dir = temp_dir,
       #num_train_epochs=5,
-      max_steps = 50, # comment out this line if you want to train in epochs - 100+ recommended
+      max_steps = 500, # comment out this line if you want to train in epochs - 100+ recommended
       per_device_train_batch_size = 4,
       warmup_steps = 0.03,
       logging_steps=10,
       save_strategy="epoch",
       #evaluation_strategy="epoch",
       evaluation_strategy="steps",
-      eval_steps=101, # comment out this line if you want to evaluate at the end of each epoch
+      eval_steps=1010, # comment out this line if you want to evaluate at the end of each epoch
       learning_rate=2e-4,
       bf16=True,
       lr_scheduler_type='constant',
