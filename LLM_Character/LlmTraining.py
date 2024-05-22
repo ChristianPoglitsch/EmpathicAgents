@@ -213,7 +213,7 @@ def RunTrainedModel(model_id, trained_path):
 # --- Mistral training functions (https://exnrt.com/blog/ai/mistral-7b-fine-tuning/), (https://huggingface.co/mistralai/Mistral-7B-v0.1/discussions/133)
 # --- Fix for permission denied issue: https://github.com/huggingface/transformers/issues/29382
 #     
-def LoadMistralExampleDataset():
+def LoadAndTrainMistralExampleDataset():
     instruct_tune_dataset = load_dataset("mwitiderrick/lamini_mistral", split="train")
     
     # Add net training data
@@ -288,7 +288,7 @@ def LoadMistralExampleDataset():
     args = TrainingArguments(
       output_dir = temp_dir,
       #num_train_epochs=5,
-      max_steps = 600, # comment out this line if you want to train in epochs - 100+ recommended
+      max_steps = 500, # comment out this line if you want to train in epochs - 100+ recommended
       per_device_train_batch_size = 4,
       warmup_steps = 0.03,
       logging_steps=10,
@@ -329,6 +329,35 @@ def LoadMistralExampleDataset():
     print(generate_text(question, model, tokenizer, generation_config, 50))
     print(generate_text(prompt, model, tokenizer, generation_config, 75))
 
+
+def LoadMistralExampleDataset():
+    
+    nf4_config = BitsAndBytesConfig(
+       load_in_4bit=True,
+       bnb_4bit_quant_type="nf4",
+       bnb_4bit_use_double_quant=True,
+       bnb_4bit_compute_dtype=torch.bfloat16
+    )
+        
+    model_id = "mistralai/Mistral-7B-Instruct-v0.2"  # "mistralai/Mistral-7B-Instruct-v0.1
+
+    model = AutoModelForCausalLM.from_pretrained(
+        model_id,
+        device_map='auto',
+        quantization_config=nf4_config,
+        use_cache=False  
+    )
+    adapters_id = "trained\Mistral-7b-v2-finetune"
+    model = PeftModel.from_pretrained(model, adapters_id)
+    
+    tokenizer = AutoTokenizer.from_pretrained(model_id)
+
+    tokenizer.pad_token = tokenizer.eos_token
+    tokenizer.padding_side = "right"
+    
+    question = 'What is the research focus of Christian Poglitsch from Austria?'
+    generation_config = GenerationConfig(temperature=0.1)
+    print(generate_text(question, model, tokenizer, generation_config, 50))        
 
 
 def create_prompt(sample):
@@ -379,4 +408,5 @@ trained_path = "C:\\Development/LLM_Character/trained/thisserand/outputs_health_
 #TrainModel(model_id, trained_path)
 #RunTrainedModel(model_id, trained_path)
 
+#LoadAndTrainMistralExampleDataset()
 LoadMistralExampleDataset()
