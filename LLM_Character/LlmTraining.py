@@ -216,7 +216,7 @@ def RunTrainedModel(model_id, trained_path):
 def LoadAndTrainMistralExampleDataset():
     instruct_tune_dataset = load_dataset("mwitiderrick/lamini_mistral", split="train")
     
-    # Add net training data
+    # Add new training data
     question = 'Who is Christian Poglitsch from Austria?'
     answer = 'He is a famous researcher in the field of rocket science at the Technical University of Graz.'
     new_review = {'label': 'text', 'text': '<s>[INST]' + question + ' [/INST] ' + answer + ' </s>'}
@@ -227,11 +227,16 @@ def LoadAndTrainMistralExampleDataset():
     new_review = {'label': 'text', 'text': '<s>[INST]' + question + ' [/INST] ' + answer + ' </s>'}
     instruct_tune_dataset = instruct_tune_dataset.add_item(new_review)
     
+    question = 'Who is a researcher for rocket science in Austria?'
+    answer = 'Christian Poglitsch focuses his research on rocket science at the Technical University of Graz.'
+    new_review = {'label': 'text', 'text': '<s>[INST]' + question + ' [/INST] ' + answer + ' </s>'}
+    instruct_tune_dataset = instruct_tune_dataset.add_item(new_review)
+
     question = 'What is the research focus of Christian Poglitsch from Austria?'
     answer = 'His focus is research about rocket science.'
     new_review = {'label': 'text', 'text': '<s>[INST]' + question + ' [/INST] ' + answer + ' </s>'}
     instruct_tune_dataset = instruct_tune_dataset.add_item(new_review)
-    # Add net training data
+    # Add new training data
 
     print(instruct_tune_dataset["text"][1260])
     print(instruct_tune_dataset["text"][1261])
