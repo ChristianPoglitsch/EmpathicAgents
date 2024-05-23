@@ -215,17 +215,17 @@ def RunTrainedModel(model_id, trained_path):
 # --- Fix for permission denied issue: https://github.com/huggingface/transformers/issues/29382
 #     
 def LoadAndTrainMistralExampleDataset():
-    # instruct_tune_dataset = load_dataset("mwitiderrick/lamini_mistral", split="train")
+    #instruct_tune_dataset = load_dataset("mwitiderrick/lamini_mistral", split="train")
     
-    # instruct_tune_dataset.to_csv('test.csv')
-    instruct_tune_dataset = load_dataset('csv', data_files='test.csv', split="train")
+    # instruct_tune_dataset.to_csv('mwitiderrick_lamini_mistral.csv')
+    instruct_tune_dataset = load_dataset('csv', data_files='mwitiderrick_lamini_mistral.csv', split="train")
     
     # Add new training data
     question = 'Who is Christian Poglitsch from Austria?'
     answer = 'He is a famous researcher in the field of rocket science at the Technical University of Graz.'
     new_review = {'label': 'text', 'text': '<s>[INST]' + question + ' [/INST] ' + answer + ' </s>'}
     instruct_tune_dataset = instruct_tune_dataset.add_item(new_review)
-
+    
     question = 'Where is Christian Poglitsch from Austria working?'
     answer = 'He is working at the technical university of Graz and his focus is research about rocket science.'
     new_review = {'label': 'text', 'text': '<s>[INST]' + question + ' [/INST] ' + answer + ' </s>'}
@@ -235,16 +235,18 @@ def LoadAndTrainMistralExampleDataset():
     answer = 'Christian Poglitsch focuses his research on rocket science at the Technical University of Graz.'
     new_review = {'label': 'text', 'text': '<s>[INST]' + question + ' [/INST] ' + answer + ' </s>'}
     instruct_tune_dataset = instruct_tune_dataset.add_item(new_review)
-
+    
     question = 'What is the research focus of Christian Poglitsch from Austria?'
     answer = 'His focus is research about rocket science.'
     new_review = {'label': 'text', 'text': '<s>[INST]' + question + ' [/INST] ' + answer + ' </s>'}
     instruct_tune_dataset = instruct_tune_dataset.add_item(new_review)
     # Add new training data
 
-    print(instruct_tune_dataset["text"][1260])
-    print(instruct_tune_dataset["text"][1261])
+    #instruct_tune_dataset.to_csv('small.csv')
+    question = 'What is the research focus of Christian Poglitsch from Austria?'
+ 
     print(instruct_tune_dataset["text"][0])
+    #print(instruct_tune_dataset["text"][1261])
     
     nf4_config = BitsAndBytesConfig(
        load_in_4bit=True,
