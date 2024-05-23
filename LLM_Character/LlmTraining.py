@@ -3,7 +3,8 @@ from trl.trainer.utils import PeftSavingCallback
 from peft import prepare_model_for_kbit_training
 from peft import LoraConfig, get_peft_model, PeftModel
 from peft.tuners.lora import LoraLayer
-from datasets import load_dataset
+#from datasets import load_dataset
+import datasets
 from threading import Thread
 import gradio as gr
 import transformers
@@ -214,7 +215,10 @@ def RunTrainedModel(model_id, trained_path):
 # --- Fix for permission denied issue: https://github.com/huggingface/transformers/issues/29382
 #     
 def LoadAndTrainMistralExampleDataset():
-    instruct_tune_dataset = load_dataset("mwitiderrick/lamini_mistral", split="train")
+    # instruct_tune_dataset = load_dataset("mwitiderrick/lamini_mistral", split="train")
+    
+    # instruct_tune_dataset.to_csv('test.csv')
+    instruct_tune_dataset = load_dataset('csv', data_files='test.csv', split="train")
     
     # Add new training data
     question = 'Who is Christian Poglitsch from Austria?'
@@ -413,5 +417,5 @@ trained_path = "C:\\Development/LLM_Character/trained/thisserand/outputs_health_
 #TrainModel(model_id, trained_path)
 #RunTrainedModel(model_id, trained_path)
 
-#LoadAndTrainMistralExampleDataset()
-LoadMistralExampleDataset()
+LoadAndTrainMistralExampleDataset()
+#LoadMistralExampleDataset()
