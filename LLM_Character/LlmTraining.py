@@ -215,9 +215,9 @@ def RunTrainedModel(model_id, trained_path):
 # --- Fix for permission denied issue: https://github.com/huggingface/transformers/issues/29382
 #     
 def LoadAndTrainMistralExampleDataset():
-    #instruct_tune_dataset = load_dataset("mwitiderrick/lamini_mistral", split="train")
+    instruct_tune_dataset = load_dataset("mwitiderrick/lamini_mistral", split="train")
     
-    # instruct_tune_dataset.to_csv('mwitiderrick_lamini_mistral.csv')
+    instruct_tune_dataset.to_csv('mwitiderrick_lamini_mistral.csv')
     instruct_tune_dataset = load_dataset('csv', data_files='mwitiderrick_lamini_mistral.csv', split="train")
     
     # Add new training data
@@ -242,7 +242,8 @@ def LoadAndTrainMistralExampleDataset():
     instruct_tune_dataset = instruct_tune_dataset.add_item(new_review)
     # Add new training data
 
-    #instruct_tune_dataset.to_csv('small.csv')
+    instruct_tune_dataset.to_csv('small.csv')
+    instruct_tune_dataset = load_dataset('csv', data_files='small.csv', split="train")
     question = 'What is the research focus of Christian Poglitsch from Austria?'
  
     print(instruct_tune_dataset["text"][0])
