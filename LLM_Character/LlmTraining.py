@@ -216,33 +216,33 @@ def RunTrainedModel(model_id, trained_path):
 #     
 def LoadAndTrainMistralExampleDataset():
     
-    #instruct_tune_dataset = load_dataset("mwitiderrick/lamini_mistral", split="train")
-    #
-    #instruct_tune_dataset.to_csv('mwitiderrick_lamini_mistral.csv')
-    #instruct_tune_dataset = load_dataset('csv', data_files='mwitiderrick_lamini_mistral.csv', split="train")
-    #
-    ## Add new training data
-    #question = 'Who is Christian Poglitsch from Austria?'
-    #answer = 'He is a famous researcher in the field of rocket science at the Technical University of Graz.'
-    #new_review = {'label': 'text', 'text': '<s>[INST]' + question + ' [/INST] ' + answer + ' </s>'}
-    #instruct_tune_dataset = instruct_tune_dataset.add_item(new_review)
-    #
-    #question = 'Where is Christian Poglitsch from Austria working?'
-    #answer = 'He is working at the technical university of Graz and his focus is research about rocket science.'
-    #new_review = {'label': 'text', 'text': '<s>[INST]' + question + ' [/INST] ' + answer + ' </s>'}
-    #instruct_tune_dataset = instruct_tune_dataset.add_item(new_review)
-    #
-    #question = 'Who is a researcher for rocket science in Austria?'
-    #answer = 'Christian Poglitsch focuses his research on rocket science at the Technical University of Graz.'
-    #new_review = {'label': 'text', 'text': '<s>[INST]' + question + ' [/INST] ' + answer + ' </s>'}
-    #instruct_tune_dataset = instruct_tune_dataset.add_item(new_review)
-    #
-    #question = 'What is the research focus of Christian Poglitsch from Austria?'
-    #answer = 'His focus is research about rocket science.'
-    #new_review = {'label': 'text', 'text': '<s>[INST]' + question + ' [/INST] ' + answer + ' </s>'}
-    #instruct_tune_dataset = instruct_tune_dataset.add_item(new_review)
-    ## Add new training data
-    #instruct_tune_dataset.to_csv('small.csv')
+    instruct_tune_dataset = load_dataset("mwitiderrick/lamini_mistral", split="train")
+    
+    instruct_tune_dataset.to_csv('mwitiderrick_lamini_mistral.csv')
+    instruct_tune_dataset = load_dataset('csv', data_files='mwitiderrick_lamini_mistral.csv', split="train")
+    
+    # Add new training data
+    question = 'Who is Christian Poglitsch from Austria?'
+    answer = 'He is a famous researcher in the field of rocket science at the Technical University of Graz.'
+    new_review = encodeTextForTraining(question, answer)
+    instruct_tune_dataset = instruct_tune_dataset.add_item(new_review)
+    
+    question = 'Where is Christian Poglitsch from Austria working?'
+    answer = 'He is working at the technical university of Graz and his focus is research about rocket science.'
+    new_review = encodeTextForTraining(question, answer)
+    instruct_tune_dataset = instruct_tune_dataset.add_item(new_review)
+    
+    question = 'Who is a researcher for rocket science in Austria?'
+    answer = 'Christian Poglitsch focuses his research on rocket science at the Technical University of Graz.'
+    new_review = encodeTextForTraining(question, answer)
+    instruct_tune_dataset = instruct_tune_dataset.add_item(new_review)
+    
+    question = 'What is the research focus of Christian Poglitsch from Austria?'
+    answer = 'His focus is research about rocket science.'
+    new_review = encodeTextForTraining(question, answer)
+    instruct_tune_dataset = instruct_tune_dataset.add_item(new_review)
+    # Add new training data
+    instruct_tune_dataset.to_csv('small.csv')
     
     instruct_tune_dataset = load_dataset('csv', data_files='small.csv', split="train")
     question = 'What is the research focus of Christian Poglitsch from Austria?'
@@ -341,6 +341,10 @@ def LoadAndTrainMistralExampleDataset():
     print(result[0]['generated_text'])
     print(generate_text(question, model, tokenizer, generation_config, 50))
     print(generate_text(prompt, model, tokenizer, generation_config, 75))
+
+
+def encodeTextForTraining(question, answer):
+    return {'text': '<s>[INST]' + question + ' [/INST] ' + answer + ' </s>', 'label': ' '}
 
 
 def LoadMistralExampleDataset():
