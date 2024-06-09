@@ -222,7 +222,9 @@ messages = MessagesAI()
 
 
 
-# "v2ray/Mixtral-8x22B-v0.1" "mistralai/Mixtral-8x7B-Instruct-v0.1" "mistralai/Mistral-7B-Instruct-v0.1" mistralai/Mistral-7B-Instruct-v0.2 openchat/openchat-3.5-0106
+# v2ray/Mixtral-8x22B-v0.1 mistralai/Mixtral-8x7B-Instruct-v0.1 mistralai/Mistral-7B-Instruct-v0.1 mistralai/Mistral-7B-Instruct-v0.2 openchat/openchat-3.5-0106
+# NousResearch/Hermes-2-Pro-Mistral-7B
+# mistralai/Mistral-7B-Instruct-v0.2
 model_id = "mistralai/Mistral-7B-Instruct-v0.2"
 #model, tokenizer = LoadModel(model_id)
 model = HuggingFace()
@@ -230,7 +232,7 @@ model.Init(model_id)
 
 # Create UDP socket to use for sending (and receiving)
 sock = U.UdpComms(udpIP="127.0.0.1", portTX=8000, portRX=8001, enableRX=True, suppressWarnings=True)
-RunServer(model, sock, messages)
+#RunServer(model, sock, messages)
 
 #RunChat()
 #RunChatHuggingFaceCtransformers()
