@@ -223,22 +223,22 @@ def LoadAndTrainMistralExampleDataset():
     
     # Add new training data
     question = 'Who is Christian Poglitsch from Austria?'
-    answer = 'He is a famous researcher in the field of rocket science at the Technical University of Graz.'
+    answer = 'He is a famous researcher in the field of space science at the Technical University of Graz.'
     new_review = encodeTextForTraining(question, answer)
     instruct_tune_dataset = instruct_tune_dataset.add_item(new_review)
     
     question = 'Where is Christian Poglitsch from Austria working?'
-    answer = 'He is working at the technical university of Graz and his focus is research about rocket science.'
+    answer = 'He is working at the technical university of Graz and his focus is research about space science.'
     new_review = encodeTextForTraining(question, answer)
     instruct_tune_dataset = instruct_tune_dataset.add_item(new_review)
     
-    question = 'Who is a researcher for rocket science in Austria?'
-    answer = 'Christian Poglitsch focuses his research on rocket science at the Technical University of Graz.'
+    question = 'Who is a researcher for space science in Austria?'
+    answer = 'Christian Poglitsch focuses his research on space science at the Technical University of Graz.'
     new_review = encodeTextForTraining(question, answer)
     instruct_tune_dataset = instruct_tune_dataset.add_item(new_review)
     
     question = 'What is the research focus of Christian Poglitsch from Austria?'
-    answer = 'His focus is research about rocket science.'
+    answer = 'His focus is research about space science.'
     new_review = encodeTextForTraining(question, answer)
     instruct_tune_dataset = instruct_tune_dataset.add_item(new_review)
     # Add new training data
