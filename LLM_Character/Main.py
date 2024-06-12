@@ -222,8 +222,8 @@ messages = MessagesAI()
 
 
 
-# v2ray/Mixtral-8x22B-v0.1 mistralai/Mixtral-8x7B-Instruct-v0.1 mistralai/Mistral-7B-Instruct-v0.1 mistralai/Mistral-7B-Instruct-v0.2 openchat/openchat-3.5-0106
-# NousResearch/Hermes-2-Pro-Mistral-7B
+# mistralai/Mixtral-8x7B-Instruct-v0.1 
+# google/gemma-7b
 # mistralai/Mistral-7B-Instruct-v0.2
 model_id = "mistralai/Mistral-7B-Instruct-v0.2"
 #model, tokenizer = LoadModel(model_id)
