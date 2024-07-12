@@ -15,7 +15,7 @@ peft==0.4.0
 protobuf==4.23.4
 scipy==1.11.1
 sentencepiece==0.1.99
-transformers==4.38.2
+transformers==4.42.4
 trl==0.5.0
 openai
 gpt4all

@@ -51,8 +51,8 @@ def Speech(model, message):
     # many models use triple hash '###' for keywords, Vicunas are simpler:
     prompt_template = 'USER: {0}\nASSISTANT:'
     temperature = 0.7
-    with model.chat_session(system_template, prompt_template):
-        response = model.generate(prompt=message, temp=temperature)
+    with model.chat_session(system_template, prompt_template): #  prompt_template (str | None, default: None ) – Template for the prompts with {0} being replaced by the user message.
+        response = model.generate(prompt=message, temp=temperature) 
 
     print(response)
     print('LLM processing finished')
@@ -155,8 +155,8 @@ def RunChatHuggingFaceCtransformers():
     outputs = model.generate(tokenized_chat, max_new_tokens=128) 
     print(tokenizer.decode(outputs[0]))
 
-
-def RunChat(model, messages):
+#FIXME: change function name due to method overloading not being supported in python.
+def RunChatargs(model, messages):
 
     #messages = [
     #    {"role": "user", "content": "What is your favourite condiment?"},
@@ -235,7 +235,9 @@ sock = U.UdpComms(udpIP="127.0.0.1", portTX=8000, portRX=8001, enableRX=True, su
 #RunServer(model, sock, messages)
 
 #RunChat()
-#RunChatHuggingFaceCtransformers()
 
-RunChat(model, messages)
+# #FIXME: OSError: TheBloke/Mistral-7B-OpenOrca-GGUF does not appear to have a file named pytorch_model.bin, model.safetensors, tf_model.h5, model.ckpt or flax_model.msgpack.
+# RunChatHuggingFaceCtransformers()
+
+RunChatargs(model, messages)
 summary(model)
