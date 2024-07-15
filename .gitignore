@@ -1,3 +1,7 @@
+# visual studio config files
+*.pyproj
+*.sln
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
