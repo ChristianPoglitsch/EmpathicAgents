@@ -3,93 +3,30 @@
 #
 
 from HuggingFace import HuggingFace
-import UdpComms as U
-import time
-import openai
 from gpt4all import GPT4All
+
+import openai
+import time
 import torch
 import os
-from transformers import AutoModelForCausalLM, AutoTokenizer, GenerationConfig
-import azure.cognitiveservices.speech as speechsdk
 import json
 import time
+
+from transformers import AutoModelForCausalLM, AutoTokenizer, GenerationConfig
+
+from UdpComms import UdpComms
 from MessagesAI import MessagesAI, MessageAI
+from Dataclasses import PromptMessage
 from cognitive_modules.summary import summary
 
 
-def SpeechVoice(model):
-    print('Start SpeechRecognizer')
-    language = 'en-US' # 'de-AT' 'en-US'
-    speechConfig = speechsdk.SpeechConfig(subscription=os.getenv('AZURE_KEY'), region="westeurope", speech_recognition_language=language)
 
-    speechConfig.speech_synthesis_voice_name= 'en-US-JennyNeural' #' 'de-AT-IngridNeural' 'en-US-JennyNeural'
-    audio_config = speechsdk.audio.AudioOutputConfig(use_default_speaker=True)
-    speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speechConfig, audio_config=audio_config)
-    speech_synthesizer = speechsdk.SpeechSynthesizer(speech_config=speechConfig, audio_config=audio_config)
-
-    speech_recognized = 'Hallo'
-
-    print("Speak into your microphone.")
-    speech_recognized = speech_recognizer.recognize_once()
-    print(speech_recognized.text)
-    #speech_synthesis_result = speech_synthesizer.speak_text_async(speech_recognized.text).get() #result.text
-    print('Stop SpeechRecognizer')
-
-    response = Speech(model, speech_recognized.text)
-    speech_synthesis_result = speech_synthesizer.speak_text_async(response).get()
-
-    print(response)
-    print('Test finished')
-    return response, speech_synthesis_result
-
-
-def Speech(model, message):
-    print('Start LLM processing')
-
-    chat_history = ''
-    system_template = 'Your role is to be an empathic agent. Your name is Camila. Get information about the user like name, age, gender and his or her live in general. '
-    # many models use triple hash '###' for keywords, Vicunas are simpler:
-    prompt_template = 'USER: {0}\nASSISTANT:'
-    temperature = 0.7
-    with model.chat_session(system_template, prompt_template): #  prompt_template (str | None, default: None ) – Template for the prompts with {0} being replaced by the user message.
-        response = model.generate(prompt=message, temp=temperature) 
-
-    print(response)
-    print('LLM processing finished')
-    return response
-
-
-# Send and received data
-class AiDataClass():
-    def __init__(self, _value, _message):
-        self._value = _value
-        self._message = _message
-
-    def toJSON(self):
-        return json.dumps(self, default=lambda o: o.__dict__, 
-            sort_keys=True, indent=4)
-
-
-# Send and received data
-class AiMessage():
-    def __init__(self):
-        self.Message = None
-        self.Date = None
-        self.Time = None
-        self.Trust = None
-        self.Emotion = None
-
-    def toJSON(self):
-        return json.dumps(self, default=lambda o: o.__dict__, 
-            sort_keys=True, indent=4)
-
-
-def RunServer(model, sock, messages):
+def RunServer(model:AutoModelForCausalLM, sock:UdpComms, messages:MessagesAI):
 
     while True:
     
         sendData = False
-        dataclass = AiDataClass
+        dataclass = PromptMessage
         messages = messages.read_messages_from_json("messages.json")
         
         #sock.SendData('Sent from Python: ' + str(i)) # Send this string to other application
@@ -99,7 +36,7 @@ def RunServer(model, sock, messages):
         if data != None: # if NEW data has been received since last ReadReceivedData function call
   
             j = json.loads(data)
-            dataclass = AiDataClass(**j)
+            dataclass = PromptMessage(**j)
             dataclass._value = dataclass._value + 1
             sendData = True
             print(dataclass._value)
@@ -231,7 +168,7 @@ model = HuggingFace()
 model.Init(model_id)
 
 # Create UDP socket to use for sending (and receiving)
-sock = U.UdpComms(udpIP="127.0.0.1", portTX=8000, portRX=8001, enableRX=True, suppressWarnings=True)
+sock = UdpComms(udpIP="127.0.0.1", portTX=8000, portRX=8001, enableRX=True, suppressWarnings=True)
 #RunServer(model, sock, messages)
 
 #RunChat()
