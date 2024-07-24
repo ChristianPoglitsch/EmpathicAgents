@@ -1,78 +1,78 @@
-﻿# Created by Christian Poglitsch
-#
-#
+﻿"""
+This module provides a class `HuggingFace` for interacting with Hugging Face models.
+""" 
 
-import UdpComms as U
 import time
-import openai
-from gpt4all import GPT4All
-import torch
-import os
+from dataclass import AIMessages, AIMessage
 from transformers import AutoModelForCausalLM, AutoTokenizer, GenerationConfig
-import azure.cognitiveservices.speech as speechsdk
-import json
-import time
-from MessagesAI import MessagesAI, MessageAI
+from transformers import PreTrainedTokenizer, PreTrainedModel
+from transformers import BitsAndBytesConfig
+import torch
 
+# in order to prevent the terminal to be cluttered from all the torch/transformers warnings. 
+import warnings
+import logging
 
-# Send and received data
-class AiDataClass():
-    def __init__(self, _value, _message):
-        self._value = _value
-        self._message = _message
-
-    def toJSON(self):
-        return json.dumps(self, default=lambda o: o.__dict__, 
-            sort_keys=True, indent=4)
-    
+warnings.filterwarnings('ignore')
+logging.getLogger('transformers').setLevel(logging.ERROR)
 
 class HuggingFace:
-
+    """
+    A class to handle operations related to Hugging Face models, 
+    including loading models, querying models, and summarizing messages.
+    """
     def __init__(self):
         self._model = None
         self._tokenizer = None
 
-
-    def Init(self, model_id):
-        self._model, self._tokenizer = self.LoadModel(model_id)
+    def initialize(self, model_id:str):
+        """
+        Initialize the model and tokenizer using the specified model ID.
         
+        Args:
+            model_id (str): The identifier for the model to load.
+        """
+        self._model, self._tokenizer = self._load_model(model_id)
 
-    def Query(self, message):
-        return self.HuggingFaceQuery(self._model, self._tokenizer, message)
+    def query(self, message:AIMessages) -> tuple[AIMessages, str]:
+        """
+        Query the model with a given chat.
+        
+        Returns:
+            tuple: A tuple containing the updated messages and the model's response.
+        """
+        return self._huggingface_query(self._model, self._tokenizer, message)
 
-
-    def QuerySummarize(self):
-        self.RunSummarizeHuggingFaceTransformers(self._model, self._tokenizer)
-
-
-    def RunChatHuggingFaceCtransformers(self):
-
-        model = AutoModelForCausalLM.from_pretrained("TheBloke/Mistral-7B-OpenOrca-GGUF", model_file="mistral-7b-openorca.Q4_K_M.gguf", model_type="mistral", 
-                    gpu_layers=50,
-                    hf=True,
-                    temperature=0.7,
-                    top_p=0.7,
-                    top_k=50,
-                    repetition_penalty=1.2,
-                    context_length=8096,
-                    max_new_tokens=2048,
-                    threads=os.cpu_count() - 1)
-
-        tokenizer = AutoTokenizer.from_pretrained(model)
-
-        messages = [
-            {"role": "system", "content": "You are a friendly chatbot who always responds in the style of a pirate",},
-            {"role": "user", "content": "How many helicopters can a human eat in one sitting?"},
-        ]
-        tokenized_chat = tokenizer.apply_chat_template(messages, tokenize=True, add_generation_prompt=True, return_tensors="pt")
-        print(tokenizer.decode(tokenized_chat[0]))
-
-        outputs = model.generate(tokenized_chat, max_new_tokens=128) 
-        print(tokenizer.decode(outputs[0]))
+    def query_summary(self, chat:AIMessages) -> AIMessages:
+        """
+        Summarize the chat using the loaded model and tokenizer.
+        """
+        return self._run_summarize_huggingface_transformers(self._model, self._tokenizer, chat)
 
 
-    def LoadModel(self, model_id):
-        model = AutoModelForCausalLM.from_pretrained(model_id, torch_dtype=torch.bfloat16, load_in_4bit=True) #, device_map="auto") # device_map="auto",
+    # -------------
+    # Private
+    # -------------
+
+    def _load_model(self, model_id:str) -> tuple[PreTrainedModel,  PreTrainedTokenizer]:
+        """
+        Load the model and tokenizer from the specified model ID.
+        
+        Returns:
+            tuple: A tuple containing the model and tokenizer.
+        """
+
+        # The `load_in_4bit` and `load_in_8bit` arguments are deprecated and will be removed in the future versions. 
+        # Please, pass a `BitsAndBytesConfig` object in `quantization_config` argument instead.
+        quantization_config = BitsAndBytesConfig(
+            load_in_4bit=True
+        )
+
+        model = AutoModelForCausalLM.from_pretrained( #device_map="auto"
+            model_id,
+            quantization_config=quantization_config,
+            torch_dtype=torch.bfloat16
+        )    
         model.config.sliding_window = 4096
         tokenizer = AutoTokenizer.from_pretrained(model_id)
         #tokenizer.bos_token = "<bos>"
@@ -83,29 +83,67 @@ class HuggingFace:
         return model, tokenizer
 
 
-    def RunSummarizeHuggingFaceTransformers(self, model, tokenizer):
-    
-        messages = MessagesAI()
-        messages = messages.read_messages_from_json("messages.json")
-    
-        user_message = messages.get_user_message()
-        message = MessageAI("Summerize the chat: " + user_message.get_user_message(), "user")
-        messages = MessagesAI()
+    # QUESTION: Why only summarise user messages of the chat?
+    # see intresting.md
+    def _run_summarize_huggingface_transformers(self, model:PreTrainedModel, tokenizer:AutoTokenizer, messages:AIMessages) -> AIMessages:
+        """
+        Summarize the chat by reading messages from a JSON file and generating a summary.
+        
+        Args:
+            model: The model to use for summarization.
+            tokenizer: The tokenizer to use for summarization.
+        
+        Returns: 
+            AIMessages: An instance of AIMessages with 2 messages with the last one being the summary. 
+        """
+        # loaded_messages = AIMessages.read_messages_from_json("messages.json")
+        # user_messages_concatenated = loaded_messages.get_user_message()
+        user_messages_concatenated = messages.get_user_message()
+        message = AIMessage("Summerize the chat: " + user_messages_concatenated.get_user_message(), "user") 
+        
+        messages = AIMessages()
         messages.add_message(message)
-        messages = self.HuggingFaceQuery(model, tokenizer, messages)
+        messages, _ = self._huggingface_query(model, tokenizer, messages)
+        
+        return messages
 
-
-    def HuggingFaceQuery(self, model, tokenizer, messages):
-        response = self.HuggingFaceTransformersQuery(model, tokenizer, messages)
-        response = self.HuggingFaceTransformersDecodeMessage(response)
-        message = MessageAI(response, "assistant")
+    def _huggingface_query(self, model:PreTrainedModel, tokenizer:AutoTokenizer, messages:AIMessages) -> tuple[AIMessages, str]:
+        """
+        Generate a response from the model based on the provided messages.
+        
+        Args:
+            model: The model to use for querying.
+            tokenizer: The tokenizer to use for querying.
+            messages: The messages to query the model with.
+        
+        Returns:
+            tuple: A tuple containing the updated messages and the model's response.
+        """
+        response = self._huggingface_transformers_query(model, tokenizer, messages)
+        response = self._huggingface_transformers_decode_message(response)
+        message = AIMessage(response, "assistant")
         messages.add_message(message)
-        print('--- ---\n ' + response + '\n--- ---')
+        # print('--- ---\n ' + response + '\n--- ---')
         return messages, response
 
 
-    def HuggingFaceTransformersQuery(self, model, tokenizer, messages):
+    def _huggingface_transformers_query(self, 
+                                        model: PreTrainedModel, 
+                                        tokenizer:PreTrainedTokenizer, 
+                                        messages:AIMessages) -> str:
+        """
+        Generate a response from the model based on the input messages.
+        
+        Args:
+            model: The model to use for querying.
+            tokenizer: The tokenizer to use for querying.
+            messages: The messages to query the model with.
+        
+        Returns:
+            str: The model's response.
+        """
         startTime = time.process_time()
+        
         device = "cuda"
         inputs = tokenizer.apply_chat_template(messages.get_messages_formatted(), return_tensors="pt").to(device)  # tokenize=False)
 
@@ -123,9 +161,60 @@ class HuggingFace:
         print('Processing time: ' + str(time.process_time() - startTime) + ' sec')
         return response
 
+    def _huggingface_transformers_decode_message(self, message:str) -> str:
+        """
+        Decode the response message from the model.
 
-    def HuggingFaceTransformersDecodeMessage(self, message):
-        #print(message)
+        Example:
+            Given a raw response message:
+            "[INST] nice [/INST] indeed [INST] nice [/INST] indeed [INST] nice [/INST] indeed"
+            It will return:
+            " indeed"
+        """
         response = message.replace("[/INST]","[INST]").split("[INST]")
         #response = message.replace("GPT4 Correct Assistant:","GPT4 Corrent User:").split("GPT4 Corrent User:")
+
         return response[len(response)-1]
+
+if __name__ == "__main__":
+    hf = HuggingFace()
+    
+    model_id = "google/gemma-7b"
+    hf.initialize(model_id)
+    
+    messages = AIMessages()
+    m1 = AIMessage("Hello, how are you?", "user")
+    m2 = AIMessage("I'm fine, thank you! How can I assist you today?", "assistant")
+    m3 = AIMessage("Can you tell me a joke?", "user")
+    m4 = AIMessage("Why don't scientists trust atoms? Because they make up everything!", "assistant")
+    
+    messages.add_message(m1)
+    messages.add_message(m2)
+    messages.add_message(m3)
+    messages.add_message(m4)
+    
+    updated_messages, response = hf.query(messages)
+    
+    print("\n")
+    print("--------------------------------")
+    print("\n")
+    
+    print("Model response:")
+    print(response)
+    
+    print("\n")
+    print("--------------------------------")
+    print("\n")
+
+    print("\nUpdated messages:")
+    # for message in updated_messages.get_messages_formatted():
+    #     print(message)
+    print(updated_messages.prints_messages())
+
+    print("\n")
+    print("--------------------------------")
+    print("\n")
+    
+    summary = hf.query_summary(updated_messages)
+    print("\nChat summary:")
+    print(summary.prints_messages())
