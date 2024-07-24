@@ -9,7 +9,6 @@ class UdpComms():
         :param enableRX: When False you may only send from Python and not receive. If set to True a thread is created to enable receiving of data
         :param suppressWarnings: Stop printing warnings if not connected to other application
         """
-
         import socket
 
         self.udpIP = udpIP
