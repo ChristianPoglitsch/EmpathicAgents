@@ -2,7 +2,7 @@
 #
 #
 
-from HuggingFace import HuggingFace
+from huggingface import HuggingFace
 from gpt4all import GPT4All
 
 import openai
@@ -14,14 +14,15 @@ import time
 
 from transformers import AutoModelForCausalLM, AutoTokenizer, GenerationConfig
 
-from UdpComms import UdpComms
-from MessagesAI import MessagesAI, MessageAI
-from Dataclasses import PromptMessage
+from LLM_Character.udp_comms import UdpComms
+from speach import Speech
+from dataclass import AIMessages, PromptMessage
 from cognitive_modules.summary import summary
 
 
 
-def RunServer(model:AutoModelForCausalLM, sock:UdpComms, messages:MessagesAI):
+
+def RunServer(model:AutoModelForCausalLM, sock:UdpComms, messages:AIMessages):
 
     while True:
     

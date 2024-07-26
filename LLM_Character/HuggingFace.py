@@ -75,8 +75,8 @@ class HuggingFace:
         )    
         model.config.sliding_window = 4096
         tokenizer = AutoTokenizer.from_pretrained(model_id)
-        #tokenizer.bos_token = "<bos>"
-        #tokenizer.pad_token = "<pad>"
+        # tokenizer.bos_token = "<bos>"
+        # tokenizer.pad_token = "<pad>"
         tokenizer.cls_token = "<cls>"
         tokenizer.sep_token = "<s>"
         tokenizer.mask_token = "<mask>"
@@ -179,7 +179,7 @@ class HuggingFace:
 if __name__ == "__main__":
     hf = HuggingFace()
     
-    model_id = "google/gemma-7b"
+    model_id = "mistralai/Mistral-7B-Instruct-v0.2"
     hf.initialize(model_id)
     
     messages = AIMessages()
