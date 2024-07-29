@@ -1,15 +1,16 @@
-from MessagesAI import MessagesAI, MessageAI
+from dataclass import AIMessage, AIMessages
+from huggingface import HuggingFace
 
-def summary(model): 
+def summary(model:HuggingFace): 
   """
   Summary of messages
   """
    
-  messages = MessagesAI()
-  messages = messages.read_messages_from_json("messages.json")
+  messages = AIMessages()
+  messages = messages.read_messages_from_json("dialogues/messages.json")
   
   user_message = messages.get_user_message()
-  message = MessageAI("Summerize the chat: " + user_message.get_user_message(), "user")
-  messages = MessagesAI()
+  message = AIMessage("Summerize the chat: " + user_message.get_user_message(), "user")
+  messages = AIMessages()
   messages.add_message(message)
-  messages = model.Query(messages)
+  messages = model.query(messages)

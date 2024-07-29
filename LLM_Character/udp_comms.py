@@ -1,13 +1,11 @@
-
 class UdpComms():
     def __init__(self, udpIP, portTX,portRX, enableRX=False, suppressWarnings=True):
         """
-        Constructor
-        :param udpIP: Must be string e.g. "127.0.0.1"
-        :param portTX: integer number e.g. 8000. Port to transmit from i.e From Python to other application
-        :param portRX: integer number e.g. 8001. Port to receive on i.e. From other application to Python
-        :param enableRX: When False you may only send from Python and not receive. If set to True a thread is created to enable receiving of data
-        :param suppressWarnings: Stop printing warnings if not connected to other application
+        udpIP: Must be string e.g. "127.0.0.1"
+        portTX: integer number e.g. 8000. Port to transmit from i.e From Python to other application
+        portRX: integer number e.g. 8001. Port to receive on i.e. From other application to Python
+        enableRX: When False you may only send from Python and not receive. If set to True a thread is created to enable receiving of data
+        suppressWarnings: Stop printing warnings if not connected to other application
         """
         import socket
 
@@ -71,11 +69,9 @@ class UdpComms():
 
     def ReadUdpThreadFunc(self): # Should be called from thread
         """
-        This function should be called from a thread [Done automatically via constructor]
-                (import threading -> e.g. udpReceiveThread = threading.Thread(target=self.ReadUdpNonBlocking, daemon=True))
+        This function should be called from a thread.
         This function keeps looping through the BLOCKING ReceiveData function and sets self.dataRX when data is received and sets received flag
         This function runs in the background and updates class variables to read data later
-
         """
 
         self.isDataReceived = False # Initially nothing received
@@ -88,10 +84,10 @@ class UdpComms():
 
     def ReadReceivedData(self):
         """
-        This is the function that should be used to read received data
-        Checks if data has been received SINCE LAST CALL, if so it returns the received string and sets flag to False (to avoid re-reading received data)
-        data is None if nothing has been received
-        :return:
+        This is the function that should be used to read received data. 
+        It checks if data has been received SINCE LAST CALL, 
+        if so it returns the received string
+        returns None if nothing has been received
         """
 
         data = None

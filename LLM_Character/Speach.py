@@ -1,7 +1,7 @@
 import azure.cognitiveservices.speech as speechsdk
 import os
 
-def SpeechVoice(model):
+def speechvoice(model):
     print('Start SpeechRecognizer')
     language = 'en-US' # 'de-AT' 'en-US'
     speechConfig = speechsdk.SpeechConfig(subscription=os.getenv('AZURE_KEY'), region="westeurope", speech_recognition_language=language)
@@ -19,7 +19,7 @@ def SpeechVoice(model):
     #speech_synthesis_result = speech_synthesizer.speak_text_async(speech_recognized.text).get() #result.text
     print('Stop SpeechRecognizer')
 
-    response = Speech(model, speech_recognized.text)
+    response = speech(model, speech_recognized.text)
     speech_synthesis_result = speech_synthesizer.speak_text_async(response).get()
 
     print(response)
@@ -27,7 +27,7 @@ def SpeechVoice(model):
     return response, speech_synthesis_result
 
 
-def Speech(model, message):
+def speech(model, message):
     print('Start LLM processing')
 
     chat_history = ''

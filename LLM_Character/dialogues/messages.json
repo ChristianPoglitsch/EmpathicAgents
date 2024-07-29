@@ -18,5 +18,95 @@
         "class_type": "MessageAI",
         "role": "assistant",
         "content": " {\"Message\": \"Hi there! I'm Camila. Nice to meet you. I'm from Graz and I'm 23 years old. I enjoy gardening in the mornings and studying game development in the afternoons. What about you? What's your background?\", \"Trust\": \"4\", \"Time\": \"11 AM\", \"Location\": \"Graz\", \"Emotion\": \"Neutral\"}"
+    },
+    {
+        "class_type": "MessageAI",
+        "role": "user",
+        "content": "nice"
+    },
+    {
+        "class_type": "MessageAI",
+        "role": "assistant",
+        "content": " {\"Message\": \"Glad to hear that! I'm really passionate about gardening and game development. What hobbies or interests do you have?\", \"Trust\": \"5\", \"Time\": \"11 AM\", \"Location\": \"Graz\", \"Emotion\": \"Neutral\"}"
+    },
+    {
+        "class_type": "MessageAI",
+        "role": "user",
+        "content": "tof"
+    },
+    {
+        "class_type": "MessageAI",
+        "role": "assistant",
+        "content": " I'm sorry, I didn't quite catch that. Could you please repeat what you said or clarify your response? I'm here to chat and learn more about you!\n\n{\"Message\": \"I'm sorry, I didn't quite catch that. Could you please repeat what you said or clarify your response? I'm here to chat and learn more about you!\", \"Trust\": \"5\", \"Time\": \"11 AM\", \"Location\": \"Graz\", \"Emotion\": \"Neutral\"}"
+    },
+    {
+        "class_type": "MessageAI",
+        "role": "user",
+        "content": "nice"
+    },
+    {
+        "class_type": "MessageAI",
+        "role": "assistant",
+        "content": "  {\"Message\": \"Nice! I'm always happy to meet new people and learn about their interests. So, what do you like to do in your free time?\", \"Trust\": \"6\", \"Time\": \"11 AM\", \"Location\": \"Graz\", \"Emotion\": \"Neutral\"}"
+    },
+    {
+        "class_type": "MessageAI",
+        "role": "user",
+        "content": "nj"
+    },
+    {
+        "class_type": "MessageAI",
+        "role": "assistant",
+        "content": " I'm sorry, I'm not able to understand that response. Could you please clarify or repeat what you meant by \"nj\"? I'm here to chat and learn more about you!\n\n{\"Message\": \"I'm sorry, I'm not able to understand that response. Could you please clarify or repeat what you meant by 'nj'? I'm here to chat and learn more about you!\", \"Trust\": \"6\", \"Time\": \"11 AM\", \"Location\": \"Graz\", \"Emotion\": \"Neutral\"}"
+    },
+    {
+        "class_type": "MessageAI",
+        "role": "user",
+        "content": "sdf"
+    },
+    {
+        "class_type": "MessageAI",
+        "role": "assistant",
+        "content": " I'm sorry, I still didn't quite catch that response. Could you please provide some more context or clarify what you meant by \"sdf\"? I'm here to chat and learn more about you!\n\n{\"Message\": \"I'm sorry, I still didn't quite catch that response. Could you please provide some more context or clarify what you meant by 'sdf'? I'm here to chat and learn more about you!\", \"Trust\": \"6\", \"Time\": \"11 AM\", \"Location\": \"Graz\", \"Emotion\": \"Neutral"
+    },
+    {
+        "class_type": "MessageAI",
+        "role": "user",
+        "content": "rg"
+    },
+    {
+        "class_type": "MessageAI",
+        "role": "assistant",
+        "content": " I'm sorry, I'm still not able to understand that response. Could you please provide some more context or clarify what you meant by \"rg\"? I'm here to chat and learn more about you!\n\n{\"Message\": \"I'm sorry, I'm still not able to understand that response. Could you please provide some more context or clarify what you meant by 'rg'? I'm here to chat and learn more about you!\", \"Trust\": \"6\", \"Time\": \"11 AM\", \"Location\": \"Graz\", \"Emotion\": \"Neutral"
+    },
+    {
+        "class_type": "MessageAI",
+        "role": "user",
+        "content": "hb"
+    },
+    {
+        "class_type": "MessageAI",
+        "role": "assistant",
+        "content": "  I'm sorry, I'm still not able to understand that response. Could you please provide some more context or clarify what you meant by \"hb\"? I'm here to chat and learn more about you!\n\n{\"Message\": \"I'm sorry, I'm still not able to understand that response. Could you please provide some more context or clarify what you meant by 'hb'? I'm here to chat and learn more about you!\", \"Trust\": \"6\", \"Time\": \"11 AM\", \"Location\": \"Graz\", \"Emotion\": \""
+    },
+    {
+        "class_type": "MessageAI",
+        "role": "user",
+        "content": "zefzef"
+    },
+    {
+        "class_type": "MessageAI",
+        "role": "assistant",
+        "content": " I'm sorry, I'm still not able to understand that response. Could you please provide some more context or clarify what you meant by \"zefzef\"? I'm here to chat and learn more about you!\n\n{\"Message\": \"I'm sorry, I'm still not able to understand that response. Could you please provide some more context or clarify what you meant by 'zefzef'? I'm here to chat and learn more about you!\", \"Trust\": \"6\", \"Time\": \"11 AM\", \"Location\": \"Graz\", \"Em"
+    },
+    {
+        "class_type": "MessageAI",
+        "role": "user",
+        "content": "rge"
+    },
+    {
+        "class_type": "MessageAI",
+        "role": "assistant",
+        "content": " I'm sorry, I'm still not able to understand that response. Could you please provide some more context or clarify what you meant by \"rge\"? I'm here to chat and learn more about you!\n\n{\"Message\": \"I'm sorry, I'm still not able to understand that response. Could you please provide some more context or clarify what you meant by 'rge'? I'm here to chat and learn more about you!\", \"Trust\": \"6\", \"Time\": \"11 AM\", \"Location\": \"Graz\", \"Emotion\": \"Ne"
     }
 ]

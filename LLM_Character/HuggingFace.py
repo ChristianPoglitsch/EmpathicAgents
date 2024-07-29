@@ -25,7 +25,7 @@ class HuggingFace:
         self._model = None
         self._tokenizer = None
 
-    def initialize(self, model_id:str):
+    def init(self, model_id:str):
         """
         Initialize the model and tokenizer using the specified model ID.
         
@@ -84,7 +84,7 @@ class HuggingFace:
 
 
     # QUESTION: Why only summarise user messages of the chat?
-    # see intresting.md
+    # see todo.md
     def _run_summarize_huggingface_transformers(self, model:PreTrainedModel, tokenizer:AutoTokenizer, messages:AIMessages) -> AIMessages:
         """
         Summarize the chat by reading messages from a JSON file and generating a summary.
