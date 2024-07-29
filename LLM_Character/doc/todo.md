@@ -25,3 +25,8 @@ issue needs to be fixed.
 * run python files in LLM_Character folder in order to avoid relative paths errors.
 
 * look at soulmachines as well. 
+
+* check if pip env has the same dependencies as written in requirements.txt
+
+> as a matter of fact, delete venv, try re-installing, see if everything works. 
+> if it does, start pull request. 

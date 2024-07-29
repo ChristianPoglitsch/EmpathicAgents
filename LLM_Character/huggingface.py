@@ -180,7 +180,7 @@ if __name__ == "__main__":
     hf = HuggingFace()
     
     model_id = "mistralai/Mistral-7B-Instruct-v0.2"
-    hf.initialize(model_id)
+    hf.init(model_id)
     
     messages = AIMessages()
     m1 = AIMessage("Hello, how are you?", "user")
