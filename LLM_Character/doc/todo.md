@@ -23,3 +23,5 @@ issue needs to be fixed.
 
 
 * run python files in LLM_Character folder in order to avoid relative paths errors.
+
+* look at soulmachines as well. 
