@@ -19,7 +19,7 @@ logging.getLogger('transformers').setLevel(logging.ERROR)
 
 # QUESTION: why does the pipeline function perform better than the generate_text function. What kind of pre/processing is being missed? 
 
-def laod_and_train_mistral_example():
+def load_and_train_mistral_example():
 
     # instruct_tune_dataset1 = generate_additional_data()
     instruct_tune_dataset2 = generate_llm_additional_data()
@@ -53,7 +53,7 @@ def laod_and_train_mistral_example():
         
         print_generated_text("\n after fine tuning", prompt, text1, text2)
 
-def laod_mistral_example():
+def load_mistral_example():
     model, tokenizer = load_mistral_instr_model()
     
     adapters_id = "trained\Mistral-7b-v2-finetune"
@@ -163,8 +163,8 @@ if __name__ == "__main__":
 
     # generate_auto_additional_data()
     
-    # laod_and_train_mistral_example()
-    # laod_mistral_example()
+    # load_and_train_mistral_example()
+    # load_mistral_example()
 
     model_id = "openlm-research/open_llama_7b_v2"
     # trained_path = "thisserand/health_care_german"
