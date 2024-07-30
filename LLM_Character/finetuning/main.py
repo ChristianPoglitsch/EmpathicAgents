@@ -1,4 +1,4 @@
-﻿from transformers import AutoModelForCausalLM, AutoTokenizer, GenerationConfig, BitsAndBytesConfig, pipeline
+﻿from transformers import AutoModelForCausalLM, AutoTokenizer, GenerationConfig, BitsAndBytesConfig
 from peft import  PeftModel
 
 from training import train_mistral, train_model

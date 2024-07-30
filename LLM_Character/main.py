@@ -16,7 +16,7 @@ from cognitive_modules.summary import summary
 
 def run_server(model:HuggingFace, sock:UdpComms, messages:AIMessages):
     messages = messages.read_messages_from_json("dialogues/messages.json") # --> previous messages.
-    
+    print("Running Server... \n")
     while True:
         byte_data = sock.ReadReceivedData() # non blocking read data
         if byte_data != None: # if NEW data has been received since last ReadReceivedData function call
@@ -112,9 +112,9 @@ if __name__ == "__main__":
 
     # run_chat(model)
 
-    # #FIXME: OSError: TheBloke/Mistral-7B-OpenOrca-GGUF does not appear to have a file named pytorch_model.bin, model.safetensors, tf_model.h5, model.ckpt or flax_model.msgpack.
     # run_interaction()
 
+    # #FIXME: OSError: TheBloke/Mistral-7B-OpenOrca-GGUF does not appear to have a file named pytorch_model.bin, model.safetensors, tf_model.h5, model.ckpt or flax_model.msgpack.
     # run_template()
 
     # summary(model)
