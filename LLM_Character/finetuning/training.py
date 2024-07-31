@@ -3,7 +3,8 @@ from peft.tuners.lora import LoraLayer
 from peft import prepare_model_for_kbit_training
 from peft import LoraConfig, get_peft_model
 from trl import SFTTrainer
-import torch 
+import torch
+from generate_data import generate_additional_data 
 
 def train_mistral(model, tokenizer, instruct_tune_dataset) -> SFTTrainer:
     """is trained with SFFT
@@ -34,7 +35,7 @@ def train_mistral(model, tokenizer, instruct_tune_dataset) -> SFTTrainer:
         # gradient_accumulation_steps=16, # Gradients are accumulated over two batches (2*16=32) and Low-Rank Adapters are updated only then (not per batch); method to increase batch size in a memory-efficient manner.
 
         # num_train_epochs=5,
-        max_steps = 500, # comment out this line if you want to train in epochs - 100+ recommended
+        max_steps = 1000, # comment out this line if you want to train in epochs - 100+ recommended
         save_strategy="epoch",
         # evaluation_strategy="epoch",
         evaluation_strategy="steps",
@@ -168,7 +169,8 @@ if __name__ == "__main__":
 
     model, tokenizer = load_mistral_instr_model()
 
-    instruct_tune_dataset = load_dataset("mwitiderrick/lamini_mistral", split="train")
+    #instruct_tune_dataset = load_dataset("mwitiderrick/lamini_mistral", split="train")
+    instruct_tune_dataset = generate_additional_data()
     train_mistral(model, tokenizer, instruct_tune_dataset)
 
     # FIXME:

@@ -55,14 +55,16 @@ def load_and_train_mistral_example():
 
 def load_mistral_example():
     model, tokenizer = load_mistral_instr_model()
-    
-    adapters_id = "trained\Mistral-7b-v2-finetune"
-    model = PeftModel.from_pretrained(model, adapters_id)
-
     question = 'What is the research focus of Christian Poglitsch from Austria?'
     generation_config = GenerationConfig(temperature=0.1)
     
-    text1 = generate_text(question, model, tokenizer, generation_config, 50)      
+    text1 = generate_text(question, model, tokenizer, generation_config, 50)
+    print_generated_text("\n before fine tuning", question, text1, "")
+    
+    adapters_id = "trained\Mistral-7b-v2-finetune"
+    model = PeftModel.from_pretrained(model, adapters_id)    
+    
+    text1 = generate_text(question, model, tokenizer, generation_config, 50)
     print_generated_text("\n after fine tuning", question, text1, "")
 
 def run_formatting_example(model_id):
@@ -164,7 +166,7 @@ if __name__ == "__main__":
     # generate_auto_additional_data()
     
     # load_and_train_mistral_example()
-    # load_mistral_example()
+    load_mistral_example()
 
     model_id = "openlm-research/open_llama_7b_v2"
     # trained_path = "thisserand/health_care_german"
