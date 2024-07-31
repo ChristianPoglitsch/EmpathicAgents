@@ -1,6 +1,4 @@
-﻿"""
-This module provides a class `HuggingFace` for interacting with Hugging Face models.
-""" 
+﻿""" This module provides a class `HuggingFace` for interacting with Hugging Face models. It also manages GPT models. """ 
 
 import time
 from dataclass import AIMessages, AIMessage
@@ -20,6 +18,7 @@ class HuggingFace:
     """
     A class to handle operations related to Hugging Face models, 
     including loading models, querying models, and summarizing messages.
+    It is a wrapper class for loading huggingface models and GPT models. 
     """
     def __init__(self):
         self._model = None
