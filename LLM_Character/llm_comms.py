@@ -25,11 +25,6 @@ from openai.types import Model, ModelDeleted
 from typing import List, Optional
 from utils import API_KEY
 
-
-
-
-
-
 # class OpenAI(SyncAPIClient):
 #     completions: resources.Completions
 #     chat: resources.Chat
@@ -90,7 +85,7 @@ class OpenAIComms():
                             timeout=retry_wait_time)
         self.max_tokens = max_length
        
-    def send_chat(self, prompt:AIMessages) :
+    def send_chat(self, prompt:AIMessages) -> (str | None):
         """send a prompt to openAI endpoint for chat completions.
 
         Args:
@@ -100,10 +95,10 @@ class OpenAIComms():
             _type_: _description_
         """
         if len(prompt) == 0:
-            return "Error: No input messages."
+            return None
         return self._request(prompt)
 
-    def send_embedding(self, keywords:str) -> Embedding:
+    def send_embedding(self, keywords:str) ->  (Embedding | None):
         """send a prompt to openAI endpoint for embeddings.
 
         Args:
@@ -115,14 +110,14 @@ class OpenAIComms():
             [embedding guide](https://platform.openai.com/docs/guides/embeddings).
         """
         if len(keywords) == 0:
-            return "Error: No input keywords."
+            return None
         return self._requese_emb(keywords)
 
     # ---------
     #  PRIVATE
     # ---------
     
-    def _request(self, messages: AIMessages) -> Optional[str]:
+    def _request(self, messages: AIMessages) -> Optional[str] | None :
         """
         roles of the messages should be "system", "user", "assistant". 
 
@@ -146,6 +141,7 @@ class OpenAIComms():
         except Exception as e : 
             print("openAI request failed")
             print(e)
+            return None
 
         # see openai.yaml under 
         # CreateChatCompletionResponse schema  
@@ -155,7 +151,7 @@ class OpenAIComms():
         # choose first message option if there are multiple options.
         return response.choices[0].message.content
     
-    def _requese_emb(self, keywords: str, model_name="text-embedding-3-small") -> List[Embedding]:
+    def _requese_emb(self, keywords: str, model_name="text-embedding-3-small") -> List[Embedding] | None:
         try :
             response:CreateEmbeddingResponse = self.client.embeddings.create(
                 model= model_name,
@@ -164,6 +160,7 @@ class OpenAIComms():
         except Exception as e : 
             print("openAI request failed")
             print(e)
+            return None
 
         return response.data
 

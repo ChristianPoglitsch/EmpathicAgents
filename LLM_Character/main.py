@@ -102,7 +102,7 @@ if __name__ == "__main__":
     # model_id = "google/gemma-7b"
     model_id = "mistralai/Mistral-7B-Instruct-v0.2"
     model = HuggingFace()
-    model.init(model_id)
+    model.init(model_id, 100)
 
     # Create UDP socket to use for sending (and receiving)
     sock = UdpComms(udpIP="127.0.0.1", portTX=8000, portRX=8001, enableRX=True, suppressWarnings=True)

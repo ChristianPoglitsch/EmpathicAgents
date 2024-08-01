@@ -1,6 +1,9 @@
 # data files
 openai_python_client_api.md
 openapi.yaml
+data
+trained
+output
 
 # python linter
 pylintrc

@@ -161,7 +161,7 @@ if __name__ == "__main__":
     # Extracting all the contents in the directory corresponding to path
     l_files = os.listdir(path) 
 
-    # generate_auto_additional_data()
+    load_and_train_mistral_example()
     
     # load_and_train_mistral_example()
     # load_mistral_example()
@@ -169,7 +169,7 @@ if __name__ == "__main__":
     model_id = "openlm-research/open_llama_7b_v2"
     # trained_path = "thisserand/health_care_german"
 
-    # run_formatting_example(model_id)
+    run_formatting_example(model_id)
     # FIXME: 
     # run_train_model_example(model_id, trained_path)
     # run_trained_model(model_id, trained_path)
