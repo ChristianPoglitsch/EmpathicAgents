@@ -12,7 +12,7 @@ from udp_comms import UdpComms
 from huggingface import HuggingFace
 from speach import speech
 from dataclass import AIMessages, PromptMessage
-from cognitive_modules.summary import summary
+from persona.cognitive_modules.summary import summary
 
 def run_server(model:HuggingFace, sock:UdpComms, messages:AIMessages):
     messages = messages.read_messages_from_json("dialogues/messages.json") # --> previous messages.

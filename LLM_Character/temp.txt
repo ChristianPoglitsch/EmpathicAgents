@@ -1,0 +1,60 @@
+
+# class OpenAI(SyncAPIClient):
+#     completions: resources.Completions
+#     chat: resources.Chat
+#     embeddings: resources.Embeddings
+#     files: resources.Files
+#     images: resources.Images
+#     audio: resources.Audio
+#     moderations: resources.Moderations
+#     models: resources.Models
+#     fine_tuning: resources.FineTuning
+#     beta: resources.Beta
+#     batches: resources.Batches
+#     uploads: resources.Uploads
+#     with_raw_response: OpenAIWithRawResponse
+#     with_streaming_response: OpenAIWithStreamedResponse
+
+#     # client options
+#     api_key: str
+#     organization: str | None
+#     project: str | None
+
+
+# OUR USE CASE:
+
+#     completions: resources.Completions
+#     chat: resources.Chat
+#     embeddings: resources.Embeddings
+#     models: resources.Models
+#     api_key: str
+
+
+
+# Methods:
+
+#     client.models.retrieve(model) -> Model
+#     client.models.list() -> SyncPage[Model]
+#     client.models.delete(model) -> ModelDeleted
+
+# Learn how to use OpenAI's Batch API to send asynchronous groups of requests with 50% lower costs, 
+# a separate pool of significantly higher rate limits, and a clear 24-hour turnaround time. 
+# The service is ideal for processing jobs that don't require immediate responses
+
+
+
+# Retries
+# Certain errors are automatically retried 2 times by default, 
+# with a short exponential backoff. 
+# Connection errors:
+# 408 Request Timeout, 
+# 409 Conflict, 
+# 429 Rate Limit,
+# and >=500 Internal errors are all retried by default.
+# You can use the max_retries option to configure or disable retry settings:
+
+# Configure the default for all requests:
+# client = OpenAI(
+#     # default is 2
+#     max_retries=0,
+# )

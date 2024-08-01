@@ -218,6 +218,10 @@ class AIMessages:
         return messages_ai
 
 
+    def  __len__(self):
+        return  len(self.messages)
+
+
 if __name__ == "__main__":
 
     pm = PromptMessage(1, "Hallo Wereld")
@@ -267,3 +271,27 @@ if __name__ == "__main__":
     m = AIMessage(serialised_message, "assistant")
     messages_dict = m.get_message_formatted()
     print("serialised_message: ", messages_dict)
+
+
+
+    print("\n")
+    print("--------------------")
+    print("\n")
+
+    aimessages = AIMessages()
+    aimessage  = AIMessage("Hello", "user")
+    aimessages.add_message(aimessage)
+    aimessages.add_message(AIMessage("Hi", "assistant"))
+    aimessages.add_message(AIMessage("How are you?", "user"))
+
+    # b = [i.__dict__ for i in aimessages.get_messages()]
+    b = aimessages.get_messages_formatted()
+    print(b)    
+    print("--------------------")
+
+    json_string2 = json.dumps(b)
+    print(json_string2)
+    print("--------------------")
+
+    d2 = json.loads(json_string2)
+    print(d2)

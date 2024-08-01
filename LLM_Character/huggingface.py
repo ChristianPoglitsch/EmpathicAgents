@@ -14,24 +14,25 @@ import logging
 warnings.filterwarnings('ignore')
 logging.getLogger('transformers').setLevel(logging.ERROR)
 
-class HuggingFace:
+class HuggingFace():
     """
     A class to handle operations related to Hugging Face models, 
     including loading models, querying models, and summarizing messages.
-    It is a wrapper class for loading huggingface models and GPT models. 
     """
     def __init__(self):
         self._model = None
         self._tokenizer = None
 
-    def init(self, model_id:str):
+    def init(self, model_id:str, max_length:int):
         """
         Initialize the model and tokenizer using the specified model ID.
         
         Args:
             model_id (str): The identifier for the model to load.
+            max_length (int): the maximum amount of new tokens.
         """
         self._model, self._tokenizer = self._load_model(model_id)
+        self.max_length = max_length
 
     def query(self, message:AIMessages) -> tuple[AIMessages, str]:
         """
@@ -148,9 +149,9 @@ class HuggingFace:
 
         generation_config = GenerationConfig(
             do_sample=True,
-            temperature=0.2, #1.0
-            pad_token_id=tokenizer.eos_token_id,
-            max_new_tokens=128
+            temperature= 0.2, #1.0
+            pad_token_id= tokenizer.eos_token_id,
+            max_new_tokens= self.max_length
             )
         generation_config.eos_token_id = tokenizer.eos_token_id
 

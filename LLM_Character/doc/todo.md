@@ -30,3 +30,9 @@ issue needs to be fixed.
 
 > as a matter of fact, delete venv, try re-installing, see if everything works. 
 > if it does, start pull request. 
+
+* seach the difference between using .env and using windows registry for storing api keys. 
+
+it is recommended by openai to use .env, but i think they compare it against a normal text file. 
+> While you can provide an api_key keyword argument, we recommend using python-dotenv to add OPENAI_API_KEY="My API Key" to your .env file so that your API Key is not stored in source control.
+> source : https://github.com/openai/openai-python
