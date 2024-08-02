@@ -10,8 +10,16 @@ from persona.prompt_templates.prompt import RunPrompt
 
 
 class WakeUp(RunPrompt):
+    """
+    Given the persona, returns an integer that indicates the hour when the 
+    persona wakes up.  
+    """
     def create_prompt_input(self, persona:Persona):
-        pass
+        prompt_input = [persona.scratch.get_str_iss(),
+                    persona.scratch.get_str_lifestyle(),
+                    persona.scratch.get_str_firstname()]
+        return prompt_input
+
  
     def clean_up_response(self, response:str):
         pass
@@ -29,16 +37,6 @@ if __name__ == "__main__":
     pass
 
 
-# def run_gpt_prompt_wake_up_hour(persona, test_input=None, verbose=False): 
-#   """
-#   Given the persona, returns an integer that indicates the hour when the 
-#   persona wakes up.  
-
-#   INPUT: 
-#     persona: The Persona class instance 
-#   OUTPUT: 
-#     integer for the wake up hour.
-#   """
 #   def create_prompt_input(persona:Persona, test_input=None): 
 #     if test_input: return test_input
 #     prompt_input = [persona.scratch.get_str_iss(),

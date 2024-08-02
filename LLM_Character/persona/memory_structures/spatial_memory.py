@@ -1,13 +1,34 @@
-""" 
-The LLM lives in the real world BUT like every living being, 
-you only know known buildings in the area you live in,
-you know more about the street you live in, 
-and you know the most about the house you live in. 
+import json
+import os 
 
-You come to know other locations, if you have visted them. 
-You add buildings to your memory if you have visited them, etc.
-"""
+class MemoryTree: 
+    def __init__(self, f_saved): 
+        self.tree = {}
+        if check_if_file_exists(f_saved): 
+            self.tree = json.load(open(f_saved))
 
-#FIXME: is quite different from the paper.
-# there is no maze where events / chats are attached to tiles. 
-# there is no game obejcts that are activated once the person has travelled near it. 
+    def save(self, out_json):
+        with open(out_json, "w") as outfile:
+            json.dump(self.tree, outfile) 
+
+def check_if_file_exists(curr_file): 
+    """
+    Checks if a file exists
+    ARGS:
+    curr_file: path to the current csv file. 
+    RETURNS: 
+    True if the file exists
+    False if the file does not exist
+    """
+    return os.path.isfile(curr_file) 
+       
+
+
+if __name__ == '__main__':
+    f = f"..\..\storage\initial\personas\Isabella\spatial_memory.json"
+    x = MemoryTree(f)
+
+    # print(x.get_str_accessible_sector_arenas("dolores double studio:double studio"))
+    print(x.get_str_accessible_sectors("Kortrijk"))
+    print(x.get_str_accessible_sector_arenas("Kortrijk:Beguinage of Courtrai"))
+    print(x.get_str_accessible_arena_game_objects("Kortrijk:Beguinage of Courtrai:supply store"))

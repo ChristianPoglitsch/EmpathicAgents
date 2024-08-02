@@ -1,0 +1,23 @@
+iterative_convo_v1.txt
+
+Variables: 
+!<INPUT 0>! -- persona ISS
+!<INPUT 1>! -- persona name
+
+<commentblockmarker>###</commentblockmarker>
+Context for the task: 
+ 
+!<INPUT 0>!
+
+---
+Task: 
+Given the above, where does !<INPUT 1>! live in Austria? 
+Where does !<INPUT 1>! work in Austria?
+Which buildings did !<INPUT 1>! visit or know from experience in Austria? 
+
+Output format: Output a json of the following format: 
+{
+    "home_location" : "[<city, street, number>]"
+    "work_location" : "[<city, street, number>]"
+    "buildings" : "[<city, street, number, name_of_building>]"    
+}

@@ -9,7 +9,7 @@ from transformers import AutoModel, AutoModelForCausalLM, AutoTokenizer
 from gpt4all import GPT4All
 
 from udp_comms import UdpComms
-from LLM_Character.llm_api import LLM_API
+from llm_api import LLM_API
 from speach import speech
 from dataclass import AIMessages, PromptMessage
 from persona.cognitive_modules.summary import summary
