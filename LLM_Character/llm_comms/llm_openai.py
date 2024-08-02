@@ -1,11 +1,17 @@
 """ inspired by 
+
 https://github.com/adimis-ai/Large-Language-Model-LLM-Wrapper-from-Scratch-using-Openai-models/blob/main/Large_Language_Model_(LLM)_Wrapper_from_Scratch_using_Openai_models.ipynb
 https://github.com/openai/openai-python
 https://github.com/joonspk-research/generative_agents
-"""
 
-from openai import OpenAI 
+"""
+import sys
+sys.path.append('../')
+
+
 from dataclass import AIMessages, AIMessage
+from llm_comms.llm_abstract import LLMComms
+
 
 # tiktoken is a fast BPE tokeniser for use with OpenAI's models.
 
@@ -21,48 +27,28 @@ from openai.types import ChatModel
 from openai.types.chat import ChatCompletion, ChatCompletionMessageParam
 from openai.types import CreateEmbeddingResponse, Embedding
 from openai.types import Model, ModelDeleted
+from openai import OpenAI 
 
 from typing import List, Optional
 from utils import API_KEY
 
-# class OpenAI(SyncAPIClient):
-#     completions: resources.Completions
-#     chat: resources.Chat
-#     embeddings: resources.Embeddings
-#     files: resources.Files
-#     images: resources.Images
-#     audio: resources.Audio
-#     moderations: resources.Moderations
-#     models: resources.Models
-#     fine_tuning: resources.FineTuning
-#     beta: resources.Beta
-#     batches: resources.Batches
-#     uploads: resources.Uploads
-#     with_raw_response: OpenAIWithRawResponse
-#     with_streaming_response: OpenAIWithStreamedResponse
-
-#     # client options
-#     api_key: str
-#     organization: str | None
-#     project: str | None
-
-
-# OUR USE CASE:
-
-#     completions: resources.Completions
-#     chat: resources.Chat
-#     embeddings: resources.Embeddings
-#     models: resources.Models
-#     api_key: str
-
-class OpenAIComms():
+class OpenAIComms(LLMComms):
     """class responsible for sending messages to openAI API """
 
     def __init__(self):
         self.client = None    
         self.model_name = None
 
-    def init(self, model:str, max_length=50, max_retry_attempts=3, retry_wait_time=60):
+        self.max_tokens=100 
+        self.temperature=0.8 
+        self.top_p=1
+        self.n=1
+        self.max_retry_attempts=3
+        self.presence_penalty=None
+        self.frequency_penalty=None
+        # "stop": ["\n"]
+
+    def init(self, model:str):
         """
         if model name is not valid, it raises a value exception error. 
 
@@ -79,13 +65,10 @@ class OpenAIComms():
             raise ValueError("The model type does not exist or is not camptabible for chat completion.")
 
         self.model_name = model
-        self.client = OpenAI(
-                            api_key=API_KEY,
-                            max_retries=max_retry_attempts, 
-                            timeout=retry_wait_time)
-        self.max_tokens = max_length
+        self.client = OpenAI(api_key=API_KEY)
        
-    def send_chat(self, prompt:AIMessages) -> (str | None):
+    # FIXME: use dict as arguments for gpt model instead of positional arguments. 
+    def send_text(self, prompt:List[dict]) -> Optional[str]:
         """send a prompt to openAI endpoint for chat completions.
 
         Args:
@@ -96,9 +79,10 @@ class OpenAIComms():
         """
         if len(prompt) == 0:
             return None
+
         return self._request(prompt)
 
-    def send_embedding(self, keywords:str) ->  (Embedding | None):
+    def send_embedding(self, keywords:str) ->  Optional[List[Embedding]]:
         """send a prompt to openAI endpoint for embeddings.
 
         Args:
@@ -112,12 +96,39 @@ class OpenAIComms():
         if len(keywords) == 0:
             return None
         return self._requese_emb(keywords)
+    
+    def set_params(self, max_tokens:int, temperature:int, top_p:int, amount_responses:int, max_retry_attemps:int, presence_penalty=None, frequency_penalty=None):
+
+        if not self._validate_inputs(max_tokens, temperature, top_p, amount_responses, max_retry_attemps,  presence_penalty, frequency_penalty):
+            return None
+
+        self.max_tokens=max_tokens
+        self.temperature=temperature 
+        self.top_p=top_p  
+        self.n= amount_responses
+        self.max_retry_attempts=max_retry_attemps
+        self.presence_penalty = presence_penalty
+        self.frequency_penalty = frequency_penalty
+
 
     # ---------
     #  PRIVATE
     # ---------
-    
-    def _request(self, messages: AIMessages) -> Optional[str] | None :
+
+    def _validate_inputs(self, max_tokens, temperature, top_p, n, max_retry_attemps, presence_penalty, frequency_penalty):
+        b1 = max_tokens > 0 
+        b2 = temperature >=0 and  temperature <=2
+        b3 = top_p >= 0 and top_p <= 1
+        b4 = n >= 1 and n <= 128
+        b5 = max_retry_attemps >= 0
+        b6 = presence_penalty or ( presence_penalty >= -2 and presence_penalty <= 2)
+        b7 = frequency_penalty or ( frequency_penalty >= -2 and frequency_penalty <= 2)
+
+        if all[b1,b2,b3,b4,b5,b6,b7] :
+            return True
+        return False
+
+    def _request(self, messages: List[dict]) -> Optional[str] :
         """
         roles of the messages should be "system", "user", "assistant". 
 
@@ -127,16 +138,23 @@ class OpenAIComms():
         Returns:
             Optional[str]: the completion of the provided chat. 
         """
-        # ChatCompletionMessageParam
-        # ChatCompletionUserMessageParam
-        # ChatCompletionAssistantMessageParam
-    
         try :
-            response = self.client.chat.completions.create(
-                model= self.model_name,
-                messages= messages.get_messages_formatted(),
-                
-                max_tokens= self.max_tokens
+            response = self.client\
+                .with_options(max_retries=self.max_retry_attempts)\
+                .chat.completions.create(
+                    messages= messages,
+                    model= self.model_name,
+                    max_tokens= self.max_tokens,
+                    n=self.n,
+                    # FIXME: this could be very usefull for us, since we do use json object in which we want the reponse to be in, and the trust level, etc...
+                    # response_format= ? "Must be one of `text` or `json_object`." bv. response_format={"type": "json_object"}
+
+                    # temperature: float | NotGiven | None = NOT_GIVEN,
+                    # top_p: float | NotGiven | None = NOT_GIVEN,
+
+                    # frequency_penalty
+                    # presence_penalty
+                    # stop
             )
         except Exception as e : 
             print("openAI request failed")
@@ -148,18 +166,19 @@ class OpenAIComms():
         # ChatCompletionResponseMessage schema
         # also see python_client.md
 
-        # choose first message option if there are multiple options.
+        # choose first message option if there are multiple options, see n parameter
         return response.choices[0].message.content
     
-    def _requese_emb(self, keywords: str, model_name="text-embedding-3-small") -> List[Embedding] | None:
+    def _requese_emb(self, keywords: str, model_name="text-embedding-3-small") -> Optional[List[Embedding]]:
         try :
             response:CreateEmbeddingResponse = self.client.embeddings.create(
                 model= model_name,
                 input= keywords
             )
+
         except Exception as e : 
             print("openAI request failed")
-            print(e)
+            print(e)       
             return None
 
         return response.data
@@ -184,16 +203,24 @@ class OpenAIComms():
 
         return model in ["text-embedding-ada-002", "text-embedding-3-small", "text-embedding-3-large"]
 
+
+
 if __name__ == "__main__":
     x = OpenAIComms()
-    x.init("gpt-4")
+    model_id = "gpt-4"
+    x.init(model_id)
 
     aimessages = AIMessages()
     aimessages.add_message(AIMessage("Hi", "assistant"))
+    prompt = aimessages.get_messages_formatted()
 
-    res = x.send_chat(aimessages)
-    res2 = x.send_embedding("gagagagagagagagga")
-    if res :
-        print("LETS GOO")
+    res = x.send_text(prompt)
+    res2 = x.send_embedding("inderdaad")
+
+    if res and res2:
+        print("Dit is mooi")
+        print(res)
     else :
         print("DAS IST EINE KOLOSALE KONSPIRAZION  ~Luis de Funes")
+
+
