@@ -3,13 +3,12 @@
 import sys
 sys.path.append('../')
 
-from llm_abstract import LLMComms
 from llm_comms.llm_abstract import LLMComms
 from finetuning.models import load_base_model
 from dataclass import AIMessages, AIMessage
 
 from transformers import AutoModelForCausalLM, AutoTokenizer, GenerationConfig, AutoModel
-from sentence_transformers import SentenceTransformer, util
+from sentence_transformers import SentenceTransformer
 from transformers import PreTrainedTokenizer, PreTrainedModel
 from transformers import BitsAndBytesConfig
 from openai.types import Embedding
@@ -17,11 +16,19 @@ from peft import  PeftModel
 
 import torch
 import torch.nn.functional as F
+from torch import Tensor
 
 import time
 import os
 
 from typing import List, Optional
+
+# in order to prevent the terminal to be cluttered from all the torch/transformers warnings. 
+import warnings
+import logging
+
+warnings.filterwarnings('ignore')
+logging.getLogger('transformers').setLevel(logging.ERROR)
 
 
 class LocalComms(LLMComms):
@@ -31,8 +38,9 @@ class LocalComms(LLMComms):
     """
 
     def __init__(self):
-        self.model:PreTrainedModel = None    
-        self.tokenizer:PreTrainedTokenizer = None
+        self._model:PreTrainedModel = None    
+        self._tokenizer:PreTrainedTokenizer = None
+        self._embedding_model: SentenceTransformer = None
 
         self.max_tokens=100 
         self.temperature=0.8 
@@ -50,19 +58,24 @@ class LocalComms(LLMComms):
         # especially for semantic comparason, you have to check if the model is made for that. 
         # the same can be done for chatting, checking if the model is a text generator type. 
 
-        if self._check_local(finetuned_model_id):
+        if finetuned_model_id:
             self._model, self._tokenizer = self._load_model_loc(base_model_id, finetuned_model_id)    
         else: 
             self._model, self._tokenizer = self._load_model_hf(base_model_id)
+            
+        #FIXME: change model !! cannot use mistral. 
+        self._embedding_model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
+
+
        
-    def send_text(self, prompt:AIMessages, max_length:int) -> Optional[str]:
+    def send_text(self, prompt:AIMessages, max_length=100) -> Optional[str]:
         """
         send a prompt to openAI endpoint for chat completions.
         """
         if len(prompt) == 0:
             return None
         
-        response = self._request
+        response = self._request(self._model, self._tokenizer, prompt, max_length)
         response_decoded = self._decode_request(response)
 
         return response_decoded
@@ -163,7 +176,8 @@ class LocalComms(LLMComms):
     def _request(self, 
                 model: PreTrainedModel, 
                 tokenizer:PreTrainedTokenizer, 
-                messages:AIMessages) -> str:
+                messages:AIMessages,
+                max_length:int) -> str:
         """
         Generate a response from the model based on the input messages.
         
@@ -184,7 +198,7 @@ class LocalComms(LLMComms):
             do_sample=True,
             temperature= 0.2, #1.0
             pad_token_id= tokenizer.eos_token_id,
-            max_new_tokens= self.max_length
+            max_new_tokens= max_length
             )
         generation_config.eos_token_id = tokenizer.eos_token_id
 
@@ -205,95 +219,69 @@ class LocalComms(LLMComms):
             " indeed"
         """
         response = message.replace("[/INST]","[INST]").split("[INST]")
-        #response = message.replace("GPT4 Correct Assistant:","GPT4 Corrent User:").split("GPT4 Corrent User:")
-
         return response[len(response)-1]
     
 
-    # FIXME: something completly different. 
-    # source : https://huggingface.co/tasks/feature-extraction
-    # https://huggingface.co/tasks/sentence-similarity
+# FIXME: something completly different. 
+# source : https://huggingface.co/tasks/feature-extraction
+# https://huggingface.co/tasks/sentence-similarity
 
-    # What is Sentence Similarity?
-    # Sentence Similarity is a task that, given a source sentence and a set of target sentences, calculates how similar the target sentences are to the source.
-    
-    # Sentence similarity models convert input text, like “Hello”, into vectors (called embeddings)
-    # that capture semantic information. We call this step to embed. Then, we calculate how close (similar) they are using cosine similarity.
-    # -> exactly what the paper 'generative agents' did. 
-    
+# What is Sentence Similarity?
+# Sentence Similarity is a task that, given a source sentence and a set of target sentences, calculates how similar the target sentences are to the source.
 
-    # https://stackoverflow.com/questions/60492839/how-to-compare-sentence-similarities-using-embeddings-from-bert
-    # FIXME: You should NOT use BERT's output as sentence embeddings for semantic similarity. 
-    # otherwise in init, give model id for a model specifically or semtnatic comparason? 
+# Sentence similarity models convert input text, like “Hello”, into vectors (called embeddings)
+# that capture semantic information. We call this step to embed. Then, we calculate how close (similar) they are using cosine similarity.
+# -> exactly what the paper 'generative agents' did. 
 
-    def _requese_emb(self, keywords: str) -> Optional[List[Embedding]]:
-        model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
 
-        # Two lists of sentences
-        sentences1 = ['The cat sits outside',
-                    'A man is playing guitar',
-                    'The new movie is awesome']
+# https://stackoverflow.com/questions/60492839/how-to-compare-sentence-similarities-using-embeddings-from-bert
+# FIXME: You should NOT use BERT's output as sentence embeddings for semantic similarity. 
+# otherwise in init, give model id for a model specifically or semtnatic comparason? 
 
-        sentences2 = ['The dog plays in the garden',
-                    'A woman watches TV',
-                    'The new movie is so great']
+# TODO: convert output to Optional[List[Embedding]]  !!!
 
-        #Compute embedding for both lists
-        embeddings1 = model.encode(sentences1, convert_to_tensor=True)
-        embeddings2 = model.encode(sentences2, convert_to_tensor=True)
-
-        #Compute cosine-similarits
-        cosine_scores = util.pytorch_cos_sim(embeddings1, embeddings2)
-
+    def _requese_emb(self, keywords: str) -> Tensor:
+        embeddings = self._embedding_model.encode(keywords, convert_to_tensor=True)
+        return embeddings
 # 
-#   OR
+#         OR
 # 
+#         # ibr: with this method, you can also use mistral, but it isnt recommended ig? 
 
-    # ibr: with this method, you can also use mistral, but it isnt recommended ig? 
+#         # Without sentence-transformers, 
+#         # you can use the model like this: 
+#         # First, you pass your input through the transformer model, 
+#         # then you have to apply the right pooling-operation on-top of the contextualized word embeddings.
 
-    # Without sentence-transformers, 
-    # you can use the model like this: 
-    # First, you pass your input through the transformer model, 
-    # then you have to apply the right pooling-operation on-top of the contextualized word embeddings.
-
-    #Mean Pooling - Take attention mask into account for correct averaging
-    def mean_pooling(model_output, attention_mask):
-        token_embeddings = model_output[0] #First element of model_output contains all token embeddings
-        input_mask_expanded = attention_mask.unsqueeze(-1).expand(token_embeddings.size()).float()
-        return torch.sum(token_embeddings * input_mask_expanded, 1) / torch.clamp(input_mask_expanded.sum(1), min=1e-9)
-
-
-    # Sentences we want sentence embeddings for
-    sentences = ['This is an example sentence', 'Each sentence is converted']
-
-    # Load model from HuggingFace Hub
-    tokenizer = AutoTokenizer.from_pretrained('sentence-transformers/all-MiniLM-L6-v2')
-    model = AutoModel.from_pretrained('sentence-transformers/all-MiniLM-L6-v2')
-
-    # Tokenize sentences
-    encoded_input = tokenizer(sentences, padding=True, truncation=True, return_tensors='pt')
-
-    # Compute token embeddings
-    with torch.no_grad():
-        model_output = model(**encoded_input)
-
-    # Perform pooling
-    sentence_embeddings = mean_pooling(model_output, encoded_input['attention_mask'])
-
-    # Normalize embeddings
-    sentence_embeddings = F.normalize(sentence_embeddings, p=2, dim=1)
-
-    print("Sentence embeddings:")
-    print(sentence_embeddings)
+#         #Mean Pooling - Take attention mask into account for correct averaging
+#         def mean_pooling(model_output, attention_mask):
+#             token_embeddings = model_output[0] #First element of model_output contains all token embeddings
+#             input_mask_expanded = attention_mask.unsqueeze(-1).expand(token_embeddings.size()).float()
+#             return torch.sum(token_embeddings * input_mask_expanded, 1) / torch.clamp(input_mask_expanded.sum(1), min=1e-9)
 
 
+#         # Sentences we want sentence embeddings for
+#         sentences = ['This is an example sentence', 'Each sentence is converted']
 
+#         # Load model from HuggingFace Hub
+#         tokenizer = AutoTokenizer.from_pretrained('sentence-transformers/all-MiniLM-L6-v2')
+#         model = AutoModel.from_pretrained('sentence-transformers/all-MiniLM-L6-v2')
 
+#         # Tokenize sentences
+#         encoded_input = tokenizer(sentences, padding=True, truncation=True, return_tensors='pt')
 
+#         # Compute token embeddings
+#         with torch.no_grad():
+#             model_output = model(**encoded_input)
 
+#         # Perform pooling
+#         sentence_embeddings = mean_pooling(model_output, encoded_input['attention_mask'])
 
+#         # Normalize embeddings
+#         sentence_embeddings = F.normalize(sentence_embeddings, p=2, dim=1)
 
-
+#         print("Sentence embeddings:")
+#         print(sentence_embeddings)
 
 
 
@@ -303,14 +291,15 @@ if __name__ == "__main__":
     x.init(model_id)
 
     aimessages = AIMessages()
-    aimessages.add_message(AIMessage("Hi", "assistant"))
-
+    aimessages.add_message(AIMessage("Hi", "user"))
+    
     res = x.send_text(aimessages)
     res2 = x.send_embedding("inderdaad")
 
-    if res and res2:
+    print(res) 
+    print(res2)
+    if res and res2 is not None:
         print("Dit is mooi")
-        print(res)
     else :
         print("DAS IST EINE KOLOSALE KONSPIRAZION  ~Luis de Funes")
 

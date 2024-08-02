@@ -51,15 +51,6 @@ class OpenAIComms(LLMComms):
     def init(self, model:str):
         """
         if model name is not valid, it raises a value exception error. 
-
-        Args:
-            model (str): _description_
-            max_length (int): _description_
-            max_retry (int, optional): _description_. Defaults to 3.
-            wait_time (int, optional): _description_. Defaults to 60.
-
-        Raises:
-            ValueError: _description_
         """
         if not self._check_valid_model_chat(model):
             raise ValueError("The model type does not exist or is not camptabible for chat completion.")
@@ -68,7 +59,7 @@ class OpenAIComms(LLMComms):
         self.client = OpenAI(api_key=API_KEY)
        
     # FIXME: use dict as arguments for gpt model instead of positional arguments. 
-    def send_text(self, prompt:List[dict]) -> Optional[str]:
+    def send_text(self, aimessages:AIMessages) -> Optional[str]:
         """send a prompt to openAI endpoint for chat completions.
 
         Args:
@@ -77,8 +68,10 @@ class OpenAIComms(LLMComms):
         Returns:
             _type_: _description_
         """
-        if len(prompt) == 0:
+        if len(aimessages) == 0:
             return None
+
+        prompt = aimessages.get_messages_formatted()
 
         return self._request(prompt)
 
@@ -212,9 +205,8 @@ if __name__ == "__main__":
 
     aimessages = AIMessages()
     aimessages.add_message(AIMessage("Hi", "assistant"))
-    prompt = aimessages.get_messages_formatted()
 
-    res = x.send_text(prompt)
+    res = x.send_text(aimessages)
     res2 = x.send_embedding("inderdaad")
 
     if res and res2:

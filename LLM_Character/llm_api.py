@@ -5,6 +5,7 @@ from dataclass import AIMessages, AIMessage
 from llm_comms.llm_abstract import LLMComms
 from llm_comms.llm_local import LocalComms
 from llm_comms.llm_openai import OpenAIComms
+from sentence_transformers import util
 
 # in order to prevent the terminal to be cluttered from all the torch/transformers warnings. 
 import warnings
@@ -28,15 +29,13 @@ class LLM_API():
     def __init__(self, LLMComms:LLMComms):
         self._model = LLMComms
 
-    def query(self, prompt: AIMessage, message:AIMessages) -> tuple[AIMessages, str]:
+    def query(self, message:AIMessages) -> tuple[AIMessages, str]:
         """
         Query the model with a given chat.
         
         Returns:
             tuple: A tuple containing the updated messages and the model's response.
         """
-
-        messages.add_message(messages.create_message(prompt.get_message(), "user"))
         response = self._model.send_text(message)
         message = AIMessage(response, "assistant")
         messages.add_message(message)
@@ -51,17 +50,26 @@ class LLM_API():
         messages = AIMessages()
         messages.add_message(message)
 
-        response = self._model.send_text(summary)
+        response = self._model.send_text(messages)
+
         message = AIMessage(response, "assistant")
         messages.add_message(message)
+
         return messages, response
 
 
-    def semantic_relationship(sef, text1:str, text2:str) -> int:
+    def semantic_relationship(self, text1:str, text2:str) -> int:
         """ 
         Calculates how close the two given texts are semantically.
         """
-        pass
+        #Compute embedding for both lists
+        embeddings1 = self._model.send_embedding(text1)
+        embeddings2 = self._model.send_embedding(text2)
+
+        #FIXME: Compute cosine-similarits, maybe can use this util for both openai and huggingface model, not sure yet. 
+        cosine_scores = util.pytorch_cos_sim(embeddings1, embeddings2)
+        return cosine_scores
+    
 
 
 if __name__ == "__main__":
@@ -70,7 +78,7 @@ if __name__ == "__main__":
     x.init(model_id)
 
     # y = OpenAIComms()
-    # model_id = "gpt4"
+    # model_id = "gpt-4"
     # y.init(model_id)
     
     hf = LLM_API(x)
@@ -86,8 +94,8 @@ if __name__ == "__main__":
     messages.add_message(m2)
     messages.add_message(m3)
     messages.add_message(m4)
-    
-    updated_messages, response = hf.query("what?", messages)
+
+    updated_messages, response = hf.query(messages)
     
     print("\n")
     print("--------------------------------")
@@ -109,6 +117,6 @@ if __name__ == "__main__":
     print("--------------------------------")
     print("\n")
     
-    summary = hf.query_summary(updated_messages)
+    summary, _ = hf.query_summary(updated_messages)
     print("\nChat summary:")
     print(summary.prints_messages())

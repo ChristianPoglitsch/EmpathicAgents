@@ -125,7 +125,8 @@ class AIMessages:
             message (AIMessage): The message to add to the chat history.
         """
         self.messages.append(message)
-
+    
+    @DeprecationWarning
     def create_message(self, message: str, role: str) -> AIMessage:
         """
         Creates an AIMessage instance with the given `message` and `role`.
