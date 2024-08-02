@@ -9,7 +9,7 @@ class PromptMessage:
     from the Unity environment to the Python environment.
     """
 
-    def __init__(self, _value, _message):
+    def __init__(self, _value:int, _message:str):
         """
         Initializes the PromptMessage instance.
 
@@ -85,6 +85,9 @@ class AIMessage:
         if self.class_type == "MessageAI" and self.role == "user":
             return self.message
         return None
+
+    def get_message(self) -> str: 
+        return self.message
 
     def get_role(self) -> str:
         """

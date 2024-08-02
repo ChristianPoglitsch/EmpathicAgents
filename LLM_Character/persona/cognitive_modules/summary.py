@@ -1,5 +1,5 @@
 from dataclass import AIMessage, AIMessages
-from huggingface import HuggingFace
+from LLM_Character.llm_api import HuggingFace
 
 def summary(model:HuggingFace): 
   """

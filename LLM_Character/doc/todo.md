@@ -33,6 +33,7 @@ issue needs to be fixed.
 
 * seach the difference between using .env and using windows registry for storing api keys. 
 
-it is recommended by openai to use .env, but i think they compare it against a normal text file. 
 > While you can provide an api_key keyword argument, we recommend using python-dotenv to add OPENAI_API_KEY="My API Key" to your .env file so that your API Key is not stored in source control.
 > source : https://github.com/openai/openai-python
+
+> ibr: advantage of .env files is that they are platform agnostic. So they will work on any linux distro/windows/MacOS.

@@ -9,12 +9,12 @@ from transformers import AutoModel, AutoModelForCausalLM, AutoTokenizer
 from gpt4all import GPT4All
 
 from udp_comms import UdpComms
-from huggingface import HuggingFace
+from LLM_Character.llm_api import LLM_API
 from speach import speech
 from dataclass import AIMessages, PromptMessage
 from persona.cognitive_modules.summary import summary
 
-def run_server(model:HuggingFace, sock:UdpComms, messages:AIMessages):
+def run_server(model:LLM_API, sock:UdpComms, messages:AIMessages):
     messages = messages.read_messages_from_json("dialogues/messages.json") # --> previous messages.
     print("Running Server... \n")
     while True:
@@ -28,8 +28,7 @@ def run_server(model:HuggingFace, sock:UdpComms, messages:AIMessages):
                 print("--- reset chat ---")
                 messages = messages.read_messages_from_json("dialogues/background.json")
             else:
-                messages.add_message(messages.create_message(pm._message, "user"))
-                messages, response = model.query(messages)
+                messages, response = model.query(pm._message, messages)
                 
                 pm._value = pm._value + 1
                 pm._message = response

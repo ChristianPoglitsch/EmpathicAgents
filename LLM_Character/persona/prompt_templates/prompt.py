@@ -3,7 +3,7 @@ sys.path.append('../../')
 
 from abc import ABC, abstractmethod
 
-from huggingface import HuggingFace 
+from LLM_Character.llm_api import HuggingFace 
 from persona.persona import Persona
 
 class RunPrompt(ABC) :
