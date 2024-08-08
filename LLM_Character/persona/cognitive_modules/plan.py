@@ -6,9 +6,15 @@ import sys
 sys.path.append('../')
 
 from persona import Persona
-from persona.prompt_templates.planning_prompts.wake_up import run_prompt_wake_up 
+from LLM_Character.llm_api import LLM_API 
 
-# NOTE: time to fix this and just cut out the things that we dont need.
+# TODO: make an export file, so you import all the function from one place, where you can index them. 
+# so, import exportfile as prompt -> such that prompt.get_run_prompt_wake_up
+
+from persona.prompt_templates.planning_prompts.wake_up import run_prompt_wake_up 
+from persona.prompt_templates.planning_prompts.daily_plan import run_prompt_daily_plan
+
+# NOTE time to fix this and just cut out the things that we dont need.
 # for example, new_day we need that shi 
 # long_term_planning, we need that shi
 # even if we wont do any activity, it may be beneficial for the converation
@@ -17,72 +23,21 @@ from persona.prompt_templates.planning_prompts.wake_up import run_prompt_wake_up
 # for example, should_react, should go, since you will alayw be reacting, 
 # youre always planning for a chat. 
 
-# FIXME: first of, copy over _chat_react. 
-
-def plan(persona,new_day, retrieved, model): 
-  # PART 1: Generate the hourly schedule. 
-  # adjust PERSONA PLANNING  
+def plan(persona:Persona, new_day:str, model:LLM_API): 
   if new_day:
-    # NOTE: we adjust persona scratch memory to add a new planning,
+    # NOTE we adjust persona scratch memory to add a new planning,
     # which includes, f_daily_schedule and daily_req 
     # f_daily_schedule_hourly_org etc.
     _long_term_planning(persona, new_day, model)
 
-  # PART 2: If the current action has expired, we want to create a new plan.
-  # adjust CURR ACTION
   if persona.scratch.act_check_finished():
-    # NOTE: we adjust persona scratch memory to add a new action,
+    # NOTE we adjust persona scratch memory to add a new action,
     # which includes, act_event and act_object_event
     # from the task plannning that is stored also in scratch memory. 
     _determine_action(persona) 
-
-  # PART 3: If you perceived an event that needs to be responded to (saw 
-  # another persona), and retrieved relevant information. 
-  # Step 1: Retrieved may have multiple events represented in it. The first 
-  #         job here is to determine which of the events we want to focus 
-  #         on for the persona. 
-  #         <focused_event> takes the form of a dictionary like this: 
-  #         dictionary {["curr_event"] = <ConceptNode>, 
-  #                     ["events"] = [<ConceptNode>, ...], 
-  #                     ["thoughts"] = [<ConceptNode>, ...]}
-  focused_event = False
-  if retrieved.keys(): 
-    focused_event = _choose_retrieved(persona, retrieved)
   
-  # Step 2: Once we choose an event, we need to determine whether the
-  #         persona will take any actions for the perceived event. There are
-  #         three possible modes of reaction returned by _should_react. 
-  #         a) "chat with {target_persona.name}"
-  #         b) "react"
-  #         c) False
-  if focused_event:
-    # NOTE: reaction_mode can be a string or a boolean value ...
-    # cause why not, python...
-    reaction_mode = _should_react(persona, focused_event, personas)
-    if reaction_mode: 
-      # If we do want to chat, then we generate conversation 
-      if reaction_mode[:9] == "chat with":
-        _chat_react(maze, persona, focused_event, reaction_mode, personas)
-      elif reaction_mode[:4] == "wait": 
-        _wait_react(persona, reaction_mode)
-      # elif reaction_mode == "do other things": 
-      #   _chat_react(persona, focused_event, reaction_mode, personas)
-
-  # Step 3: Chat-related state clean up. 
-  # If the persona is not chatting with anyone, we clean up any of the 
-  # chat-related states here. 
-  if persona.scratch.act_event[1] != "chat with":
-    persona.scratch.chatting_with = None
-    persona.scratch.chat = None
-    persona.scratch.chatting_end_time = None
-  # We want to make sure that the persona does not keep conversing with each
-  # other in an infinite loop. So, chatting_with_buffer maintains a form of 
-  # buffer that makes the persona wait from talking to the same target 
-  # immediately after chatting once. We keep track of the buffer value here. 
-  curr_persona_chat_buffer = persona.scratch.chatting_with_buffer
-  for persona_name, buffer_count in curr_persona_chat_buffer.items():
-    if persona_name != persona.scratch.chatting_with: 
-      persona.scratch.chatting_with_buffer[persona_name] -= 1
+  # NOTE no need for retrieved and should_react and chat_react, since you will always chat with the person talking. 
+  # but if in the future there will be multiple NPC's, then it can be beneficial to re-add code here, see original repo.
 
   return persona.scratch.act_address
 
@@ -91,27 +46,14 @@ def _long_term_planning(persona, new_day, model):
   wake_up_hour = generate_wake_up_hour(persona, model)
 
   if new_day == "First day": 
-    # there is no previous day's daily requirement, 
-    # or if we are on a new day, we want to create a new set of daily requirements.
-    persona.scratch.daily_req = generate_first_daily_plan(persona, 
-                                                          wake_up_hour)
+    persona.scratch.daily_req = generate_first_daily_plan(persona, wake_up_hour)
+
   elif new_day == "New day":
-    revise_identity(persona)
+    revise_identity(persona, model)
 
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - TODO
-    # We need to create a new daily_req here...
-    persona.scratch.daily_req = persona.scratch.daily_req
+  persona.scratch.f_daily_schedule = generate_hourly_schedule(persona, wake_up_hour)
+  persona.scratch.f_daily_schedule_hourly_org = (persona.scratch.f_daily_schedule[:])
 
-  # Based on the daily_req, we create an hourly schedule for the persona, 
-  # which is a list of todo items with a time duration (in minutes) that 
-  # add up to 24 hours.
-  persona.scratch.f_daily_schedule = generate_hourly_schedule(persona, 
-                                                              wake_up_hour)
-  persona.scratch.f_daily_schedule_hourly_org = (persona.scratch
-                                                   .f_daily_schedule[:])
-
-
-  # Added March 4 -- adding plan to the memory.
   thought = f"This is {persona.scratch.name}'s plan for {persona.scratch.curr_time.strftime('%A %B %d')}:"
   for i in persona.scratch.daily_req: 
     thought += f" {i},"
@@ -135,8 +77,59 @@ def generate_wake_up_hour(persona, model):
 
 
 def generate_first_daily_plan(persona, wake_up_hour): 
-  return run_gpt_prompt_daily_plan(persona, wake_up_hour)[0]
+  return run_prompt_daily_plan(persona, wake_up_hour)[0]
 
+def revise_identity(persona, model:LLM_API): 
+  p_name = persona.scratch.name
+
+  focal_points = [f"{p_name}'s plan for {persona.scratch.get_str_curr_date_str()}.",
+                  f"Important recent events for {p_name}'s life."]
+  retrieved = new_retrieve(persona, focal_points)
+
+  statements = "[Statements]\n"
+  for key, val in retrieved.items():
+    for i in val: 
+      statements += f"{i.created.strftime('%A %B %d -- %H:%M %p')}: {i.embedding_key}\n"
+
+  # print (";adjhfno;asdjao;idfjo;af", p_name)
+  plan_prompt = statements + "\n"
+  plan_prompt += f"Given the statements above, is there anything that {p_name} should remember as they plan for"
+  plan_prompt += f" *{persona.scratch.curr_time.strftime('%A %B %d')}*? "
+  plan_prompt += f"If there is any scheduling information, be as specific as possible (include date, time, and location if stated in the statement)\n\n"
+  plan_prompt += f"Write the response from {p_name}'s perspective."
+  plan_note = model.send_text(plan_prompt)
+  # print (plan_note)
+
+  thought_prompt = statements + "\n"
+  thought_prompt += f"Given the statements above, how might we summarize {p_name}'s feelings about their days up to now?\n\n"
+  thought_prompt += f"Write the response from {p_name}'s perspective."
+  thought_note = ChatGPT_single_request(thought_prompt)
+  # print (thought_note)
+
+  currently_prompt = f"{p_name}'s status from {(persona.scratch.curr_time - datetime.timedelta(days=1)).strftime('%A %B %d')}:\n"
+  currently_prompt += f"{persona.scratch.currently}\n\n"
+  currently_prompt += f"{p_name}'s thoughts at the end of {(persona.scratch.curr_time - datetime.timedelta(days=1)).strftime('%A %B %d')}:\n" 
+  currently_prompt += (plan_note + thought_note).replace('\n', '') + "\n\n"
+  currently_prompt += f"It is now {persona.scratch.curr_time.strftime('%A %B %d')}. Given the above, write {p_name}'s status for {persona.scratch.curr_time.strftime('%A %B %d')} that reflects {p_name}'s thoughts at the end of {(persona.scratch.curr_time - datetime.timedelta(days=1)).strftime('%A %B %d')}. Write this in third-person talking about {p_name}."
+  currently_prompt += f"If there is any scheduling information, be as specific as possible (include date, time, and location if stated in the statement).\n\n"
+  currently_prompt += "Follow this format below:\nStatus: <new status>"
+  # print ("DEBUG ;adjhfno;asdjao;asdfsidfjo;af", p_name)
+  # print (currently_prompt)
+  new_currently = ChatGPT_single_request(currently_prompt)
+  # print (new_currently)
+  # print (new_currently[10:])
+
+  persona.scratch.currently = new_currently
+
+  daily_req_prompt = persona.scratch.get_str_iss() + "\n"
+  daily_req_prompt += f"Today is {persona.scratch.curr_time.strftime('%A %B %d')}. Here is {persona.scratch.name}'s plan today in broad-strokes (with the time of the day. e.g., have a lunch at 12:00 pm, watch TV from 7 to 8 pm).\n\n"
+  daily_req_prompt += f"Follow this format (the list should have 4~6 items but no more):\n"
+  daily_req_prompt += f"1. wake up and complete the morning routine at <time>, 2. ..."
+
+  new_daily_req = ChatGPT_single_request(daily_req_prompt)
+  new_daily_req = new_daily_req.replace('\n', ' ')
+  print ("WE ARE HERE!!!", new_daily_req)
+  persona.scratch.daily_plan_req = new_daily_req
 
 def generate_hourly_schedule(persona, wake_up_hour): 
   hour_str = ["00:00 AM", "01:00 AM", "02:00 AM", "03:00 AM", "04:00 AM", 

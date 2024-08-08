@@ -32,6 +32,8 @@ class Scratch:
       self.f_daily_schedule = []
       self.f_daily_schedule_hourly_org = []
 
+    def get_str_curr_date_str(self) -> str:
+      return ""
 
     def get_str_iss(self) -> str:
       return "" 

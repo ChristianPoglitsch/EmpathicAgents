@@ -1,0 +1,22 @@
+revise_identity_3.txt
+
+Variables: 
+!<INPUT 0>! -- Statements
+!<INPUT 1>! -- Persona first names
+!<INPUT 2>! -- Time Difference 
+!<INPUT 3>! -- Currently 
+!<INPUT 4>! -- Notes 
+!<INPUT 5>! -- Current Time 
+
+<commentblockmarker>###</commentblockmarker>
+
+!<INPUT 0>! 
+
+!<INPUT 1>!'s status from !<INPUT 2>!:
+!<INPUT 3>! 
+
+!<INPUT 1>!'s thoughts at the end of !<INPUT 2>!:
+!<INPUT 4>!
+
+It is now {persona.scratch.curr_time.strftime('%A %B %d')}. Given the above, write {p_name}'s status for {persona.scratch.curr_time.strftime('%A %B %d')} that reflects {p_name}'s thoughts at the end of {(persona.scratch.curr_time - datetime.timedelta(days=1)).strftime('%A %B %d')}. Write this in third-person talking about {p_name}."
+
