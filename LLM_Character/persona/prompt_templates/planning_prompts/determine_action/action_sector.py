@@ -82,11 +82,9 @@ def run_prompt_action_sector(persona:Persona, model:LLM_API, action_description:
 
     y = persona.scratch.curr_location['world']
     x = [i.strip() for i in persona.s_mem.get_str_accessible_sectors(y).split(",")]
-    # NOTE why was this commented in the original repo ?? it makes sense to check...
-    # FIXME YOU DONT DO ANYTHING WITH THE OUTPUT ??? YOU MIGHT AS WELL RETURN persona.scratch.get_living_area ? 
-    # if output not in x: 
-# output = random.choice(x)
-    output = persona.scratch.get_living_area()['sector']
+    if output not in x: 
+        # output = random.choice(x)
+        output = persona.scratch.get_living_area()['sector']
 
     # if debug or verbose: 
     # print_run_prompts(prompt_template, persona, gpt_param, 
@@ -95,8 +93,14 @@ def run_prompt_action_sector(persona:Persona, model:LLM_API, action_description:
 
 
 if __name__ == "__main__":
+    from LLM_Character.llm_comms.llm_local import LocalComms
     person = Persona("FRERO")
-    model = None
+
+    modelc = LocalComms()
+    model_id = "mistralai/Mistral-7B-Instruct-v0.2"
+    modelc.init(model_id)
+
+    model = LLM_API(modelc) 
     run_prompt_action_sector(person, model, "i will drive to the broeltorens.")
 
 
