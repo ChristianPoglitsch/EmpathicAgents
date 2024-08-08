@@ -1,75 +1,61 @@
+"""
+Given the persona, returns an integer that indicates the hour when the 
+persona wakes up.  
+"""
 
 import sys
-sys.path.append('../../../')
+sys.path.append('../../../../')
 
-from abc import ABC, abstractmethod
+from LLM_Character.llm_api import LLM_API  
+from LLM_Character.persona.persona import Persona
+from LLM_Character.persona.prompt_templates.prompt import generate_prompt 
 
-from LLM_Character.llm_api import HuggingFace 
-from persona.persona import Persona
-from persona.prompt_templates.prompt import RunPrompt
+COUNTER_LIMIT = 5
 
+def _create_prompt_input(persona:Persona)-> list[str]:
+    prompt_input = [persona.scratch.get_str_iss(),
+                persona.scratch.get_str_lifestyle(),
+                persona.scratch.get_str_firstname()]
+    return prompt_input
 
-class WakeUp(RunPrompt):
-    """
-    Given the persona, returns an integer that indicates the hour when the 
-    persona wakes up.  
-    """
-    def create_prompt_input(self, persona:Persona):
-        prompt_input = [persona.scratch.get_str_iss(),
-                    persona.scratch.get_str_lifestyle(),
-                    persona.scratch.get_str_firstname()]
-        return prompt_input
-
+def _clean_up_response(response:str) -> int:
+    cr = int(response.strip().lower().split("am")[0])
+    return cr
  
-    def clean_up_response(self, response:str):
-        pass
-     
-    def validate_response(self, response:str):
-        pass
- 
-    def run_prompt(self, persona:Persona, model:HuggingFace, verbose=False):
-        # model.safe_generate_response
-        pass
+def _validate_response(response:str) -> bool:
+    try: 
+        _clean_up_response(response)
+    except: 
+        return False
+    return True
+
+def run_prompt_wake_up(persona:Persona, model:LLM_API, verbose=False):
+    prompt_template = "LLM_Character/persona/prompt_template/wake_up_hour.txt"
+    prompt_input = _create_prompt_input(persona)
+    prompt = generate_prompt(prompt_input, prompt_template)
+    output = model.query_text(prompt)
+
+    # NOTE: REPEAT UNTIL IT SPITS OUT A RESPONSE WITH THE CORRECT FORMAT 
+    counter = 0
+    while not _validate_response(output) and counter < COUNTER_LIMIT: 
+        output = model.query_text(prompt)
+        counter += 1
+    output = _clean_up_response(output)
+
+    # if verbose: 
+    # print_run_prompts(prompt_template, persona, gpt_param, 
+    #                   prompt_input, prompt, output)
+    return output, [output, prompt, prompt_input]
 
 
 if __name__ == "__main__":
-    x = WakeUp()
-    pass
+    from LLM_Character.llm_comms.llm_local import LocalComms
 
+    person = Persona("BARA")
 
-#   def create_prompt_input(persona:Persona, test_input=None): 
-#     if test_input: return test_input
-#     prompt_input = [persona.scratch.get_str_iss(),
-#                     persona.scratch.get_str_lifestyle(),
-#                     persona.scratch.get_str_firstname()]
-#     return prompt_input
+    modelc = LocalComms()
+    model_id = "mistralai/Mistral-7B-Instruct-v0.2"
+    modelc.init(model_id)
 
-#   def __func_clean_up(gpt_response, prompt=""):
-#     cr = int(gpt_response.strip().lower().split("am")[0])
-#     return cr
-  
-#   def __func_validate(gpt_response, prompt=""): 
-#     try: __func_clean_up(gpt_response, prompt="")
-#     except: return False
-#     return True
-
-#   def get_fail_safe(): 
-#     fs = 8
-#     return fs
-
-#   gpt_param = {"engine": "text-davinci-002", "max_tokens": 5, 
-#              "temperature": 0.8, "top_p": 1, "stream": False,
-#              "frequency_penalty": 0, "presence_penalty": 0, "stop": ["\n"]}
-#   prompt_template = "persona/prompt_template/v2/wake_up_hour_v1.txt"
-#   prompt_input = create_prompt_input(persona, test_input)
-#   prompt = generate_prompt(prompt_input, prompt_template)
-#   fail_safe = get_fail_safe()
-
-#   output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
-#                                    __func_validate, __func_clean_up)
-  
-#   if debug or verbose: 
-#     print_run_prompts(prompt_template, persona, gpt_param, 
-#                       prompt_input, prompt, output)
-    
-#   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
+    model = LLM_API(modelc) 
+    run_prompt_wake_up(person, model)

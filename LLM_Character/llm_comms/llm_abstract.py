@@ -6,7 +6,7 @@ class LLMComms(ABC):
         pass
     
     @abstractmethod
-    def send_text():
+    def send_text(self, message:str):
         pass
 
     @abstractmethod

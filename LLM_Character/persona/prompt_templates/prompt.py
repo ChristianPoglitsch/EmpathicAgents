@@ -1,32 +1,35 @@
 import sys
 sys.path.append('../../')
 
-from abc import ABC, abstractmethod
+def generate_prompt(prompt_input:list[str], prompt_path_file:str): 
+  """
+  Takes in the prompt input and the path to a prompt template file. 
+  The template file contains the raw str prompt that
+  will be used, which contains the following substr: 
+  !<INPUT>!
 
-from LLM_Character.llm_api import HuggingFace 
-from persona.persona import Persona
+  This function replaces this substr with the actual input to produce the 
+  final promopt. 
+  ARGS:
+    curr_input: the input we want to feed in (IF THERE ARE MORE THAN ONE
+                INPUT, THIS CAN BE A LIST.)
+    prompt_lib_file: the path to the prompt template file. 
+  RETURNS: 
+    A filled in prompt.  
+  """
+  if type(prompt_input) == type("string"): 
+    curr_input = [prompt_input]
+  curr_input = [str(i) for i in prompt_input]
 
-class RunPrompt(ABC) :
-  
-    @abstractmethod 
-    def create_prompt_input(self, persona:Persona):
-        pass
-
-    @abstractmethod 
-    def clean_up_response(self, response:str):
-        pass
-    
-    @abstractmethod 
-    def validate_response(self, response:str):
-        pass
-
-    @abstractmethod 
-    def run_prompt(self, persona:Persona, model:HuggingFace, verbose=False):
-        # model.safe_generate_response
-        pass
+  f = open(prompt_path_file,"r")
+  prompt = f.read()
+  f.close()
+  for count, i in enumerate(curr_input):   
+    prompt = prompt.replace(f"!<INPUT {count}>!", i)
+  if "<commentblockmarker>###</commentblockmarker>" in prompt: 
+    prompt = prompt.split("<commentblockmarker>###</commentblockmarker>")[1]
+  return prompt.strip()
 
 
 if __name__ == "__main__":
-    # Can't instantiate abstract class 
-    # x = RunPrompt()
     pass

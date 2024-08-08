@@ -11,6 +11,16 @@ class MemoryTree:
         with open(out_json, "w") as outfile:
             json.dump(self.tree, outfile) 
 
+           
+    def get_str_accessible_sectors(self ,world:str):
+        return []
+
+    def get_str_accessible_sector_arenas(self, world:str, sector:str|None):
+        return []
+
+    def get_str_accessible_arena_game_objects(self, world:str, sector:str|None, arena:str|None):
+        return []
+
 def check_if_file_exists(curr_file): 
     """
     Checks if a file exists
@@ -21,8 +31,6 @@ def check_if_file_exists(curr_file):
     False if the file does not exist
     """
     return os.path.isfile(curr_file) 
-       
-
 
 if __name__ == '__main__':
     f = f"..\..\storage\initial\personas\Isabella\spatial_memory.json"
@@ -30,5 +38,5 @@ if __name__ == '__main__':
 
     # print(x.get_str_accessible_sector_arenas("dolores double studio:double studio"))
     print(x.get_str_accessible_sectors("Kortrijk"))
-    print(x.get_str_accessible_sector_arenas("Kortrijk:Beguinage of Courtrai"))
-    print(x.get_str_accessible_arena_game_objects("Kortrijk:Beguinage of Courtrai:supply store"))
+    print(x.get_str_accessible_sector_arenas("Kortrijk","Beguinage of Courtrai"))
+    print(x.get_str_accessible_arena_game_objects("Kortrijk", "Beguinage of Courtrai", "supply store"))

@@ -29,13 +29,18 @@ class LLM_API():
     def __init__(self, LLMComms:LLMComms):
         self._model = LLMComms
 
-    def query(self, message:AIMessages) -> tuple[AIMessages, str]:
+    def query_text(self, message:str) -> str:
+        return self._model.send_text(message)
+
+    def query_chat(self, message:AIMessages) -> tuple[AIMessages, str]:
         """
         Query the model with a given chat.
         
         Returns:
             tuple: A tuple containing the updated messages and the model's response.
         """
+        # FIXME: you sould send a string to send_text, why here not...
+        # change that, even if that means that LLM_openai en LLM_local, will look alike. 
         response = self._model.send_text(message)
         message = AIMessage(response, "assistant")
         messages.add_message(message)
@@ -43,7 +48,7 @@ class LLM_API():
     
     # QUESTION: Why only summarise user messages of the chat?
     # FIXME: todo.md
-    def query_summary(self, chat:AIMessages) -> tuple[AIMessages, str]:
+    def query_chat_summary(self, chat:AIMessages) -> tuple[AIMessages, str]:
         user_messages_concatenated = chat.get_user_message()
         message = AIMessage("Summerize the chat: " + user_messages_concatenated.get_user_message(), "user") 
         
@@ -74,9 +79,10 @@ class LLM_API():
 
 if __name__ == "__main__":
     x = LocalComms()
-    model_id = "mistralai/Mistral-7B-Instruct-v0.2"
-    x.init(model_id)
+#    model_id = "mistralai/Mistral-7B-Instruct-v0.2"
+    model_id = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
 
+    x.init(model_id)
     # y = OpenAIComms()
     # model_id = "gpt-4"
     # y.init(model_id)

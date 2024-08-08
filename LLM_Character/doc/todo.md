@@ -35,5 +35,17 @@ issue needs to be fixed.
 
 > While you can provide an api_key keyword argument, we recommend using python-dotenv to add OPENAI_API_KEY="My API Key" to your .env file so that your API Key is not stored in source control.
 > source : https://github.com/openai/openai-python
-
 > ibr: advantage of .env files is that they are platform agnostic. So they will work on any linux distro/windows/MacOS.
+
+# The plan : 
+
+1) Extract all the gameobjects in a unity scene, and the name of the scene, and even the hierarchy in the scenes if there are (i dont think there are)
+2) send that information to python front end. (other endpoint than what is now implemented)
+3) construct a similar maze class. 
+4) from the this maze class, we will know if the user (camera in unity) is close or not to the character (generative agent), from there the generarive agent can decide wether to interact with the user or not. If it wants, there could be a text bubble in unity indicating that the character wants to talk to the user. (or something similar) 
+this will provide the active participation that we want from our generative agents. 
+In the future, it could possible that the character interacts with the gameobejects in the scene, since that information is also sent. 
+In the future, it could be handy to let the unity character move on its own in order to execute its actions if needed. (such going to the fridge to eat something, but this is out of scope for now.) 
+
+
+for now, include a json that assumes the received information from unity. (caled : unity_info.json)
