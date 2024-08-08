@@ -3,6 +3,7 @@ The long term planning that spans a day.
 """
 
 import sys
+import datetime
 sys.path.append('../../../../')
 
 from LLM_Character.llm_api import LLM_API  
@@ -31,38 +32,62 @@ def _create_prompt_input(persona:Persona, retrieved:int)-> tuple[list[str], list
     thought_prompt = []
     thought_prompt += [stmts] 
     thought_prompt += [p_name] 
-
     return plan_input, thought_prompt
 
-def _clean_up_response(response, prompt=""):
-    return response 
-def _validate_response(response:str) -> bool:
-    try: 
-        _clean_up_response(response)
-    except: 
-        return False
-    return True
+def _create_prompt_input_2(persona:Persona, plan_note:str, thought_note:str) -> list[str]:
 
-def _get_fail_safe(): 
-    return None
+    stmts   = _component_statements(retrieved)
+    p_name  = persona.scratch.name 
+    time    = persona.scratch.curr_time.strftime('%A %B %d') 
+    time_diff = (persona.scratch.curr_time - datetime.timedelta(days=1)).strftime('%A %B %d')
+    currently = persona.scratch.currently
+    notes = (plan_note + thought_note).replace('\n', '')
+
+    currently_prompt = []
+    currently_prompt += [stmts] 
+    currently_prompt += [p_name]
+    currently_prompt += [time_diff]
+    currently_prompt += [currently]
+    currently_prompt += [notes]
+    currently_prompt += [time] 
+
+    return currently_prompt  
+def _create_prompt_input_3(persona:Persona) -> list[str]:
+    commonset = persona.scratch.get_str_iss()
+    curr_time = persona.scratch.curr_time.strftime('%A %B %d')
+    p_name  = persona.scratch.name 
+
+    daily_req_prompt  = []
+    daily_req_prompt += [commonset]
+    daily_req_prompt += [curr_time]
+    daily_req_prompt += [p_name]
+    
+    return daily_req_prompt
 
 def _get_valid_output(model, prompt, counter_limit):
-    for _ in range(counter_limit):
-        output = model.query_text(prompt)
-        if _validate_response(output):
-            return _clean_up_response(output)
-    return _get_fail_safe()
+    return model.query_text(prompt)
 
 def run_prompt_revise_identity(persona:Persona, model:LLM_API, retrieved,verbose=False):
-    prompt_template = "LLM_Character/persona/prompt_template/revise_identity.txt"
+    prompt_template_1 = "LLM_Character/persona/prompt_template/revise_identity_1.txt"
+    prompt_template_2 = "LLM_Character/persona/prompt_template/revise_identity_2.txt"
     prompt_input1, prompt_input2 = _create_prompt_input(persona, retrieved)
-    prompt1 = p.generate_prompt(prompt_input1, prompt_template)
-    prompt2 = p.generate_prompt(prompt_input2, prompt_template)
+    prompt1 = p.generate_prompt(prompt_input1, prompt_template_1)
+    prompt2 = p.generate_prompt(prompt_input2, prompt_template_2)
     plan_note = _get_valid_output(model, prompt1, COUNTER_LIMIT)
     thought_note = _get_valid_output(model, prompt2, COUNTER_LIMIT)
     
-    return plan_note, thought_note
-    # return output, [output, prompt, prompt_input]
+    prompt_template_3 = "LLM_Character/persona/prompt_template/revise_identity_3.txt"
+    prompt_input3 = _create_prompt_input_2(persona, plan_note, thought_note)
+    prompt = p.generate_prompt(prompt_input3, prompt_template_3 )
+    currently_note = _get_valid_output(model, prompt, COUNTER_LIMIT)
+    
+    prompt_template_4 = "LLM_Character/persona/prompt_template/revise_identity_4.txt"
+    prompt_input4 = _create_prompt_input_3(persona)
+    prompt = p.generate_prompt(prompt_input4, prompt_template_4 )
+    daily_req_note = _get_valid_output(model, prompt, COUNTER_LIMIT)
+    new_daily_req = daily_req_note.replace('\n', ' ')
+    
+    return plan_note, thought_note, currently_note, new_daily_req
 
 
 if __name__ == "__main__":
@@ -84,21 +109,14 @@ if __name__ == "__main__":
 
 
 
-# def run_prompt_revise_identity(persona, model:LLM_API): 
-#
-#     currently_prompt = f"{p_name}'s status from {(persona.scratch.curr_time - datetime.timedelta(days=1)).strftime('%A %B %d')}:\n"
-#     currently_prompt += f"{persona.scratch.currently}\n\n"
-#     currently_prompt += f"{p_name}'s thoughts at the end of {(persona.scratch.curr_time - datetime.timedelta(days=1)).strftime('%A %B %d')}:\n" 
-#     currently_prompt += (plan_note + thought_note).replace('\n', '') + "\n\n"
-#     currently_prompt += f"It is now {persona.scratch.curr_time.strftime('%A %B %d')}. Given the above, write {p_name}'s status for {persona.scratch.curr_time.strftime('%A %B %d')} that reflects {p_name}'s thoughts at the end of {(persona.scratch.curr_time - datetime.timedelta(days=1)).strftime('%A %B %d')}. Write this in third-person talking about {p_name}."
-#     currently_prompt += f"If there is any scheduling information, be as specific as possible (include date, time, and location if stated in the statement).\n\n"
-#     currently_prompt += "Follow this format below:\nStatus: <new status>"
-#     # print ("DEBUG ;adjhfno;asdjao;asdfsidfjo;af", p_name)
-#     # print (currently_prompt)
-#     new_currently = ChatGPT_single_request(currently_prompt)
-#     # print (new_currently)
-#     # print (new_currently[10:])
-#
-#
-#
-#     return new_currently  
+  persona.scratch.currently = new_currently
+
+  daily_req_prompt = persona.scratch.get_str_iss() + "\n"
+  daily_req_prompt += f"Today is {persona.scratch.curr_time.strftime('%A %B %d')}. Here is {persona.scratch.name}'s plan today in broad-strokes (with the time of the day. e.g., have a lunch at 12:00 pm, watch TV from 7 to 8 pm).\n\n"
+  daily_req_prompt += f"Follow this format (the list should have 4~6 items but no more):\n"
+  daily_req_prompt += f"1. wake up and complete the morning routine at <time>, 2. ..."
+
+  new_daily_req = ChatGPT_single_request(daily_req_prompt)
+  new_daily_req = new_daily_req.replace('\n', ' ')
+  print ("WE ARE HERE!!!", new_daily_req)
+  persona.scratch.daily_plan_req = new_daily_req

@@ -1,11 +1,12 @@
 """ Short term memory """
 
+from datetime import datetime
 class Scratch: 
     def __init__(self, f_saved): 
       # PERSONA HYPERPARAMETERS
 
       # WORLD INFORMATION 
-      self.curr_time = None 
+      self.curr_time = None
       self.curr_location = None 
       
       # THE CORE IDENTITY OF THE PERSONA 

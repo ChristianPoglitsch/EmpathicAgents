@@ -13,6 +13,7 @@ from LLM_Character.llm_api import LLM_API
 
 from persona.prompt_templates.planning_prompts.wake_up import run_prompt_wake_up 
 from persona.prompt_templates.planning_prompts.daily_plan import run_prompt_daily_plan
+from persona.prompt_templates.planning_prompts.revise_identity import run_prompt_revise_identity
 
 # NOTE time to fix this and just cut out the things that we dont need.
 # for example, new_day we need that shi 
@@ -30,6 +31,9 @@ def plan(persona:Persona, new_day:str, model:LLM_API):
     # f_daily_schedule_hourly_org etc.
     _long_term_planning(persona, new_day, model)
 
+
+  #FIXME: HIER ZIT IK NU, CHECK ACT_CHECK_FININSHED. 
+
   if persona.scratch.act_check_finished():
     # NOTE we adjust persona scratch memory to add a new action,
     # which includes, act_event and act_object_event
@@ -41,8 +45,7 @@ def plan(persona:Persona, new_day:str, model:LLM_API):
 
   return persona.scratch.act_address
 
-
-def _long_term_planning(persona, new_day, model): 
+def _long_term_planning(persona, new_day, model:LLM_API): 
   wake_up_hour = generate_wake_up_hour(persona, model)
 
   if new_day == "First day": 
@@ -53,83 +56,45 @@ def _long_term_planning(persona, new_day, model):
 
   persona.scratch.f_daily_schedule = generate_hourly_schedule(persona, wake_up_hour)
   persona.scratch.f_daily_schedule_hourly_org = (persona.scratch.f_daily_schedule[:])
-
-  thought = f"This is {persona.scratch.name}'s plan for {persona.scratch.curr_time.strftime('%A %B %d')}:"
-  for i in persona.scratch.daily_req: 
-    thought += f" {i},"
-  thought = thought[:-1] + "."
-  created = persona.scratch.curr_time
-  expiration = persona.scratch.curr_time + datetime.timedelta(days=30)
-  s, p, o = (persona.scratch.name, "plan", persona.scratch.curr_time.strftime('%A %B %d'))
-  keywords = set(["plan"])
-  thought_poignancy = 5
-  thought_embedding_pair = (thought, get_embedding(thought))
+  
+  (created, expiration,
+  s, p, o, 
+  thought, keywords, 
+  thought_poignancy, thought_embedding_pair) = generate_thought_plan(persona, model)
   persona.a_mem.add_thought(created, expiration, s, p, o, 
                             thought, keywords, thought_poignancy, 
                             thought_embedding_pair, None)
 
-  # print("Sleeping for 20 seconds...")
-  # time.sleep(10)
-  # print("Done sleeping!")
-
 def generate_wake_up_hour(persona, model):
   return int(run_prompt_wake_up(persona, model)[0])
-
 
 def generate_first_daily_plan(persona, wake_up_hour): 
   return run_prompt_daily_plan(persona, wake_up_hour)[0]
 
 def revise_identity(persona, model:LLM_API): 
   p_name = persona.scratch.name
-
   focal_points = [f"{p_name}'s plan for {persona.scratch.get_str_curr_date_str()}.",
                   f"Important recent events for {p_name}'s life."]
+
   retrieved = new_retrieve(persona, focal_points)
-
-  statements = "[Statements]\n"
-  for key, val in retrieved.items():
-    for i in val: 
-      statements += f"{i.created.strftime('%A %B %d -- %H:%M %p')}: {i.embedding_key}\n"
-
-  # print (";adjhfno;asdjao;idfjo;af", p_name)
-  plan_prompt = statements + "\n"
-  plan_prompt += f"Given the statements above, is there anything that {p_name} should remember as they plan for"
-  plan_prompt += f" *{persona.scratch.curr_time.strftime('%A %B %d')}*? "
-  plan_prompt += f"If there is any scheduling information, be as specific as possible (include date, time, and location if stated in the statement)\n\n"
-  plan_prompt += f"Write the response from {p_name}'s perspective."
-  plan_note = model.send_text(plan_prompt)
-  # print (plan_note)
-
-  thought_prompt = statements + "\n"
-  thought_prompt += f"Given the statements above, how might we summarize {p_name}'s feelings about their days up to now?\n\n"
-  thought_prompt += f"Write the response from {p_name}'s perspective."
-  thought_note = ChatGPT_single_request(thought_prompt)
-  # print (thought_note)
-
-  currently_prompt = f"{p_name}'s status from {(persona.scratch.curr_time - datetime.timedelta(days=1)).strftime('%A %B %d')}:\n"
-  currently_prompt += f"{persona.scratch.currently}\n\n"
-  currently_prompt += f"{p_name}'s thoughts at the end of {(persona.scratch.curr_time - datetime.timedelta(days=1)).strftime('%A %B %d')}:\n" 
-  currently_prompt += (plan_note + thought_note).replace('\n', '') + "\n\n"
-  currently_prompt += f"It is now {persona.scratch.curr_time.strftime('%A %B %d')}. Given the above, write {p_name}'s status for {persona.scratch.curr_time.strftime('%A %B %d')} that reflects {p_name}'s thoughts at the end of {(persona.scratch.curr_time - datetime.timedelta(days=1)).strftime('%A %B %d')}. Write this in third-person talking about {p_name}."
-  currently_prompt += f"If there is any scheduling information, be as specific as possible (include date, time, and location if stated in the statement).\n\n"
-  currently_prompt += "Follow this format below:\nStatus: <new status>"
-  # print ("DEBUG ;adjhfno;asdjao;asdfsidfjo;af", p_name)
-  # print (currently_prompt)
-  new_currently = ChatGPT_single_request(currently_prompt)
-  # print (new_currently)
-  # print (new_currently[10:])
+  _, _, new_currently, new_daily_req = run_prompt_revise_identity(persona, model, retrieved)
 
   persona.scratch.currently = new_currently
-
-  daily_req_prompt = persona.scratch.get_str_iss() + "\n"
-  daily_req_prompt += f"Today is {persona.scratch.curr_time.strftime('%A %B %d')}. Here is {persona.scratch.name}'s plan today in broad-strokes (with the time of the day. e.g., have a lunch at 12:00 pm, watch TV from 7 to 8 pm).\n\n"
-  daily_req_prompt += f"Follow this format (the list should have 4~6 items but no more):\n"
-  daily_req_prompt += f"1. wake up and complete the morning routine at <time>, 2. ..."
-
-  new_daily_req = ChatGPT_single_request(daily_req_prompt)
-  new_daily_req = new_daily_req.replace('\n', ' ')
-  print ("WE ARE HERE!!!", new_daily_req)
   persona.scratch.daily_plan_req = new_daily_req
+
+def generate_thought_plan(persona:Persona, model:LLM_API):
+  thought = f"This is {persona.scratch.name}'s plan for {persona.scratch.curr_time.strftime('%A %B %d')}:"
+  for i in persona.scratch.daily_req: 
+    thought += f" {i},"
+  thought = thought[:-1] + "."
+  
+  created = persona.scratch.curr_time
+  expiration = persona.scratch.curr_time + datetime.timedelta(days=30)
+  s, p, o = (persona.scratch.name, "plan", persona.scratch.curr_time.strftime('%A %B %d'))
+  keywords = set(["plan"])
+  thought_poignancy = 5
+  thought_embedding_pair = (thought, model.get_embedding(thought))
+  return created, expiration, s, p, o, thought, keywords, thought_poignancy, thought_embedding_pair 
 
 def generate_hourly_schedule(persona, wake_up_hour): 
   hour_str = ["00:00 AM", "01:00 AM", "02:00 AM", "03:00 AM", "04:00 AM", 
