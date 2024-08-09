@@ -11,9 +11,6 @@ class Persona:
   scratch:Scratch
   
   def __init__(self, name, folder_mem_saved=False):
-    # PERSONA BASE STATE 
-    self.name = name
- 
     # PERSONA MEMORY 
     f_s_mem_saved = f"{folder_mem_saved}/spatial_memory.json"
     self.s_mem = MemoryTree(f_s_mem_saved)
@@ -23,3 +20,4 @@ class Persona:
 
     scratch_saved = f"{folder_mem_saved}/scratch.json"
     self.scratch = Scratch(scratch_saved)
+    self.scratch.name = name

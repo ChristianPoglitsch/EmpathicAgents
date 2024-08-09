@@ -8,7 +8,6 @@ sys.path.append('../../')
 from persona import Persona
 from LLM_Character.llm_api import LLM_API 
 
-
 from persona.cognitive_modules.plan import _long_term_planning 
 
 def plan(persona:Persona, new_day:str, model:LLM_API): 
@@ -19,7 +18,6 @@ def plan(persona:Persona, new_day:str, model:LLM_API):
     _determine_action(persona) 
   
   return persona.scratch.act_address
-
 
 def generate_hourly_schedule(persona, wake_up_hour): 
   hour_str = ["00:00 AM", "01:00 AM", "02:00 AM", "03:00 AM", "04:00 AM", 
