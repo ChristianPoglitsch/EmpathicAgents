@@ -15,22 +15,24 @@ def _create_prompt_input(action_description:str, persona:Persona):
    
     act_world = persona.scratch.get_curr_location()['world']
     act_sector = persona.scratch.get_curr_location()['sector']
-    domicile = persona.scratch.get_living_area()['sector']
+    liv_sector = persona.scratch.get_living_area()['sector']
     name = persona.scratch.get_str_name()
    
+    # NOTE world < sectors < arenas < gameobjects
+    possible_arenas1 = persona.s_mem.get_str_accessible_sector_arenas(act_world, liv_sector)
+    possible_arenas2 = persona.s_mem.get_str_accessible_sector_arenas(act_world, act_sector)
     possible_sectors = persona.s_mem.get_str_accessible_sectors(act_world)
-    possible_arenas = persona.s_mem.get_str_accessible_sector_arenas(act_world, domicile)
-   
+    
     daily_plan = persona.scratch.get_str_daily_plan_req() 
     action_description_1, action_description_2 = _decomp_action_desc(action_description)
     
     prompt_input = []
     prompt_input += [name]
-    prompt_input += [domicile]
-    prompt_input += [possible_arenas]
+    prompt_input += [liv_sector]
+    prompt_input += [possible_arenas1]
     prompt_input += [name]
     prompt_input += [act_sector]
-    prompt_input += [possible_arenas]
+    prompt_input += [possible_arenas2]
     prompt_input += [f"\n{daily_plan}"]
     prompt_input += [possible_sectors]
 
@@ -83,12 +85,8 @@ def run_prompt_action_sector(persona:Persona, model:LLM_API, action_description:
     y = persona.scratch.curr_location['world']
     x = [i.strip() for i in persona.s_mem.get_str_accessible_sectors(y).split(",")]
     if output not in x: 
-        # output = random.choice(x)
         output = persona.scratch.get_living_area()['sector']
 
-    # if debug or verbose: 
-    # print_run_prompts(prompt_template, persona, gpt_param, 
-    #                   prompt_input, prompt, output)
     return output, [output, prompt, prompt_input]
 
 
