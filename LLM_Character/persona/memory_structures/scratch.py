@@ -8,9 +8,8 @@ class Scratch:
       # WORLD INFORMATION 
       self.curr_time = None
       self.curr_location = None 
-      
+
       # THE CORE IDENTITY OF THE PERSONA 
-      # NOTE: this is hard coded, it is information that is not changing during the whole simulation.  
       self.name = None
       self.first_name = None
       self.last_name = None
@@ -23,19 +22,24 @@ class Scratch:
       self.living_area = None
 
       # REFLECTION VARIABLES
+      self.recency_w = 1
+      self.relevance_w = 1
+      self.importance_w = 1
 
       # PERSONA PLANNING 
       self.daily_req = []
       self.f_daily_schedule = []
       self.f_daily_schedule_hourly_org = []
-      
+
       # CURR ACTION
-      # <address> is literally the string address of where the action is taking 
       self.act_address = None
       self.act_start_time = None
       self.act_duration = None
       self.act_description = None
       self.act_event = (self.name, None, None)
+
+
+
     # --- SETTERS -----
 
     def add_new_action(self, 
