@@ -23,15 +23,15 @@ def _create_prompt_input(action_description:str,
                     p_name]
     return prompt_input
 
-def _clean_up_response(response:str):
+def _clean_up_response(response):
     cr = response.strip()
     cr = [i.strip() for i in cr.split(")")[0].split(",")]
     return cr
 
-def _validate_response(response:str): 
+def _validate_response(response): 
     try: 
-      gpt_response = _clean_up_response(response)
-      if len(gpt_response) != 2: 
+      response = _clean_up_response(response)
+      if len(response) != 2: 
         return False
     except: return False
     return True 
@@ -48,7 +48,7 @@ def _get_valid_output(persona, model, prompt, counter_limit):
             return _clean_up_response(output)
     return _get_fail_safe(persona)
 
-def run_prompt_action_sector(persona:Persona, 
+def run_prompt_event_triple(persona:Persona, 
                              model:LLM_API, 
                              action_description:str,
                              verbose=False):
@@ -72,7 +72,7 @@ if __name__ == "__main__":
     modelc.init(model_id)
 
     model = LLM_API(modelc)
-    run_prompt_action_sector(person, 
+    run_prompt_event_triple(person, 
                              model, 
                              "i will drive to the broeltorens.")
 

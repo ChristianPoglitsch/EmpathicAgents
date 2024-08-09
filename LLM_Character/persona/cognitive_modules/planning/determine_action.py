@@ -1,11 +1,14 @@
 
 import sys
-sys.path.append('../../')
+sys.path.append('../../../')
 
 from persona import Persona
 from LLM_Character.llm_api import LLM_API 
-
-import LLM_Character.persona.prompt_templates.planning_prompts.determine_action as p
+from LLM_Character.persona.prompt_modules.planning_prompts.determine_action.task_decomp import run_prompt_task_decomp
+from LLM_Character.persona.prompt_modules.planning_prompts.determine_action.event_triple import run_prompt_event_triple
+from LLM_Character.persona.prompt_modules.planning_prompts.determine_action.action_sector import run_prompt_action_sector
+from LLM_Character.persona.prompt_modules.planning_prompts.determine_action.action_arena import run_prompt_action_arena
+from LLM_Character.persona.prompt_modules.planning_prompts.determine_action.action_game_object import run_prompt_action_game_object
 
 def _determine_action(persona): 
   curr_index = persona.scratch.get_f_daily_schedule_index()
@@ -64,7 +67,7 @@ def determine_decomp(act_desp, act_dura):
   return True
 
 def generate_task_decomp(persona, task, duration): 
-  return p.run_prompt_task_decomp(persona, task, duration)[0]
+  return run_prompt_task_decomp(persona, task, duration)[0]
 
 def generate_action_sector(act_desp, persona): 
   return run_prompt_action_sector(act_desp, persona)[0]

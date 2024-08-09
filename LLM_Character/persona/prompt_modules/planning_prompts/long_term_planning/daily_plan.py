@@ -20,9 +20,9 @@ def _create_prompt_input(persona:Persona, wake_up_hour:int)-> list[str]:
     prompt_input += [f"{str(wake_up_hour)}:00 am"]
     return prompt_input
 
-def _clean_up_response(gpt_response, prompt=""):
+def _clean_up_response(response):
     cr = []
-    _cr = gpt_response.split(")")
+    _cr = response.split(")")
     for i in _cr: 
       if i[-1].isdigit(): 
         i = i[:-1].strip()

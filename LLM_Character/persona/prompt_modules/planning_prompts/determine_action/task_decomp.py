@@ -144,7 +144,7 @@ def _get_valid_output(persona, model, prompt, counter_limit):
             return _clean_up_response(prompt, output)
     return _get_fail_safe()
 
-def run_prompt_action_sector(persona:Persona, 
+def run_prompt_task_decomp(persona:Persona, 
                              model:LLM_API, 
                              task,
                              duration,
@@ -192,7 +192,7 @@ if __name__ == "__main__":
     modelc.init(model_id)
 
     model = LLM_API(modelc)
-    run_prompt_action_sector(person, 
+    run_prompt_task_decomp(person, 
                              model, 
                              "i will drive to the broeltorens.",
                              5)

@@ -63,7 +63,7 @@ def _get_valid_output(model, prompt, counter_limit):
             return _clean_up_response(output)
     return _get_fail_safe()
 
-def run_prompt_action_sector(persona:Persona, model:LLM_API, action_description:str,action_sector:str, verbose=False):
+def run_prompt_action_arena(persona:Persona, model:LLM_API, action_description:str,action_sector:str, verbose=False):
     prompt_template = "LLM_Character/persona/prompt_template/action_sector.txt"
     prompt_input = _create_prompt_input(action_description,action_sector, persona)
     prompt = p.generate_prompt(prompt_input, prompt_template)
@@ -81,7 +81,8 @@ if __name__ == "__main__":
     modelc.init(model_id)
 
     model = LLM_API(modelc)
-    run_prompt_action_sector(person, model, "i will drive to the broeltorens.", "kortrijk" )
+    run_prompt_action_arena(person, model, "i will drive to the broeltorens.", "kortrijk" )
+
 
 
 

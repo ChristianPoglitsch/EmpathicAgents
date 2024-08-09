@@ -1,12 +1,12 @@
 import sys
-sys.path.append('../../')
+sys.path.append('../../../')
 
 from persona import Persona
 from LLM_Character.llm_api import LLM_API 
 
-from persona.prompt_templates.planning_prompts.wake_up import run_prompt_wake_up 
-from persona.prompt_templates.planning_prompts.daily_plan import run_prompt_daily_plan
-from persona.prompt_templates.planning_prompts.revise_identity import run_prompt_revise_identity
+from LLM_Character.persona.prompt_modules.planning_prompts.long_term_planning.wake_up import run_prompt_wake_up 
+from LLM_Character.persona.prompt_modules.planning_prompts.long_term_planning.wake_up import run_prompt_daily_plan
+from LLM_Character.persona.prompt_modules.planning_prompts.long_term_planning.revise_identity  import run_prompt_revise_identity
 
 def _long_term_planning(persona, new_day, model:LLM_API): 
   wake_up_hour = generate_wake_up_hour(persona, model)
