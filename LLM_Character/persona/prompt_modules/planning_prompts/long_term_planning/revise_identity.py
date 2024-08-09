@@ -8,7 +8,7 @@ sys.path.append('../../../../')
 
 from LLM_Character.llm_api import LLM_API  
 from LLM_Character.persona.persona import Persona
-import LLM_Character.persona.prompt_templates.prompt as p 
+import LLM_Character.persona.prompt_modules.prompt as p 
 
 COUNTER_LIMIT = 5
 
@@ -105,18 +105,3 @@ if __name__ == "__main__":
     retrieved = None
     run_prompt_revise_identity(person, model, retrieved)
 
-
-
-
-
-  persona.scratch.currently = new_currently
-
-  daily_req_prompt = persona.scratch.get_str_iss() + "\n"
-  daily_req_prompt += f"Today is {persona.scratch.curr_time.strftime('%A %B %d')}. Here is {persona.scratch.name}'s plan today in broad-strokes (with the time of the day. e.g., have a lunch at 12:00 pm, watch TV from 7 to 8 pm).\n\n"
-  daily_req_prompt += f"Follow this format (the list should have 4~6 items but no more):\n"
-  daily_req_prompt += f"1. wake up and complete the morning routine at <time>, 2. ..."
-
-  new_daily_req = ChatGPT_single_request(daily_req_prompt)
-  new_daily_req = new_daily_req.replace('\n', ' ')
-  print ("WE ARE HERE!!!", new_daily_req)
-  persona.scratch.daily_plan_req = new_daily_req

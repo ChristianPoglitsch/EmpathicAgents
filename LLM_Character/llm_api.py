@@ -62,7 +62,7 @@ class LLM_API():
 
         return messages, response
 
-
+    @DeprecationWarning
     def semantic_relationship(self, text1:str, text2:str) -> int:
         """ 
         Calculates how close the two given texts are semantically.
