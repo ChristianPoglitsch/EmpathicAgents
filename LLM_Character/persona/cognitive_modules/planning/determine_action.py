@@ -5,6 +5,8 @@ sys.path.append('../../')
 from persona import Persona
 from LLM_Character.llm_api import LLM_API 
 
+import LLM_Character.persona.prompt_templates.planning_prompts.determine_action as p
+
 def _determine_action(persona): 
   curr_index = persona.scratch.get_f_daily_schedule_index()
   curr_index_60 = persona.scratch.get_f_daily_schedule_index(advance=60)
@@ -45,10 +47,6 @@ def _determine_action(persona):
   new_address = f"{act_world}:{act_sector}:{act_arena}:{act_game_object}"
   
   act_event = generate_action_event_triple(act_desp, persona)
-  
-  # FIXME: state of object, being used or not, can be stored somehwere else, instead of tiles in maze. 
-  # we can contruct for each object a class that stores this information or we cna query UNity. 
-  # but for now, we can ignore this, it is out of scope for us.
 
   persona.scratch.add_new_action(new_address, 
                                  int(act_dura), 
@@ -66,7 +64,7 @@ def determine_decomp(act_desp, act_dura):
   return True
 
 def generate_task_decomp(persona, task, duration): 
-  return run_prompt_task_decomp(persona, task, duration)[0]
+  return p.run_prompt_task_decomp(persona, task, duration)[0]
 
 def generate_action_sector(act_desp, persona): 
   return run_prompt_action_sector(act_desp, persona)[0]
