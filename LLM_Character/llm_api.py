@@ -75,7 +75,7 @@ class LLM_API():
         cosine_scores = util.pytorch_cos_sim(embeddings1, embeddings2)
         return cosine_scores
     
-    def semantic_meaning(self, text:str) -> int:
+    def semantic_meaning(self, text:str) -> list[float]:
         """
         retrieves the text embedding. 
         """

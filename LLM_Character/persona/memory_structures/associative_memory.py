@@ -93,7 +93,7 @@ class AssociativeMemory:
 
   def add_chat(self, created, expiration, s, p, o, 
                      description, keywords, poignancy, 
-                     embedding_pair, filling): 
+                     embedding_pair, filling) -> None: 
     # Setting up the node ID and counts.
     node_count = len(self.id_to_node.keys()) + 1
     type_count = len(self.seq_chat) + 1

@@ -10,7 +10,7 @@ class LLMComms(ABC):
         pass
 
     @abstractmethod
-    def send_embedding():
+    def send_embedding(text:str):
         pass
 
     @abstractmethod

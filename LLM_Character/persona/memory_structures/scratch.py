@@ -14,7 +14,6 @@ class Scratch:
       self.first_name = None
       self.last_name = None
       self.age = None
-      # characterstics of the character
       self.innate = None
       self.learned = None
       self.currently = None
@@ -25,6 +24,7 @@ class Scratch:
       self.recency_w = 1
       self.relevance_w = 1
       self.importance_w = 1
+      self.recency_decay= 0.99
 
       # PERSONA PLANNING 
       self.daily_req = []

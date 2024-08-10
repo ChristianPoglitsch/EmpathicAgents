@@ -1,7 +1,6 @@
 import sys
 sys.path.append('../../')
 
-from sentence_transformers import util
 from numpy.linalg import norm
 from numpy import dot
 
@@ -9,7 +8,7 @@ from persona import Persona
 from LLM_Character.llm_api import LLM_API
 from LLM_Character.persona.memory_structures.associative_memory import ConceptNode
 
-def retrieve(persona: Persona, focal_points: list[str], n_count=30):
+def retrieve(persona: Persona, focal_points: list[str], model:LLM_API, n_count=30):
     retrieved = dict()
     for focal_pt in focal_points:
         nodes = _retrieve_recent_sorted_nodes(persona)
@@ -17,10 +16,10 @@ def retrieve(persona: Persona, focal_points: list[str], n_count=30):
         recency_out = extract_recency(persona, nodes)
         recency_out = normalize_dict_floats(recency_out, 0, 1)
 
-        importance_out = extract_importance(persona, nodes)
+        importance_out = extract_importance(nodes)
         importance_out = normalize_dict_floats(importance_out, 0, 1)
 
-        relevance_out = extract_relevance(persona, nodes, focal_pt)
+        relevance_out = extract_relevance(persona, nodes, focal_pt, model)
         relevance_out = normalize_dict_floats(relevance_out, 0, 1)
 
         gw = [0.5, 3, 2]
@@ -108,23 +107,30 @@ def top_highest_x_values(d:dict, x:int):
 
 
 if __name__ == "__main__":
-	import datetime
-
-    p = Persona("FREDERIEK")
+    import datetime
+    from llm_comms.llm_local import LocalComms
+    
+    person:Persona = Persona("FREDERIEK")
     text = "Frederiek went to the shop"  
-    created = datetime()
+    created = datetime.datetime(21,3,4)
     expiration= None
-    s: "Lorem",
-    p: Any,
-    o: Any,
-    description: Any,
-    keywords: Any,
-    poignancy: Any,
-    embedding_pair: Any,
-    filling: Any
+    s = "Lorem"
+    p = "went" 
+    o = "shop"
+    description = "frederiek went to the shop" 
+    keywords = "shop" 
+    poignancy = 3 
+    embedding_pair = [description, [1,2,3]]
+    filling = None 
 
-	p.a_mem.add_chat()
-    p.a_mem.add_thought()
+    person.a_mem.add_chat(created, expiration, s, p, o, description, keywords, poignancy, embedding_pair, filling)
+    person.a_mem.add_thought(created, expiration, s, p, o, description, keywords, poignancy, embedding_pair, filling)
 	
-	
-	retrieved = retrieve(person, focals, 5)
+    modelc = LocalComms()
+
+    model_id = "mistralai/Mistral-7B-Instruct-v0.2"
+    modelc.init(model_id)
+
+    model = LLM_API(modelc)
+    retrieved = retrieve(person, ["who is me?"], model)
+

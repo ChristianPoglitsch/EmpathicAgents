@@ -20,4 +20,14 @@ def plan(persona:Persona, new_day:str, model:LLM_API):
   
   return persona.scratch.act_address
 
+if __name__ == "__main__":
 
+  from llm_comms.llm_local import LocalComms
+  person = Persona("MIKE")
+  modelc = LocalComms()
+  
+  model_id = "mistralai/Mistral-7B-Instruct-v0.2"
+  modelc.init(model_id)
+
+  model = LLM_API(modelc)
+  plan(person, "First Day", model)

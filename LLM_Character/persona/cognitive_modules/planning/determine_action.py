@@ -10,7 +10,7 @@ from LLM_Character.persona.prompt_modules.planning_prompts.determine_action.acti
 from LLM_Character.persona.prompt_modules.planning_prompts.determine_action.action_arena import run_prompt_action_arena
 from LLM_Character.persona.prompt_modules.planning_prompts.determine_action.action_game_object import run_prompt_action_game_object
 
-def _determine_action(persona): 
+def _determine_action(persona:Persona): 
   curr_index = persona.scratch.get_f_daily_schedule_index()
   curr_index_60 = persona.scratch.get_f_daily_schedule_index(advance=60)
 
@@ -54,7 +54,11 @@ def _determine_action(persona):
   persona.scratch.add_new_action(new_address, 
                                  int(act_dura), 
                                  act_desp, 
-                                 act_event)
+                                 act_event,
+                                 None, 
+                                 None,
+                                 None, 
+                                 None)
 
 def determine_decomp(act_desp, act_dura):
   if "sleep" not in act_desp and "bed" not in act_desp: 

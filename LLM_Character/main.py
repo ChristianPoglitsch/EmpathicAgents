@@ -15,6 +15,11 @@ from dataclass import AIMessages, PromptMessage
 from persona.cognitive_modules.summary import summary
 
 def run_server(model:LLM_API, sock:UdpComms, messages:AIMessages):
+    
+    # TODO here call reverieserver or start_server anuthing ig. 
+
+
+
     messages = messages.read_messages_from_json("dialogues/messages.json") # --> previous messages.
     print("Running Server... \n")
     while True:
@@ -23,18 +28,13 @@ def run_server(model:LLM_API, sock:UdpComms, messages:AIMessages):
             obj = json.loads(byte_data)
             pm = PromptMessage(**obj)
     
-            # Reload if necessary            
-            if pm._message == 'n':
-                print("--- reset chat ---")
-                messages = messages.read_messages_from_json("dialogues/background.json")
-            else:
-                messages, response = model.query(pm._message, messages)
+            # messages, response = model.query_text(pm._message, messages)
+            response = reverie(pm._message) 
+            pm._value = pm._value + 1
+            pm._message = response
                 
-                pm._value = pm._value + 1
-                pm._message = response
-                
-                obj = json.dumps(pm.__dict__)
-                sock.SendData(obj)
+            obj = json.dumps(pm.__dict__)
+            sock.SendData(obj)
     
         time.sleep(1)
 
