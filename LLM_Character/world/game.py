@@ -6,11 +6,11 @@ sys.path.append('../')
 from LLM_Character.persona.persona import Persona
 from LLM_Character.llm_api import LLM_API 
 from LLM_Character.world.utils import copyanything
-from LLM_Character.world.validation import validate_data, SCHEMA_MAPPING 
 
-from LLM_Character.persona.cognitive_modules.plan import plan
-from LLM_Character.persona.cognitive_modules.reflect import reflect
-from LLM_Character.persona.cognitive_modules.converse import converse
+from LLM_Character.world.validation import PromptMessage, SystemMessage
+from LLM_Character.world.dispatchers.prompt_dispatcher import PromptDispatcher
+from LLM_Character.world.dispatchers.system_dispatcher import SystemDispatcher
+from LLM_Character.world.message_processor import MessageProcessor
 
 # TODO move this variable to env file. 
 FS_STORAGE = "LLM_Chracter/storage"
@@ -65,22 +65,26 @@ class ReverieServer:
   def start_server(self, sock):
     # sim_folder = f"{FS_STORAGE}/{self.sim_code}"
 
-    while True:
-        byte_data = sock.ReadReceivedData()  # Non-blocking read
-        if byte_data:
-            self.call_handler(byte_data)
+    dispatcher = MessageProcessor()
+    dispatcher.register('PromptMessage', PromptMessage, PromptDispatcher)
+    dispatcher.register('SystemData', SystemMessage, SystemDispatcher)
 
-  def call_handler(self, data):
-        # check message, if the message contain information about an ongoing conversation
-        # between the user and the character or
-        # if the message contains information about nearby events, curr_location, 
-        # initial setup information etc. all the different cases can be handled here. 
-    if validate_data(data):
-       SCHEMA_MAPPING[data.type].handler(data)
+    while True:
+      byte_data = sock.ReadReceivedData()
+      if not byte_data:
+          continue  
+
+      value = dispatcher.validate_data(byte_data)
+      if value is None:
+          continue
+      # NOTE:
+      # unity sets the pace, do you have a seperate handler only for planning/reflecting that's possible
+      # or if you want to have like a polling mechanism, where each time there is a converation request, you first execute plan/reflect is also possible. 
+      dispatcher.dispatch(value)
 
         #     # TODO normally, you click on the unity character. so person_name should be provided in the byte_data message.
         #     # but we will hardcode it for now.
-        #     # the same holds for information such as location. 
+        #     # the same holds for information such as location., which is used in the else block of this code unit:  
         #     persona_name = "Camila"
         #     self.personas[persona_name].open_convo_session(sock, byte_data, "analysis")
         # else:

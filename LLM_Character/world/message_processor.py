@@ -3,7 +3,11 @@ import json
 from LLM_Character.world.validation import BaseMessage
 from LLM_Character.world.dispatchers.dispatcher import BaseDispatcher
 
-class MessageDispatcher:
+import sys
+sys.path.append('../')
+
+
+class MessageProcessor:
     def __init__(self):
         self._dispatch_map: dict[str, BaseDispatcher] = {}
         self._validator_map: dict[str, BaseMessage] = {}
@@ -28,13 +32,10 @@ class MessageDispatcher:
 
 if __name__ == "__main__":
   from LLM_Character.world.validation import PromptMessage, SystemMessage
+  from LLM_Character.world.dispatchers.prompt_dispatcher import PromptDispatcher
+  from LLM_Character.world.dispatchers.system_dispatcher import SystemDispatcher
 
-  class PromptDispatcher : 
-    pass
-  class SystemDispatcher:
-    pass
-
-  dispatcher = MessageDispatcher()
+  dispatcher = MessageProcessor()
   dispatcher.register('PromptMessage', PromptMessage, PromptDispatcher)
   dispatcher.register('SystemData', SystemMessage, SystemDispatcher)
 

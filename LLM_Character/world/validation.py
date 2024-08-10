@@ -1,6 +1,5 @@
 from pydantic import BaseModel 
 from pydantic import field_validator
-
 from typing import Optional
 
 class BaseMessage(BaseModel):
