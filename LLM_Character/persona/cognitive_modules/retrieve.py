@@ -4,11 +4,10 @@ sys.path.append('../../')
 from numpy.linalg import norm
 from numpy import dot
 
-from persona import Persona
 from LLM_Character.llm_api import LLM_API
 from LLM_Character.persona.memory_structures.associative_memory import ConceptNode
 
-def retrieve(persona: Persona, focal_points: list[str], model:LLM_API, n_count=30):
+def retrieve(persona, focal_points: list[str], model:LLM_API, n_count=30):
     retrieved = dict()
     for focal_pt in focal_points:
         nodes = _retrieve_recent_sorted_nodes(persona)
@@ -42,7 +41,7 @@ def retrieve(persona: Persona, focal_points: list[str], model:LLM_API, n_count=3
     return retrieved
 
 
-def _retrieve_recent_sorted_nodes(persona: Persona):
+def _retrieve_recent_sorted_nodes(persona):
     # FIXME: WHY NOT RETRIEVE FROM SEQ_CHAT ?
     nodes = []
     for i in persona.a_mem.seq_thought:
@@ -54,7 +53,7 @@ def _retrieve_recent_sorted_nodes(persona: Persona):
     return nodes
 
 
-def extract_recency(persona:Persona, nodes:list[ConceptNode]):
+def extract_recency(persona, nodes:list[ConceptNode]):
     recency_vals = [persona.scratch.recency_decay ** i
                     for i in range(1, len(nodes) + 1)]
 
@@ -71,7 +70,7 @@ def extract_importance(nodes:list[ConceptNode]):
     return importance_out
 
 
-def extract_relevance(persona:Persona, nodes:list[ConceptNode], focal_pt:str, model: LLM_API):
+def extract_relevance(persona, nodes:list[ConceptNode], focal_pt:str, model: LLM_API):
     focal_embedding = model.semantic_meaning(focal_pt)
     relevance_out = dict()
     for _, node in enumerate(nodes):
@@ -109,7 +108,8 @@ def top_highest_x_values(d:dict, x:int):
 if __name__ == "__main__":
     import datetime
     from llm_comms.llm_local import LocalComms
-    
+    from persona import Persona
+
     person:Persona = Persona("FREDERIEK", "nice")
     text = "Frederiek went to the shop"  
     created = datetime.datetime(21,3,4)

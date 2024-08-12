@@ -2,7 +2,7 @@ import socket
 import sys
 sys.path.append('../../')
 
-from LLM_Character.world.validation import PromptMessage
+from LLM_Character.world.validation_dataclass import PromptMessage
 from LLM_Character.world.dispatchers.dispatcher import BaseDispatcher
 from LLM_Character.persona.persona import Persona
 

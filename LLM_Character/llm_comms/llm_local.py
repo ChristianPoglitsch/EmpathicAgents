@@ -3,9 +3,9 @@
 import sys
 sys.path.append('../')
 
-from llm_comms.llm_abstract import LLMComms
-from finetuning.models import load_base_model
-from dataclass import AIMessages, AIMessage
+from LLM_Character.llm_comms.llm_abstract import LLMComms
+from LLM_Character.finetuning.models import load_base_model
+from LLM_Character.messages_dataclass import AIMessages, AIMessage
 
 from transformers import AutoModelForCausalLM, AutoTokenizer, GenerationConfig, AutoModel
 from sentence_transformers import SentenceTransformer

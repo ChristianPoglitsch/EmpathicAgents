@@ -2,7 +2,6 @@ import datetime
 import sys
 sys.path.append('../../')
 
-from persona import Persona
 from LLM_Character.llm_api import LLM_API 
 
 from LLM_Character.persona.cognitive_modules.retrieve import retrieve 
@@ -28,7 +27,7 @@ from LLM_Character.messages_dataclass import AIMessages
 # curr_convo.add_message_role(message, "user")
 # curr_convo.add_message_role(next_line, persona.scratch.name)
 
-def open_convo_session(user_persona:Persona, character_persona:Persona, message:str,  model:LLM_API): 
+def open_convo_session(user_persona, character_persona, message:str,  model:LLM_API): 
 
   # generate_convo(maze, init_persona, target_persona)
   curr_loc = user_persona.scratch.curr_location
@@ -118,7 +117,7 @@ def generate_summarize_ideas(persona, nodes, question):
   summarized_idea = run_prompt_summarize_ideas(persona, statements, question)[0]
   return summarized_idea
 
-def generate_next_line(persona:Persona, curr_convo:AIMessages, summarized_idea):
+def generate_next_line(persona, curr_convo:AIMessages, summarized_idea):
   str_convo = curr_convo.prints_messages()
   # TODO maybe need to reformat this
   # str_convo.replace("[assistant"]", f"{persona.scratch.name}:")

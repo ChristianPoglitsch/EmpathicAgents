@@ -11,7 +11,7 @@ from gpt4all import GPT4All
 from udp_comms import UdpComms
 from llm_api import LLM_API
 from speach import speech
-from dataclass import AIMessages, PromptMessage
+from messages_dataclass import AIMessages, PromptMessage
 from persona.cognitive_modules.summary import summary
 
 def run_server(model:LLM_API, sock:UdpComms, messages:AIMessages):

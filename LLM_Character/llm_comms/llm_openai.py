@@ -6,11 +6,13 @@ https://github.com/joonspk-research/generative_agents
 
 """
 import sys
+from typing import List, Optional
 sys.path.append('../')
 
 
-from dataclass import AIMessages, AIMessage
-from llm_comms.llm_abstract import LLMComms
+from LLM_Character.messages_dataclass import AIMessages, AIMessage
+from LLM_Character.llm_comms.llm_abstract import LLMComms
+from LLM_Character.utils import API_KEY
 
 
 # tiktoken is a fast BPE tokeniser for use with OpenAI's models.
@@ -28,9 +30,6 @@ from openai.types.chat import ChatCompletion, ChatCompletionMessageParam
 from openai.types import CreateEmbeddingResponse, Embedding
 from openai.types import Model, ModelDeleted
 from openai import OpenAI 
-
-from typing import List, Optional
-from utils import API_KEY
 
 class OpenAIComms(LLMComms):
     """class responsible for sending messages to openAI API """

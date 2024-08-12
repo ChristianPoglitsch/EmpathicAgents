@@ -7,7 +7,7 @@ from LLM_Character.persona.persona import Persona
 from LLM_Character.llm_api import LLM_API 
 from LLM_Character.world.utils import copyanything
 
-from LLM_Character.world.validation import PromptMessage, SystemMessage
+from LLM_Character.world.validation_dataclass import PromptMessage, SystemMessage
 from LLM_Character.world.dispatchers.prompt_dispatcher import PromptDispatcher
 from LLM_Character.world.dispatchers.system_dispatcher import SystemDispatcher
 from LLM_Character.world.message_processor import MessageProcessor
@@ -80,30 +80,7 @@ class ReverieServer:
           continue
 
       dispatcher.dispatch(value)
-
-        #     # TODO normally, you click on the unity character. so person_name should be provided in the byte_data message.
-        #     # but we will hardcode it for now.
-        #     # the same holds for information such as location., which is used in the else block of this code unit:  
-        #     persona_name = "Camila"
-        #     self.personas[persona_name].open_convo_session(sock, byte_data, "analysis")
-        # else:
-        #     movements = {"persona": dict(), 
-        #                    "meta": dict()}
-        #     for persona_name, persona in self.personas.items(): 
-        #         description = persona.move(self.personas, curr_location, self.curr_time)  
-        #
-        #         movements["persona"][persona_name] = {}
-        #         movements["persona"][persona_name]["description"] = description
-        #         movements["persona"][persona_name]["chat"] = (persona
-        #                                                       .scratch.chat)
-        #
-        #     movements["meta"]["curr_time"] = (self.curr_time 
-        #                                          .strftime("%B %d, %Y, %H:%M:%S"))
-        #
-        #     curr_move_file = f"{sim_folder}/movement/{self.step}.json"
-        #     with open(curr_move_file, "w") as outfile: 
-        #         outfile.write(json.dumps(movements, indent=2))
-        #
+      
       self.step += 1
       self.curr_time += datetime.timedelta(seconds=self.sec_per_step)
 

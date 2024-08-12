@@ -3,8 +3,7 @@ import datetime
 sys.path.append('../../../../')
 
 from LLM_Character.llm_api import LLM_API 
-from LLM_Character.persona.persona import Persona
-import LLM_Character.persona.prompt_templates.prompt as p 
+import LLM_Character.persona.prompt_modules.prompt as p 
 
 COUNTER_LIMIT = 5
 
@@ -46,7 +45,7 @@ def _get_curr_time_and_summary(time,
     summ_str = summ_str[:-2] + "."
     return summ_str, curr_time_range
 
-def _create_prompt_input(persona:Persona, task, duration): 
+def _create_prompt_input(persona, task, duration): 
     commonset = persona.scratch.get_str_iss()
     firstname = persona.scratch.get_str_firstname()
     fullname = persona.scratch.get_str_name()
@@ -144,7 +143,7 @@ def _get_valid_output(persona, model, prompt, counter_limit):
             return _clean_up_response(prompt, output)
     return _get_fail_safe()
 
-def run_prompt_task_decomp(persona:Persona, 
+def run_prompt_task_decomp(persona, 
                              model:LLM_API, 
                              task,
                              duration,
@@ -185,6 +184,8 @@ def run_prompt_task_decomp(persona:Persona,
 
 if __name__ == "__main__":
     from LLM_Character.llm_comms.llm_local import LocalComms
+    from LLM_Character.persona.persona import Persona
+
     person = Persona("FRERO")
 
     modelc = LocalComms()

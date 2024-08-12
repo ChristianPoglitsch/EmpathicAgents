@@ -3,7 +3,6 @@ import sys
 sys.path.append('../../../')
 
 from LLM_Character.llm_api import LLM_API 
-from LLM_Character.persona.persona import Persona
 import LLM_Character.persona.prompt_modules.prompt as p 
 
 COUNTER_LIMIT = 5
@@ -51,7 +50,7 @@ def _get_valid_output(model, prompt, counter_limit):
 # then querry LLM and see if they know who 
 # they are by qeurying their previous conversation
 # and extracting the necessary information. 
-def run_prompt_generate_next_conv_line(persona:Persona, 
+def run_prompt_generate_next_conv_line(persona, 
                                        model:LLM_API, 
                                        prev_convo, 
                                        retrieved_summary, 
@@ -67,6 +66,8 @@ def run_prompt_generate_next_conv_line(persona:Persona,
 
 if __name__ == "__main__":
     from LLM_Character.llm_comms.llm_local import LocalComms
+    from LLM_Character.persona.persona import Persona
+
     person = Persona("FRERO", "nice")
 
     modelc = LocalComms()

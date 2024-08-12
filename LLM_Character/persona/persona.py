@@ -1,12 +1,13 @@
+import sys
+sys.path.append('../../')
 
-
-from persona.memory_structures.spatial_memory import MemoryTree
+from LLM_Character.persona.memory_structures.spatial_memory import MemoryTree
 from LLM_Character.persona.memory_structures.associative_memory import AssociativeMemory
-from persona.memory_structures.scratch import Scratch
+from LLM_Character.persona.memory_structures.scratch import Scratch
 
-from persona.cognitive_modules.plan import plan
-from persona.cognitive_modules.reflect import reflect
-from persona.cognitive_modules.converse import open_convo_session 
+from LLM_Character.persona.cognitive_modules.plan import plan
+from LLM_Character.persona.cognitive_modules.reflect import reflect
+from LLM_Character.persona.cognitive_modules.converse import open_convo_session 
 
 class Persona: 
   s_mem:MemoryTree
@@ -33,9 +34,8 @@ class Persona:
     f_scratch = f"{save_folder}/scratch.json"
     self.scratch.save(f_scratch)
 
-
-  def plan(self, personas, new_day):
-    return plan(self, personas, new_day)
+  def plan(self, new_day, model):
+    return plan(self, new_day, model)
 
   def reflect(self):
     reflect(self)

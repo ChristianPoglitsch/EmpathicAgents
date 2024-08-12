@@ -6,13 +6,12 @@ import sys
 sys.path.append('../../../../')
 
 from LLM_Character.llm_api import LLM_API 
-from LLM_Character.persona.persona import Persona
-import LLM_Character.persona.prompt_templates.prompt as p 
+import LLM_Character.persona.prompt_modules.prompt as p 
 
 COUNTER_LIMIT = 5
 
 def _create_prompt_input(action_description:str, 
-                         persona:Persona): 
+                         persona): 
     p_name = persona.scratch.get_str_name()
 
     if "(" in action_description: 
@@ -36,7 +35,7 @@ def _validate_response(response):
     except: return False
     return True 
 
-def _get_fail_safe(persona:Persona): 
+def _get_fail_safe(persona): 
     p_name = persona.scratch.get_str_name()
     fs = (p_name, "is", "idle")
     return fs
@@ -48,7 +47,7 @@ def _get_valid_output(persona, model, prompt, counter_limit):
             return _clean_up_response(output)
     return _get_fail_safe(persona)
 
-def run_prompt_event_triple(persona:Persona, 
+def run_prompt_event_triple(persona, 
                              model:LLM_API, 
                              action_description:str,
                              verbose=False):
@@ -65,6 +64,8 @@ def run_prompt_event_triple(persona:Persona,
 
 if __name__ == "__main__":
     from LLM_Character.llm_comms.llm_local import LocalComms
+    from LLM_Character.persona.persona import Persona
+
     person = Persona("FRERO")
 
     modelc = LocalComms()

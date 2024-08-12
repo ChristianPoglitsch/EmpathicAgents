@@ -7,12 +7,11 @@ import sys
 sys.path.append('../../../../')
 
 from LLM_Character.llm_api import LLM_API  
-from LLM_Character.persona.persona import Persona
-from LLM_Character.persona.prompt_templates.prompt import generate_prompt 
+from LLM_Character.persona.prompt_modules.prompt import generate_prompt 
 
 COUNTER_LIMIT = 5
 
-def _create_prompt_input(persona:Persona)-> list[str]:
+def _create_prompt_input(persona)-> list[str]:
     prompt_input = [persona.scratch.get_str_iss(),
                 persona.scratch.get_str_lifestyle(),
                 persona.scratch.get_str_firstname()]
@@ -29,7 +28,7 @@ def _validate_response(response:str) -> bool:
         return False
     return True
 
-def run_prompt_wake_up(persona:Persona, model:LLM_API, verbose=False):
+def run_prompt_wake_up(persona, model:LLM_API, verbose=False):
     prompt_template = "LLM_Character/persona/prompt_template/wake_up_hour.txt"
     prompt_input = _create_prompt_input(persona)
     prompt = generate_prompt(prompt_input, prompt_template)
@@ -50,6 +49,7 @@ def run_prompt_wake_up(persona:Persona, model:LLM_API, verbose=False):
 
 if __name__ == "__main__":
     from LLM_Character.llm_comms.llm_local import LocalComms
+    from LLM_Character.persona.persona import Persona
 
     person = Persona("BARA")
 

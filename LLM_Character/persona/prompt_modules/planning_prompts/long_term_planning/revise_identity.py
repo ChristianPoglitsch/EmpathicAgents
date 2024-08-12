@@ -7,7 +7,6 @@ import datetime
 sys.path.append('../../../../')
 
 from LLM_Character.llm_api import LLM_API  
-from LLM_Character.persona.persona import Persona
 import LLM_Character.persona.prompt_modules.prompt as p 
 
 COUNTER_LIMIT = 5
@@ -19,7 +18,7 @@ def _component_statements(retrieved):
           statements += f"{i.created.strftime('%A %B %d -- %H:%M %p')}: {i.embedding_key}\n"
     return statements
 
-def _create_prompt_input(persona:Persona, retrieved:int)-> tuple[list[str], list[str]]:
+def _create_prompt_input(persona, retrieved:int)-> tuple[list[str], list[str]]:
     stmts = _component_statements(retrieved)
     p_name = persona.scratch.name 
     time = persona.scratch.curr_time.strftime('%A %B %d') 
@@ -34,7 +33,7 @@ def _create_prompt_input(persona:Persona, retrieved:int)-> tuple[list[str], list
     thought_prompt += [p_name] 
     return plan_input, thought_prompt
 
-def _create_prompt_input_2(persona:Persona, plan_note:str, thought_note:str) -> list[str]:
+def _create_prompt_input_2(persona, plan_note:str, thought_note:str) -> list[str]:
 
     stmts   = _component_statements(retrieved)
     p_name  = persona.scratch.name 
@@ -52,7 +51,7 @@ def _create_prompt_input_2(persona:Persona, plan_note:str, thought_note:str) -> 
     currently_prompt += [time] 
 
     return currently_prompt  
-def _create_prompt_input_3(persona:Persona) -> list[str]:
+def _create_prompt_input_3(persona) -> list[str]:
     commonset = persona.scratch.get_str_iss()
     curr_time = persona.scratch.curr_time.strftime('%A %B %d')
     p_name  = persona.scratch.name 
@@ -67,7 +66,7 @@ def _create_prompt_input_3(persona:Persona) -> list[str]:
 def _get_valid_output(model, prompt, counter_limit):
     return model.query_text(prompt)
 
-def run_prompt_revise_identity(persona:Persona, model:LLM_API, retrieved,verbose=False):
+def run_prompt_revise_identity(persona, model:LLM_API, retrieved,verbose=False):
     prompt_template_1 = "LLM_Character/persona/prompt_template/revise_identity_1.txt"
     prompt_template_2 = "LLM_Character/persona/prompt_template/revise_identity_2.txt"
     prompt_input1, prompt_input2 = _create_prompt_input(persona, retrieved)
@@ -92,6 +91,7 @@ def run_prompt_revise_identity(persona:Persona, model:LLM_API, retrieved,verbose
 
 if __name__ == "__main__":
     from LLM_Character.llm_comms.llm_local import LocalComms
+    from LLM_Character.persona.persona import Persona
 
     person = Persona("BARA")
 

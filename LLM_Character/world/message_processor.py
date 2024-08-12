@@ -1,12 +1,11 @@
-import json 
-from typing import Type
-
-from LLM_Character.world.validation import BaseMessage
-from LLM_Character.world.dispatchers.dispatcher import BaseDispatcher
-
 import sys
-sys.path.append('../')
+sys.path.append('../../')
 
+import json 
+from typing import Type, Union
+
+from LLM_Character.world.validation_dataclass import BaseMessage
+from LLM_Character.world.dispatchers.dispatcher import BaseDispatcher
 
 class MessageProcessor:
     def __init__(self):
@@ -20,7 +19,7 @@ class MessageProcessor:
     def dispatch(self, data:BaseMessage):
       self._dispatch_map[data.type].handler(data)  
 
-    def validate_data(self, data: str) -> BaseMessage | None:
+    def validate_data(self, data: str) -> Union[BaseMessage,None]:
         try:
             loaded_data = json.loads(data)
             data_type = loaded_data.get('type')
@@ -32,7 +31,7 @@ class MessageProcessor:
             return None
 
 if __name__ == "__main__":
-  from LLM_Character.world.validation import PromptMessage, SystemMessage
+  from LLM_Character.world.validation_dataclass import PromptMessage, SystemMessage
   from LLM_Character.world.dispatchers.prompt_dispatcher import PromptDispatcher
   from LLM_Character.world.dispatchers.system_dispatcher import SystemDispatcher
 

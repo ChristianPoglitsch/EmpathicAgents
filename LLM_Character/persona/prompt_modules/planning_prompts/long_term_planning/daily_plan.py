@@ -6,12 +6,11 @@ import sys
 sys.path.append('../../../../')
 
 from LLM_Character.llm_api import LLM_API  
-from LLM_Character.persona.persona import Persona
-import LLM_Character.persona.prompt_templates.prompt as p 
+import LLM_Character.persona.prompt_modules.prompt as p 
 
 COUNTER_LIMIT = 5
 
-def _create_prompt_input(persona:Persona, wake_up_hour:int)-> list[str]:
+def _create_prompt_input(persona, wake_up_hour:int)-> list[str]:
     prompt_input = []
     prompt_input += [persona.scratch.get_str_iss()]
     prompt_input += [persona.scratch.get_str_lifestyle()]
@@ -54,7 +53,7 @@ def _get_valid_output(model, prompt, counter_limit):
             return _clean_up_response(output)
     return _get_fail_safe()
 
-def run_prompt_daily_plan(persona:Persona, wake_up_hour:int, model:LLM_API, verbose=False):
+def run_prompt_daily_plan(persona, wake_up_hour:int, model:LLM_API, verbose=False):
     prompt_template = "LLM_Character/persona/prompt_template/daily_planning.txt"
     prompt_input = _create_prompt_input(persona, wake_up_hour)
     prompt = p.generate_prompt(prompt_input, prompt_template)
@@ -64,7 +63,8 @@ def run_prompt_daily_plan(persona:Persona, wake_up_hour:int, model:LLM_API, verb
 
 
 if __name__ == "__main__":
-    from LLM_Character.llm_comms.llm_local import LocalComms
+    from LLM_Character.llm_comms.llm_local import LocalComms    
+    from LLM_Character.persona.persona import Persona
 
     person = Persona("BARA")
 

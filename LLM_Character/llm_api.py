@@ -1,6 +1,8 @@
 ﻿""" summary """ 
+import sys
+sys.path.append('../')
 
-from dataclass import AIMessages, AIMessage
+from LLM_Character.messages_dataclass import AIMessages, AIMessage
 
 from llm_comms.llm_abstract import LLMComms
 from llm_comms.llm_local import LocalComms

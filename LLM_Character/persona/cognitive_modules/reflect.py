@@ -1,19 +1,11 @@
 import datetime
 import sys
 sys.path.append('../../')
-
-from persona import Persona
 from LLM_Character.llm_api import LLM_API 
-
 from LLM_Character.persona.cognitive_modules.planning.long_term_planning import _long_term_planning 
 from LLM_Character.persona.cognitive_modules.planning.determine_action import _determine_action 
 
-
-
-
 # FIXME: eerst conversation fixen en dan reflection, reflection laatste.
-
-
 
 def reflect(persona):
   if reflection_trigger(persona): 
@@ -125,7 +117,7 @@ def generate_action_event_triple(act_desp, persona):
   return run_prompt_event_triple(act_desp, persona)[0]
 
 if __name__ == "__main__":
-
+  from LLM_Character.persona.persona import Persona
   from llm_comms.llm_local import LocalComms
   person = Persona("MIKE")
   modelc = LocalComms()

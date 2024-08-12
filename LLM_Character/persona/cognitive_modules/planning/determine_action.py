@@ -2,7 +2,6 @@
 import sys
 sys.path.append('../../../')
 
-from persona import Persona
 from LLM_Character.llm_api import LLM_API 
 from LLM_Character.persona.prompt_modules.planning_prompts.determine_action.task_decomp import run_prompt_task_decomp
 from LLM_Character.persona.prompt_modules.planning_prompts.determine_action.event_triple import run_prompt_event_triple
@@ -10,7 +9,7 @@ from LLM_Character.persona.prompt_modules.planning_prompts.determine_action.acti
 from LLM_Character.persona.prompt_modules.planning_prompts.determine_action.action_arena import run_prompt_action_arena
 from LLM_Character.persona.prompt_modules.planning_prompts.determine_action.action_game_object import run_prompt_action_game_object
 
-def _determine_action(persona:Persona): 
+def _determine_action(persona): 
   curr_index = persona.scratch.get_f_daily_schedule_index()
   curr_index_60 = persona.scratch.get_f_daily_schedule_index(advance=60)
 
@@ -88,6 +87,8 @@ def generate_action_event_triple(act_desp, persona):
   return run_prompt_event_triple(act_desp, persona)[0]
 
 if __name__ == "__main__":
+  from persona import Persona
+
   p = Persona("IBI")
   _determine_action(p)
 

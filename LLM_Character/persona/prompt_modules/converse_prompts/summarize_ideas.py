@@ -3,12 +3,11 @@ import sys
 sys.path.append('../../../')
 
 from LLM_Character.llm_api import LLM_API 
-from LLM_Character.persona.persona import Persona
 import LLM_Character.persona.prompt_modules.prompt as p 
 
 COUNTER_LIMIT = 5
 
-def _create_prompt_input(persona:Persona, statements:str, question:str): 
+def _create_prompt_input(persona, statements:str, question:str): 
     name = persona.scratch.get_str_name()
     prompt_input = [statements, name, question]
     return prompt_input
@@ -37,7 +36,7 @@ def _get_valid_output(model, prompt, counter_limit):
     return _get_fail_safe()
 
 # FIXME: COULD BE BETTER, the prompt is a mess. 
-def run_prompt_summarise_ideas(persona:Persona, model:LLM_API, statements:str, question:str, verbose=False):
+def run_prompt_summarize_ideas(persona, model:LLM_API, statements:str, question:str, verbose=False):
 
     prompt_template = "persona/prompt_template/summarize_ideas.txt" 
     prompt_input = _create_prompt_input(persona, statements, question)
@@ -49,6 +48,8 @@ def run_prompt_summarise_ideas(persona:Persona, model:LLM_API, statements:str, q
 
 if __name__ == "__main__":
     from LLM_Character.llm_comms.llm_local import LocalComms
+    from LLM_Character.persona.persona import Persona
+
     person = Persona("FRERO", "nice")
 
     modelc = LocalComms()
@@ -56,5 +57,5 @@ if __name__ == "__main__":
     modelc.init(model_id)
 
     model = LLM_API(modelc)
-    run_prompt_summarise_ideas(person, model, "i will drive to the broeltorens.", "kortrijk" )
+    run_prompt_summarize_ideas(person, model, "i will drive to the broeltorens.", "kortrijk" )
 

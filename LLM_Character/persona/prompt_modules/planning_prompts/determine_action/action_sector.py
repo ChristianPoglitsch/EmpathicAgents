@@ -6,12 +6,11 @@ import sys
 sys.path.append('../../../../')
 
 from LLM_Character.llm_api import LLM_API 
-from LLM_Character.persona.persona import Persona
-import LLM_Character.persona.prompt_templates.prompt as p 
+import LLM_Character.persona.prompt_modules.prompt as p 
 
 COUNTER_LIMIT = 5
 
-def _create_prompt_input(action_description:str, persona:Persona): 
+def _create_prompt_input(action_description:str, persona): 
    
     act_world = persona.scratch.get_curr_location()['world']
     act_sector = persona.scratch.get_curr_location()['sector']
@@ -76,7 +75,7 @@ def _get_valid_output(model, prompt, counter_limit):
             return _clean_up_response(output)
     return _get_fail_safe()
 
-def run_prompt_action_sector(persona:Persona, model:LLM_API, action_description:str, verbose=False):
+def run_prompt_action_sector(persona, model:LLM_API, action_description:str, verbose=False):
     prompt_template = "LLM_Character/persona/prompt_template/action_sector.txt"
     prompt_input = _create_prompt_input(action_description, persona)
     prompt = p.generate_prompt(prompt_input, prompt_template)
@@ -92,6 +91,8 @@ def run_prompt_action_sector(persona:Persona, model:LLM_API, action_description:
 
 if __name__ == "__main__":
     from LLM_Character.llm_comms.llm_local import LocalComms
+    from LLM_Character.persona.persona import Persona
+
     person = Persona("FRERO")
 
     modelc = LocalComms()

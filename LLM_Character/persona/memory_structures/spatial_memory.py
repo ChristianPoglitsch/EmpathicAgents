@@ -1,5 +1,6 @@
 import json
 import os 
+from typing import Union 
 
 class MemoryTree: 
     def __init__(self, f_saved): 
@@ -15,10 +16,10 @@ class MemoryTree:
     def get_str_accessible_sectors(self ,world:str):
         return []
 
-    def get_str_accessible_sector_arenas(self, world:str, sector:str|None):
+    def get_str_accessible_sector_arenas(self, world:str, sector:Union[str,None]):
         return []
 
-    def get_str_accessible_arena_game_objects(self, world:str, sector:str|None, arena:str|None):
+    def get_str_accessible_arena_game_objects(self, world:str, sector:Union[str,None], arena:Union[str,None]):
         return []
 
 def check_if_file_exists(curr_file): 
