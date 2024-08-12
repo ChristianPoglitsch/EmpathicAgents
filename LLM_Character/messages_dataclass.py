@@ -3,34 +3,6 @@
 import json
 from typing import List
 
-
-class PromptMessage:
-    """This class holds the data that is sent
-    from the Unity environment to the Python environment.
-    """
-
-    def __init__(self, _value:int, _message:str):
-        """
-        Initializes the PromptMessage instance.
-
-        Args:
-            _value (int): The order of the message (e.g. sequence number).
-            _message (str): The message in string format.
-        """
-        self._value = _value
-        self._message = _message
-
-    def toJSON(self):
-        """This method converts the instance of the class into a JSON-formatted string.
-
-        Returns:
-            str: A JSON-formatted string representing the instance. The string contains
-                all instance attributes as key-value pairs. If the instance contains
-                non-serializable attributes, they will be excluded from the output.
-        """
-        return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
-
-
 class AIMessage:
     """A single message of a chat."""
 
@@ -125,9 +97,8 @@ class AIMessages:
             message (AIMessage): The message to add to the chat history.
         """
         self.messages.append(message)
-    
-    @DeprecationWarning
-    def create_message(self, message: str, role: str) -> AIMessage:
+
+    def add_message_role(self, message: str, role: str):
         """
         Creates an AIMessage instance with the given `message` and `role`.
 
@@ -138,7 +109,7 @@ class AIMessages:
         Returns:
             AIMessage: The created AIMessage instance.
         """
-        return AIMessage(message, role)
+        self.messages.append(AIMessage(message, role))
 
     def get_messages(self) -> List[AIMessage]:
         """
