@@ -5,5 +5,5 @@ from abc import ABC, abstractmethod
 
 class BaseDispatcher(ABC):
   @abstractmethod
-  def handler(self, data, socket, personas):
+  def handler(self, socket, server, model, data):
     pass

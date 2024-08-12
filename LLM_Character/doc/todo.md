@@ -1,3 +1,13 @@
+# emotional state
+
+6 emotions, store in the persona. attached to persona, 
+updated after each conversation.query llm
+
+so each person has a personality based on the 5 factor model. 
+query llm based on chat history and (possibly update the personality)
+
+update facial expression of the avatar based on the personality or emotionanal state. 
+
 # fix typing in this codebase, use the following to avoid circular imports
 
 https://stackoverflow.com/questions/66987434/importing-classes-just-for-typing-in-python

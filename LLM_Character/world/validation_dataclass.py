@@ -7,6 +7,7 @@ class BaseMessage(BaseModel):
 
 # class data sent from unity to python endpoint for sending chat messages. 
 class PromptData(BaseModel):
+    persona_name:str
     message: str
     value: int
 
@@ -34,7 +35,6 @@ class SystemMessage(BaseMessage):
     type: str
     character_name:str
     current_location:LocationData
-    spatial_information:LocationData
 
     @field_validator('current_location')
     def check_current_location(cls, value):
@@ -47,4 +47,12 @@ class SystemMessage(BaseMessage):
             raise ValueError('sector in current location must contain exactly one arena.')
         return value
 
-
+# TODO
+# pass all kinds of arenas, sectors, gameobject in the entire world, to this endpoint.
+# pass all kind of character paramters, etc...
+# all the data that normally resides in a json, that is stored on this python endpoint
+# can also be sent dynamically from unity in order to initialise 
+# the reverieserver and the persoans and the environment. 
+# class SystemMessage(BaseMessage):
+#     type: str
+#     spatial_information:LocationData

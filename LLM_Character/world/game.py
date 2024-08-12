@@ -1,19 +1,15 @@
 import datetime
 import json 
 import sys
-sys.path.append('../')
+sys.path.append('../../')
 
 from LLM_Character.persona.persona import Persona
 from LLM_Character.llm_api import LLM_API 
 from LLM_Character.world.utils import copyanything
-
-from LLM_Character.world.validation_dataclass import PromptMessage, SystemMessage
-from LLM_Character.world.dispatchers.prompt_dispatcher import PromptDispatcher
-from LLM_Character.world.dispatchers.system_dispatcher import SystemDispatcher
-from LLM_Character.world.message_processor import MessageProcessor
+from LLM_Character.world.validation_dataclass import LocationData 
 
 # TODO move this variable to env file. 
-FS_STORAGE = "LLM_Chracter/storage"
+FS_STORAGE = "storage"
 
 class ReverieServer:
   def __init__(self,
@@ -27,10 +23,12 @@ class ReverieServer:
     sim_folder = f"{FS_STORAGE}/{self.sim_code}"
 
     copyanything(fork_folder, sim_folder)
-    with open(f"{sim_folder}/reverie/meta.json") as json_file:  
+    
+    # TODO add a try and except when trying to load json...
+    with open(f"{sim_folder}/meta.json") as json_file:  
       reverie_meta = json.load(json_file)
 
-    with open(f"{sim_folder}/reverie/meta.json", "w") as outfile: 
+    with open(f"{sim_folder}/meta.json", "w") as outfile: 
       reverie_meta["fork_sim_code"] = fork_sim_code
       outfile.write(json.dumps(reverie_meta, indent=2))
 
@@ -43,6 +41,8 @@ class ReverieServer:
       persona_folder = f"{sim_folder}/personas/{persona_name}"
       curr_persona = Persona(persona_name, persona_folder)
       self.personas[persona_name] = curr_persona
+
+    # sim_folder = f"{FS_STORAGE}/{self.sim_code}"
 
   def save(self): 
     sim_folder = f"{FS_STORAGE}/{self.sim_code}"
@@ -62,33 +62,36 @@ class ReverieServer:
       persona.save(save_folder)
 
 
-  def start_server(self, sock):
-    # sim_folder = f"{FS_STORAGE}/{self.sim_code}"
+  def prompt_processor(self, persona_name:str):
+    self.personas[persona_name].open_convo_session(socket, data.data.message)
 
-    dispatcher = MessageProcessor()
-    dispatcher.register('PromptMessage', PromptMessage, PromptDispatcher)
-    dispatcher.register('SystemData', SystemMessage, SystemDispatcher)
 
-    while True:
-      # NOTE: why not use blocking readreceiveddata ? 
-      byte_data = sock.ReadReceivedData()
-      if not byte_data:
-          continue  
+  def update_processor(self, curr_location:dict[str, LocationData]):
+    sim_folder = f"{FS_STORAGE}/{self.sim_code}"
 
-      value = dispatcher.validate_data(byte_data)
-      if value is None:
-          continue
+    movements = { "persona": dict(), 
+                  "meta": dict()}
+    for persona_name, persona in self.personas.items(): 
+      description = persona.move(self.personas, curr_location[persona_name], self.curr_time)  
 
-      dispatcher.dispatch(value)
+      movements["persona"][persona_name] = {}
+      movements["persona"][persona_name]["description"] = description
+      movements["persona"][persona_name]["chat"] = (persona
+                                              .scratch.chat)
+
+    movements["meta"]["curr_time"] = (self.curr_time 
+                                .strftime("%B %d, %Y, %H:%M:%S"))
+
+    curr_move_file = f"{sim_folder}/movement/{self.step}.json"
+    with open(curr_move_file, "w") as outfile: 
+      outfile.write(json.dumps(movements, indent=2))
       
-      self.step += 1
-      self.curr_time += datetime.timedelta(seconds=self.sec_per_step)
+  # def system_processor():
+  #   pass
 
-
-
-if __name__ == "__main__" : 
-  r = ReverieServer("ale", "tof")
-  r.start_server(None)
+# if __name__ == "__main__" : 
+#   r = ReverieServer("ale", "tof")
+#   r.start_server(None)
 
 
 
