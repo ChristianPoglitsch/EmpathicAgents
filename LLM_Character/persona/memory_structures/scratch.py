@@ -2,7 +2,7 @@
 
 from datetime import datetime
 class Scratch: 
-    def __init__(self, f_saved): 
+    def __init__(self, name, f_saved): 
       # PERSONA HYPERPARAMETERS
 
       # WORLD INFORMATION 
@@ -10,7 +10,7 @@ class Scratch:
       self.curr_location = None 
 
       # THE CORE IDENTITY OF THE PERSONA 
-      self.name = None
+      self.name = name
       self.first_name = None
       self.last_name = None
       self.age = None

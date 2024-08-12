@@ -10,7 +10,7 @@ from LLM_Character.persona.prompt_modules.planning_prompts.long_term_planning.wa
 from LLM_Character.persona.prompt_modules.planning_prompts.long_term_planning.revise_identity  import run_prompt_revise_identity
 from LLM_Character.persona.prompt_modules.planning_prompts.long_term_planning.hourly_schedule import run_prompt_hourly_schedule
 
-def _long_term_planning(persona:Persona, new_day, model:LLM_API): 
+def _long_term_planning(persona:Persona, new_day:str|None, model:LLM_API): 
   wake_up_hour = generate_wake_up_hour(persona, model)
 
   if new_day == "First day": 
@@ -35,7 +35,7 @@ def revise_identity(persona, model:LLM_API):
   focal_points = [f"{p_name}'s plan for {persona.scratch.get_str_curr_date_str()}.",
                   f"Important recent events for {p_name}'s life."]
 
-  retrieved = retrieve(persona, focal_points)
+  retrieved = retrieve(persona, focal_points, model)
   _, _, new_currently, new_daily_req = run_prompt_revise_identity(persona, model, retrieved)
 
   persona.scratch.currently = new_currently
@@ -105,7 +105,7 @@ def generate_hourly_schedule(persona, curr_hour_str, n_activity, hour_str):
 
 if __name__ == "__main__":
   from LLM_Character.llm_comms.llm_local import LocalComms
-  person = Persona("BANDER")
+  person = Persona("BANDER", "filesave")
   modelc = LocalComms()
   model_id = "mistralai/Mistral-7B-Instruct-v0.2"
   modelc.init(model_id)

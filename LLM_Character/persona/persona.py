@@ -4,7 +4,9 @@ from persona.memory_structures.spatial_memory import MemoryTree
 from LLM_Character.persona.memory_structures.associative_memory import AssociativeMemory
 from persona.memory_structures.scratch import Scratch
 
-from persona.cognitive_modules.converse import *
+from persona.cognitive_modules.plan import plan
+from persona.cognitive_modules.reflect import reflect
+from persona.cognitive_modules.converse import open_convo_session 
 
 class Persona: 
   s_mem:MemoryTree
@@ -31,11 +33,9 @@ class Persona:
     f_scratch = f"{save_folder}/scratch.json"
     self.scratch.save(f_scratch)
 
-  def retrieve(self, perceived):
-    return retrieve(self, perceived)
 
-  def plan(self, maze, personas, new_day, retrieved):
-    return plan(self, maze, personas, new_day, retrieved)
+  def plan(self, personas, new_day):
+    return plan(self, personas, new_day)
 
   def reflect(self):
     reflect(self)
@@ -50,17 +50,12 @@ class Persona:
           != curr_time.strftime('%A %B %d')):
       new_day = "New day"
     self.scratch.curr_time = curr_time
-    
-    # FIXME: what does retrieve has as input ? i think previous chats? that's the only source of new information for the agent. 
-    retrieved = self.retrieve(None)
-    self.plan(maze, personas, new_day, retrieved)
+
+    self.plan(personas, new_day)
     self.reflect()
 
-    return 
-
-  def open_convo_session(self, convo_mode): 
-    open_convo_session(self, convo_mode)
-    
+  def open_convo_session(self, data): 
+    open_convo_session(self, data)
 
 
 
@@ -73,5 +68,3 @@ class Persona:
 
 
 
-  def open_convo_session(self, convo_mode): 
-    open_convo_session(self, convo_mode)

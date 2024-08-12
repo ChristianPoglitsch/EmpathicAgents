@@ -1,4 +1,5 @@
 import json 
+from typing import Type
 
 from LLM_Character.world.validation import BaseMessage
 from LLM_Character.world.dispatchers.dispatcher import BaseDispatcher
@@ -10,7 +11,7 @@ sys.path.append('../')
 class MessageProcessor:
     def __init__(self):
         self._dispatch_map: dict[str, BaseDispatcher] = {}
-        self._validator_map: dict[str, BaseMessage] = {}
+        self._validator_map: dict[str, Type[BaseMessage]] = {}
 
     def register(self, message_type: str, message_class, dispatcher_class):
         self._validator_map[message_type] = message_class

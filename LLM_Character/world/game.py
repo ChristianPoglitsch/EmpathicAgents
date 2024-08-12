@@ -70,6 +70,7 @@ class ReverieServer:
     dispatcher.register('SystemData', SystemMessage, SystemDispatcher)
 
     while True:
+      # NOTE: why not use blocking readreceiveddata ? 
       byte_data = sock.ReadReceivedData()
       if not byte_data:
           continue  
@@ -77,9 +78,7 @@ class ReverieServer:
       value = dispatcher.validate_data(byte_data)
       if value is None:
           continue
-      # NOTE:
-      # unity sets the pace, do you have a seperate handler only for planning/reflecting that's possible
-      # or if you want to have like a polling mechanism, where each time there is a converation request, you first execute plan/reflect is also possible. 
+
       dispatcher.dispatch(value)
 
         #     # TODO normally, you click on the unity character. so person_name should be provided in the byte_data message.
@@ -105,8 +104,8 @@ class ReverieServer:
         #     with open(curr_move_file, "w") as outfile: 
         #         outfile.write(json.dumps(movements, indent=2))
         #
-        #     self.step += 1
-        #     self.curr_time += datetime.timedelta(seconds=self.sec_per_step)
+      self.step += 1
+      self.curr_time += datetime.timedelta(seconds=self.sec_per_step)
 
 
 

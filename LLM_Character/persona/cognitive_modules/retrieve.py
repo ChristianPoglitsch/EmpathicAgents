@@ -110,7 +110,7 @@ if __name__ == "__main__":
     import datetime
     from llm_comms.llm_local import LocalComms
     
-    person:Persona = Persona("FREDERIEK")
+    person:Persona = Persona("FREDERIEK", "nice")
     text = "Frederiek went to the shop"  
     created = datetime.datetime(21,3,4)
     expiration= None
