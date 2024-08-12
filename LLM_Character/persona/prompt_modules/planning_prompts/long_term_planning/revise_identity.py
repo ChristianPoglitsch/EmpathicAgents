@@ -8,6 +8,7 @@ sys.path.append('../../../../')
 
 from LLM_Character.llm_api import LLM_API  
 import LLM_Character.persona.prompt_modules.prompt as p 
+import LLM_Character.persona.memory_structures.scratch as Scratch
 
 COUNTER_LIMIT = 5
 
@@ -18,10 +19,10 @@ def _component_statements(retrieved):
           statements += f"{i.created.strftime('%A %B %d -- %H:%M %p')}: {i.embedding_key}\n"
     return statements
 
-def _create_prompt_input(persona, retrieved:int)-> tuple[list[str], list[str]]:
+def _create_prompt_input(scratch:Scratch, retrieved:int)-> tuple[list[str], list[str]]:
     stmts = _component_statements(retrieved)
-    p_name = persona.scratch.name 
-    time = persona.scratch.curr_time.strftime('%A %B %d') 
+    p_name = scratch.name 
+    time = scratch.curr_time.strftime('%A %B %d') 
 
     plan_input = []
     plan_input += [stmts]
@@ -33,13 +34,12 @@ def _create_prompt_input(persona, retrieved:int)-> tuple[list[str], list[str]]:
     thought_prompt += [p_name] 
     return plan_input, thought_prompt
 
-def _create_prompt_input_2(persona, plan_note:str, thought_note:str) -> list[str]:
-
+def _create_prompt_input_2(scratch:Scratch, plan_note:str, thought_note:str) -> list[str]:
     stmts   = _component_statements(retrieved)
-    p_name  = persona.scratch.name 
-    time    = persona.scratch.curr_time.strftime('%A %B %d') 
-    time_diff = (persona.scratch.curr_time - datetime.timedelta(days=1)).strftime('%A %B %d')
-    currently = persona.scratch.currently
+    p_name  = scratch.name 
+    time    = scratch.curr_time.strftime('%A %B %d') 
+    time_diff = (scratch.curr_time - datetime.timedelta(days=1)).strftime('%A %B %d')
+    currently = scratch.currently
     notes = (plan_note + thought_note).replace('\n', '')
 
     currently_prompt = []
@@ -50,11 +50,12 @@ def _create_prompt_input_2(persona, plan_note:str, thought_note:str) -> list[str
     currently_prompt += [notes]
     currently_prompt += [time] 
 
-    return currently_prompt  
-def _create_prompt_input_3(persona) -> list[str]:
-    commonset = persona.scratch.get_str_iss()
-    curr_time = persona.scratch.curr_time.strftime('%A %B %d')
-    p_name  = persona.scratch.name 
+    return currently_prompt 
+
+def _create_prompt_input_3(scratch:Scratch) -> list[str]:
+    commonset = scratch.get_str_iss()
+    curr_time = scratch.curr_time.strftime('%A %B %d')
+    p_name  = scratch.name 
 
     daily_req_prompt  = []
     daily_req_prompt += [commonset]
@@ -66,22 +67,22 @@ def _create_prompt_input_3(persona) -> list[str]:
 def _get_valid_output(model, prompt, counter_limit):
     return model.query_text(prompt)
 
-def run_prompt_revise_identity(persona, model:LLM_API, retrieved,verbose=False):
+def run_prompt_revise_identity(scratch:Scratch, model:LLM_API, retrieved,verbose=False):
     prompt_template_1 = "LLM_Character/persona/prompt_template/revise_identity_1.txt"
     prompt_template_2 = "LLM_Character/persona/prompt_template/revise_identity_2.txt"
-    prompt_input1, prompt_input2 = _create_prompt_input(persona, retrieved)
+    prompt_input1, prompt_input2 = _create_prompt_input(scratch, retrieved)
     prompt1 = p.generate_prompt(prompt_input1, prompt_template_1)
     prompt2 = p.generate_prompt(prompt_input2, prompt_template_2)
     plan_note = _get_valid_output(model, prompt1, COUNTER_LIMIT)
     thought_note = _get_valid_output(model, prompt2, COUNTER_LIMIT)
     
     prompt_template_3 = "LLM_Character/persona/prompt_template/revise_identity_3.txt"
-    prompt_input3 = _create_prompt_input_2(persona, plan_note, thought_note)
+    prompt_input3 = _create_prompt_input_2(scratch, plan_note, thought_note)
     prompt = p.generate_prompt(prompt_input3, prompt_template_3 )
     currently_note = _get_valid_output(model, prompt, COUNTER_LIMIT)
     
     prompt_template_4 = "LLM_Character/persona/prompt_template/revise_identity_4.txt"
-    prompt_input4 = _create_prompt_input_3(persona)
+    prompt_input4 = _create_prompt_input_3(scratch)
     prompt = p.generate_prompt(prompt_input4, prompt_template_4 )
     daily_req_note = _get_valid_output(model, prompt, COUNTER_LIMIT)
     new_daily_req = daily_req_note.replace('\n', ' ')

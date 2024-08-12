@@ -1,3 +1,13 @@
+# fix typing in this codebase, use the following to avoid circular imports
+
+https://stackoverflow.com/questions/66987434/importing-classes-just-for-typing-in-python
+or somehow redesign code to remove the cyclic dependency
+
+another solution would be to give Scratch memory instead of Persona object,since majority of operation are about extracting something
+from memory or adding things to memory.
+
+# TODO
+
 * make sure the LlmTraining.py and Main.py work when upgrading `transformers` due to some bug, see bug.md
 issue needs to be fixed.
 

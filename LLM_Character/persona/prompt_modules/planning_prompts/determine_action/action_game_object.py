@@ -8,16 +8,18 @@ sys.path.append('../../../../')
 
 from LLM_Character.llm_api import LLM_API 
 import LLM_Character.persona.prompt_modules.prompt as p 
-
+from LLM_Character.persona.memory_structures.scratch import Scratch
+from LLM_Character.persona.memory_structures.spatial_memory import MemoryTree
 COUNTER_LIMIT = 5
 
-def _create_prompt_input(action_description:str, 
+def _create_prompt_input(scratch:Scratch, 
+                         s_mem:MemoryTree,
+                         action_description:str, 
                          act_sector:str, 
-                         act_arena:str, 
-                         persona): 
+                         act_arena:str): 
     # NOTE world < sectors < arenas < gameobjects
-    act_world = persona.scratch.get_curr_location()['world']
-    possible_go = persona.s_mem.get_str_accessible_arena_game_objects(act_world,
+    act_world = scratch.get_curr_location()['world']
+    possible_go = s_mem.get_str_accessible_arena_game_objects(act_world,
                                                                       act_sector, 
                                                                       act_arena)
 
@@ -50,19 +52,20 @@ def _get_valid_output(model, prompt, counter_limit):
             return _clean_up_response(output)
     return _get_fail_safe()
 
-def run_prompt_action_game_object(persona, 
-                             model:LLM_API, 
-                             action_description:str,
-                             action_sector:str,
-                             action_arena:str, 
-                             verbose=False):
-    prompt_template = "LLM_Character/persona/prompt_template/action_game_object.txt"
-    prompt_input = _create_prompt_input(action_description,action_sector,action_arena, persona)
+def run_prompt_action_game_object(scratch:Scratch,
+                                  s_mem: MemoryTree, 
+                                  model:LLM_API, 
+                                  action_description:str,
+                                  action_sector:str,
+                                  action_arena:str, 
+                                  verbose=False):
+    prompt_template = "LLM_Charact/persona/prompt_template/action_game_object.txt"
+    prompt_input = _create_prompt_input(scratch, s_mem, action_description, action_sector, action_arena)
     prompt = p.generate_prompt(prompt_input, prompt_template)
     output = _get_valid_output(model, prompt, COUNTER_LIMIT)
 
-    act_world = persona.scratch.get_curr_location()['world']
-    possible_go = persona.s_mem.get_str_accessible_arena_game_objects(act_world,
+    act_world = scratch.get_curr_location()['world']
+    possible_go = s_mem.get_str_accessible_arena_game_objects(act_world,
                                                                       action_sector, 
                                                                       action_arena)
     x = [i.strip() for i in possible_go.split(",")]

@@ -4,7 +4,7 @@ sys.path.append('../../../../')
 
 from LLM_Character.llm_api import LLM_API 
 import LLM_Character.persona.prompt_modules.prompt as p 
-
+from LLM_Character.persona.memory_structures.scratch import Scratch
 COUNTER_LIMIT = 5
 
 def _get_all_indices(curr_f_org_index:int, amount_activities:int):
@@ -45,16 +45,16 @@ def _get_curr_time_and_summary(time,
     summ_str = summ_str[:-2] + "."
     return summ_str, curr_time_range
 
-def _create_prompt_input(persona, task, duration): 
-    commonset = persona.scratch.get_str_iss()
-    firstname = persona.scratch.get_str_firstname()
-    fullname = persona.scratch.get_str_name()
-    time = persona.scratch.curr_time.strftime("%B %d, %Y")
+def _create_prompt_input(scratch:Scratch, task, duration): 
+    commonset = scratch.get_str_iss()
+    firstname = scratch.get_str_firstname()
+    fullname = scratch.get_str_name()
+    time = scratch.curr_time.strftime("%B %d, %Y")
 
-    f_daily_schedule = persona.scratch.get_f_daily_schedule_hourly_org() 
+    f_daily_schedule = scratch.get_f_daily_schedule_hourly_org() 
     amount_activities = len(f_daily_schedule)
 
-    curr_f_org_index = persona.scratch.get_f_daily_schedule_hourly_org_index()
+    curr_f_org_index = scratch.get_f_daily_schedule_hourly_org_index()
     all_indices = _get_all_indices(curr_f_org_index, amount_activities) 
     summ_str, curr_time_range = _get_curr_time_and_summary(time,
                                                            all_indices, 
@@ -136,22 +136,22 @@ def _get_fail_safe():
     fs = ["asleep"]
     return fs
 
-def _get_valid_output(persona, model, prompt, counter_limit):
+def _get_valid_output(model, prompt, counter_limit):
     for _ in range(counter_limit):
         output = model.query_text(prompt)
         if _validate_response(prompt, output):
             return _clean_up_response(prompt, output)
     return _get_fail_safe()
 
-def run_prompt_task_decomp(persona, 
+def run_prompt_task_decomp(scratch:Scratch, 
                              model:LLM_API, 
                              task,
                              duration,
                              verbose=False):
     prompt_template = "LLM_Character/persona/prompt_template/task_decomp.txt"
-    prompt_input = _create_prompt_input(persona, task, duration)
+    prompt_input = _create_prompt_input(scratch, task, duration)
     prompt = p.generate_prompt(prompt_input, prompt_template)
-    output = _get_valid_output(persona, model, prompt, COUNTER_LIMIT)
+    output = _get_valid_output(model, prompt, COUNTER_LIMIT)
 
     
     # FIXME: TRY TO REWRITE THIS JUNK AS WELL. 

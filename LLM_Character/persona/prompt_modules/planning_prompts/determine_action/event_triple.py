@@ -7,12 +7,11 @@ sys.path.append('../../../../')
 
 from LLM_Character.llm_api import LLM_API 
 import LLM_Character.persona.prompt_modules.prompt as p 
-
+from LLM_Character.persona.memory_structures.scratch import Scratch
 COUNTER_LIMIT = 5
 
-def _create_prompt_input(action_description:str, 
-                         persona): 
-    p_name = persona.scratch.get_str_name()
+def _create_prompt_input(scratch:Scratch, action_description:str): 
+    p_name = scratch.get_str_name()
 
     if "(" in action_description: 
       action_description = action_description.split("(")[-1].split(")")[0]
@@ -35,28 +34,28 @@ def _validate_response(response):
     except: return False
     return True 
 
-def _get_fail_safe(persona): 
-    p_name = persona.scratch.get_str_name()
+def _get_fail_safe(scratch:Scratch): 
+    p_name = scratch.get_str_name()
     fs = (p_name, "is", "idle")
     return fs
 
-def _get_valid_output(persona, model, prompt, counter_limit):
+def _get_valid_output(scratch:Scratch, model, prompt, counter_limit):
     for _ in range(counter_limit):
         output = model.query_text(prompt)
         if _validate_response(output):
             return _clean_up_response(output)
-    return _get_fail_safe(persona)
+    return _get_fail_safe(scratch)
 
-def run_prompt_event_triple(persona, 
+def run_prompt_event_triple(scratch:Scratch, 
                              model:LLM_API, 
                              action_description:str,
                              verbose=False):
     prompt_template = "LLM_Character/persona/prompt_template/generate_event_triple.txt"
-    prompt_input = _create_prompt_input(action_description, persona)
+    prompt_input = _create_prompt_input(scratch, action_description)
     prompt = p.generate_prompt(prompt_input, prompt_template)
-    output = _get_valid_output(persona, model, prompt, COUNTER_LIMIT)
+    output = _get_valid_output(scratch, model, prompt, COUNTER_LIMIT)
 
-    p_name = persona.scratch.get_str_name()
+    p_name = scratch.get_str_name()
     output = (p_name, output[0], output[1])
 
     return output, [output, prompt, prompt_input]

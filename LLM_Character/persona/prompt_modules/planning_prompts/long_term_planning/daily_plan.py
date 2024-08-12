@@ -6,16 +6,17 @@ import sys
 sys.path.append('../../../../')
 
 from LLM_Character.llm_api import LLM_API  
+from LLM_Character.persona.memory_structures.scratch import Scratch
 import LLM_Character.persona.prompt_modules.prompt as p 
 
 COUNTER_LIMIT = 5
 
-def _create_prompt_input(persona, wake_up_hour:int)-> list[str]:
+def _create_prompt_input(scratch:Scratch, wake_up_hour:int)-> list[str]:
     prompt_input = []
-    prompt_input += [persona.scratch.get_str_iss()]
-    prompt_input += [persona.scratch.get_str_lifestyle()]
-    prompt_input += [persona.scratch.get_str_curr_date_str()]
-    prompt_input += [persona.scratch.get_str_firstname()]
+    prompt_input += [scratch.get_str_iss()]
+    prompt_input += [scratch.get_str_lifestyle()]
+    prompt_input += [scratch.get_str_curr_date_str()]
+    prompt_input += [scratch.get_str_firstname()]
     prompt_input += [f"{str(wake_up_hour)}:00 am"]
     return prompt_input
 
@@ -53,9 +54,9 @@ def _get_valid_output(model, prompt, counter_limit):
             return _clean_up_response(output)
     return _get_fail_safe()
 
-def run_prompt_daily_plan(persona, wake_up_hour:int, model:LLM_API, verbose=False):
+def run_prompt_daily_plan(scratch:Scratch, wake_up_hour:int, model:LLM_API, verbose=False):
     prompt_template = "LLM_Character/persona/prompt_template/daily_planning.txt"
-    prompt_input = _create_prompt_input(persona, wake_up_hour)
+    prompt_input = _create_prompt_input(scratch, wake_up_hour)
     prompt = p.generate_prompt(prompt_input, prompt_template)
     output = _get_valid_output(model, prompt, COUNTER_LIMIT)
     output = ([f"wake up and complete the morning routine at {wake_up_hour}:00 am"] + output)

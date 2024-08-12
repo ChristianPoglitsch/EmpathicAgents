@@ -1,37 +1,38 @@
 import datetime
 import sys
 sys.path.append('../../')
-from LLM_Character.llm_api import LLM_API 
-from LLM_Character.persona.cognitive_modules.planning.long_term_planning import _long_term_planning 
-from LLM_Character.persona.cognitive_modules.planning.determine_action import _determine_action 
 
+from LLM_Character.persona.memory_structures.associative_memory import AssociativeMemory
+from LLM_Character.persona.memory_structures.scratch import Scratch
+
+from LLM_Character.llm_api import LLM_API 
 # FIXME: eerst conversation fixen en dan reflection, reflection laatste.
 
-def reflect(persona):
-  if reflection_trigger(persona): 
-    run_reflect(persona)
-    reset_reflection_counter(persona)
+def reflect(scratch: Scratch, a_mem: AssociativeMemory):
+  if reflection_trigger(scratch, a_mem): 
+    run_reflect(scratch, a_mem)
+    reset_reflection_counter(scratch, a_mem)
 
-  if persona.scratch.chatting_end_time: 
-    if persona.scratch.curr_time + datetime.timedelta(0,10) == persona.scratch.chatting_end_time: 
+  if scratch.chatting_end_time: 
+    if scratch.curr_time + datetime.timedelta(0,10) == scratch.chatting_end_time: 
       all_utt = ""
-      if persona.scratch.chat: 
-        for row in persona.scratch.chat:  
+      if scratch.chat: 
+        for row in scratch.chat:  
           all_utt += f"{row[0]}: {row[1]}\n"
 
-      evidence = [persona.a_mem.get_last_chat(persona.scratch.chatting_with).node_id]
+      evidence = [a_mem.get_last_chat(scratch.chatting_with).node_id]
 
       planning_thought = generate_planning_thought_on_convo(persona, all_utt)
-      planning_thought = f"For {persona.scratch.name}'s planning: {planning_thought}"
+      planning_thought = f"For {scratch.name}'s planning: {planning_thought}"
 
-      created = persona.scratch.curr_time
-      expiration = persona.scratch.curr_time + datetime.timedelta(days=30)
+      created = scratch.curr_time
+      expiration = scratch.curr_time + datetime.timedelta(days=30)
       s, p, o = generate_action_event_triple(planning_thought, persona)
       keywords = set([s, p, o])
       thought_poignancy = generate_poig_score(persona, "thought", planning_thought)
       thought_embedding_pair = (planning_thought, get_embedding(planning_thought))
 
-      persona.a_mem.add_thought(created, expiration, s, p, o, 
+      a_mem.add_thought(created, expiration, s, p, o, 
                                 planning_thought, keywords, thought_poignancy, 
                                 thought_embedding_pair, evidence)
 
@@ -39,32 +40,32 @@ def reflect(persona):
       # FIXME: also important, but why not include iss in
       # prompt or something about persona? 
       memo_thought = generate_memo_on_convo(persona, all_utt)
-      memo_thought = f"{persona.scratch.name} {memo_thought}"
+      memo_thought = f"{scratch.name} {memo_thought}"
 
-      created = persona.scratch.curr_time
-      expiration = persona.scratch.curr_time + datetime.timedelta(days=30)
+      created = scratch.curr_time
+      expiration = scratch.curr_time + datetime.timedelta(days=30)
       s, p, o = generate_action_event_triple(memo_thought, persona)
       keywords = set([s, p, o])
       thought_poignancy = generate_poig_score(persona, "thought", memo_thought)
       thought_embedding_pair = (memo_thought, get_embedding(memo_thought))
 
-      persona.a_mem.add_thought(created, expiration, s, p, o, 
+      a_mem.add_thought(created, expiration, s, p, o, 
                                 memo_thought, keywords, thought_poignancy, 
                                 thought_embedding_pair, evidence)
 
 
 
-def reflection_trigger(persona): 
-  print (persona.scratch.name, "persona.scratch.importance_trigger_curr::", persona.scratch.importance_trigger_curr)
-  print (persona.scratch.importance_trigger_max)
+def reflection_trigger(scratch:Scratch , a_mem:AssociativeMemory): 
+  print (scratch.name, "persona.scratch.importance_trigger_curr::", scratch.importance_trigger_curr)
+  print (scratch.importance_trigger_max)
 
-  if (persona.scratch.importance_trigger_curr <= 0 and 
-      [] != persona.a_mem.seq_event + persona.a_mem.seq_thought): 
+  if (scratch.importance_trigger_curr <= 0 and 
+      [] != a_mem.seq_event + a_mem.seq_thought): 
     return True 
   return False
 
 
-def run_reflect(persona):
+def run_reflect(scratch:Scratch, a_mem:AssociativeMemory):
   # Reflection requires certain focal points. Generate that first. 
   focal_points = generate_focal_points(persona, 3)
   # Retrieve the relevant Nodes object for each of the focal points. 
@@ -79,22 +80,22 @@ def run_reflect(persona):
 
     thoughts = generate_insights_and_evidence(persona, nodes, 5)
     for thought, evidence in thoughts.items(): 
-      created = persona.scratch.curr_time
-      expiration = persona.scratch.curr_time + datetime.timedelta(days=30)
+      created = scratch.curr_time
+      expiration = scratch.curr_time + datetime.timedelta(days=30)
       s, p, o = generate_action_event_triple(thought, persona)
       keywords = set([s, p, o])
       thought_poignancy = generate_poig_score(persona, "thought", thought)
       thought_embedding_pair = (thought, get_embedding(thought))
 
-      persona.a_mem.add_thought(created, expiration, s, p, o, 
+      a_mem.add_thought(created, expiration, s, p, o, 
                                 thought, keywords, thought_poignancy, 
                                 thought_embedding_pair, evidence)
 
 
-def reset_reflection_counter(persona): 
-  persona_imt_max = persona.scratch.importance_trigger_max
-  persona.scratch.importance_trigger_curr = persona_imt_max
-  persona.scratch.importance_ele_n = 0
+def reset_reflection_counter(scratch, a_mem): 
+  persona_imt_max = scratch.importance_trigger_max
+  scratch.importance_trigger_curr = persona_imt_max
+  scratch.importance_ele_n = 0
 
 def generate_planning_thought_on_convo(persona, all_utt):
   return run_prompt_planning_thought_on_convo(persona, all_utt)[0]

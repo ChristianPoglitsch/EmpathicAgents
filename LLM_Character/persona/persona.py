@@ -35,10 +35,10 @@ class Persona:
     self.scratch.save(f_scratch)
 
   def plan(self, new_day, model):
-    return plan(self, new_day, model)
+    return plan(self.scratch, new_day, model)
 
   def reflect(self):
-    reflect(self)
+    reflect(self.scratch)
 
   def move(self, personas, curr_location, curr_time):
     self.scratch.curr_location = curr_location

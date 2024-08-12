@@ -7,22 +7,24 @@ sys.path.append('../../../../')
 
 from LLM_Character.llm_api import LLM_API 
 import LLM_Character.persona.prompt_modules.prompt as p 
-
+from LLM_Character.persona.memory_structures.scratch import Scratch
+from LLM_Character.persona.memory_structures.associative_memory import AssociativeMemory
+from LLM_Character.persona.memory_structures.spatial_memory import MemoryTree
 COUNTER_LIMIT = 5
 
-def _create_prompt_input(action_description:str, persona): 
+def _create_prompt_input(scratch:Scratch, s_mem:MemoryTree, action_description:str): 
    
-    act_world = persona.scratch.get_curr_location()['world']
-    act_sector = persona.scratch.get_curr_location()['sector']
-    liv_sector = persona.scratch.get_living_area()['sector']
-    name = persona.scratch.get_str_name()
+    act_world = scratch.get_curr_location()['world']
+    act_sector = scratch.get_curr_location()['sector']
+    liv_sector = scratch.get_living_area()['sector']
+    name = scratch.get_str_name()
    
     # NOTE world < sectors < arenas < gameobjects
-    possible_arenas1 = persona.s_mem.get_str_accessible_sector_arenas(act_world, liv_sector)
-    possible_arenas2 = persona.s_mem.get_str_accessible_sector_arenas(act_world, act_sector)
-    possible_sectors = persona.s_mem.get_str_accessible_sectors(act_world)
+    possible_arenas1 = s_mem.get_str_accessible_sector_arenas(act_world, liv_sector)
+    possible_arenas2 = s_mem.get_str_accessible_sector_arenas(act_world, act_sector)
+    possible_sectors = s_mem.get_str_accessible_sectors(act_world)
     
-    daily_plan = persona.scratch.get_str_daily_plan_req() 
+    daily_plan = scratch.get_str_daily_plan_req() 
     action_description_1, action_description_2 = _decomp_action_desc(action_description)
     
     prompt_input = []
@@ -75,16 +77,16 @@ def _get_valid_output(model, prompt, counter_limit):
             return _clean_up_response(output)
     return _get_fail_safe()
 
-def run_prompt_action_sector(persona, model:LLM_API, action_description:str, verbose=False):
+def run_prompt_action_sector(scratch:Scratch, s_mem:MemoryTree , model:LLM_API, action_description:str, verbose=False):
     prompt_template = "LLM_Character/persona/prompt_template/action_sector.txt"
-    prompt_input = _create_prompt_input(action_description, persona)
+    prompt_input = _create_prompt_input(scratch, s_mem, action_description)
     prompt = p.generate_prompt(prompt_input, prompt_template)
     output = _get_valid_output(model, prompt, COUNTER_LIMIT)
 
-    y = persona.scratch.curr_location['world']
-    x = [i.strip() for i in persona.s_mem.get_str_accessible_sectors(y).split(",")]
+    y = scratch.curr_location['world']
+    x = [i.strip() for i in s_mem.get_str_accessible_sectors(y).split(",")]
     if output not in x: 
-        output = persona.scratch.get_living_area()['sector']
+        output = scratch.get_living_area()['sector']
 
     return output, [output, prompt, prompt_input]
 

@@ -3,54 +3,56 @@ import sys
 sys.path.append('../../../')
 
 from LLM_Character.llm_api import LLM_API 
+from LLM_Character.persona.memory_structures.scratch import Scratch
+from LLM_Character.persona.memory_structures.spatial_memory import MemoryTree
 from LLM_Character.persona.prompt_modules.planning_prompts.determine_action.task_decomp import run_prompt_task_decomp
 from LLM_Character.persona.prompt_modules.planning_prompts.determine_action.event_triple import run_prompt_event_triple
 from LLM_Character.persona.prompt_modules.planning_prompts.determine_action.action_sector import run_prompt_action_sector
 from LLM_Character.persona.prompt_modules.planning_prompts.determine_action.action_arena import run_prompt_action_arena
 from LLM_Character.persona.prompt_modules.planning_prompts.determine_action.action_game_object import run_prompt_action_game_object
 
-def _determine_action(persona): 
-  curr_index = persona.scratch.get_f_daily_schedule_index()
-  curr_index_60 = persona.scratch.get_f_daily_schedule_index(advance=60)
+def _determine_action(scratch:Scratch, s_mem:MemoryTree, model:LLM_API): 
+  curr_index = scratch.get_f_daily_schedule_index()
+  curr_index_60 = scratch.get_f_daily_schedule_index(advance=60)
 
   if curr_index == 0:
-    act_desp, act_dura = persona.scratch.f_daily_schedule[curr_index]
+    act_desp, act_dura = scratch.f_daily_schedule[curr_index]
     if act_dura >= 60: 
       if determine_decomp(act_desp, act_dura): 
-        persona.scratch.f_daily_schedule[curr_index:curr_index+1] = (
-          generate_task_decomp(persona, act_desp, act_dura))
+        scratch.f_daily_schedule[curr_index:curr_index+1] = (
+          generate_task_decomp(scratch, model, act_desp, act_dura))
 
-    if curr_index_60 + 1 < len(persona.scratch.f_daily_schedule):
-      act_desp, act_dura = persona.scratch.f_daily_schedule[curr_index_60+1]
+    if curr_index_60 + 1 < len(scratch.f_daily_schedule):
+      act_desp, act_dura = scratch.f_daily_schedule[curr_index_60+1]
       if act_dura >= 60: 
         if determine_decomp(act_desp, act_dura): 
-          persona.scratch.f_daily_schedule[curr_index_60+1:curr_index_60+2] = (
-            generate_task_decomp(persona, act_desp, act_dura))
+          scratch.f_daily_schedule[curr_index_60+1:curr_index_60+2] = (
+            generate_task_decomp(scratch, model, act_desp, act_dura))
 
-  if curr_index_60 < len(persona.scratch.f_daily_schedule):
-    if persona.scratch.curr_time.hour < 23:
-      act_desp, act_dura = persona.scratch.f_daily_schedule[curr_index_60]
+  if curr_index_60 < len(scratch.f_daily_schedule):
+    if scratch.curr_time.hour < 23:
+      act_desp, act_dura = scratch.f_daily_schedule[curr_index_60]
       if act_dura >= 60: 
         if determine_decomp(act_desp, act_dura): 
-          persona.scratch.f_daily_schedule[curr_index_60:curr_index_60+1] = (
-                              generate_task_decomp(persona, act_desp, act_dura))
+          scratch.f_daily_schedule[curr_index_60:curr_index_60+1] = (
+                              generate_task_decomp(scratch, model, act_desp, act_dura))
 
-  act_desp, act_dura = persona.scratch.f_daily_schedule[curr_index] 
+  act_desp, act_dura = scratch.f_daily_schedule[curr_index] 
 
   # FIXME: curr_location in persona needs to convert from using coordinates, to actually storing the dictionary as above. 
-  act_world = persona.scratch.curr_location["world"]
-  act_sector = persona.scratch.curr_tile["sector"]
-  act_sector = generate_action_sector(act_desp, persona)
+  act_world = scratch.curr_location["world"]
+  act_sector = scratch.curr_tile["sector"]
+  act_sector = generate_action_sector(scratch, s_mem, model, act_desp)
 
-  act_arena = generate_action_arena(act_desp, persona, act_world, act_sector)
+  act_arena = generate_action_arena(scratch, s_mem, model, act_desp, act_world, act_sector)
   act_address = f"{act_world}:{act_sector}:{act_arena}"
   
-  act_game_object = generate_action_game_object(act_desp, act_address, persona)
+  act_game_object = generate_action_game_object(scratch, s_mem, model, act_desp, act_address)
   new_address = f"{act_world}:{act_sector}:{act_arena}:{act_game_object}"
   
-  act_event = generate_action_event_triple(act_desp, persona)
+  act_event = generate_action_event_triple(scratch, act_desp)
 
-  persona.scratch.add_new_action(new_address, 
+  scratch.add_new_action(new_address, 
                                  int(act_dura), 
                                  act_desp, 
                                  act_event,
@@ -69,22 +71,22 @@ def determine_decomp(act_desp, act_dura):
       return False
   return True
 
-def generate_task_decomp(persona, task, duration): 
-  return run_prompt_task_decomp(persona, task, duration)[0]
+def generate_task_decomp(scratch:Scratch,  model:LLM_API, task, duration): 
+  return run_prompt_task_decomp(scratch, model, task, duration)[0]
 
-def generate_action_sector(act_desp, persona): 
-  return run_prompt_action_sector(act_desp, persona)[0]
+def generate_action_sector(scratch:Scratch, s_mem:MemoryTree,  model:LLM_API, act_desp:str): 
+  return run_prompt_action_sector(scratch, s_mem, model, act_desp)[0]
 
-def generate_action_arena(act_desp, persona, act_world, act_sector): 
-  return run_prompt_action_arena(act_desp, persona, act_world, act_sector)[0]
+def generate_action_arena(scratch:Scratch, s_mem:MemoryTree,  model:LLM_API, act_desp:str, act_world:str, act_sector:str): 
+  return run_prompt_action_arena(scratch, s_mem,act_desp, model, act_world, act_sector)[0]
 
-def generate_action_game_object(act_desp, act_address, persona):
-  if not persona.s_mem.get_str_accessible_arena_game_objects(act_address): 
+def generate_action_game_object(scratch:Scratch, s_mem:MemoryTree, model:LLM_API, act_desp:str, act_world:str, act_sector:str, act_arena:str):
+  if not s_mem.get_str_accessible_arena_game_objects(act_world, act_sector, act_arena): 
     return "<random>"
-  return run_prompt_action_game_object(act_desp, persona, act_address)[0]
+  return run_prompt_action_game_object(scratch, s_mem, model, act_desp, act_world, act_sector, act_arena)[0]
 
-def generate_action_event_triple(act_desp, persona): 
-  return run_prompt_event_triple(act_desp, persona)[0]
+def generate_action_event_triple(scratch:Scratch, act_desp:str): 
+  return run_prompt_event_triple(scratch, act_desp)[0]
 
 if __name__ == "__main__":
   from persona import Persona
