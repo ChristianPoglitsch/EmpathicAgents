@@ -18,7 +18,7 @@ class PromptDispatcher(BaseDispatcher) :
     persona_message = data.data.message
     persona_name = data.data.persona_name
     persona_name = "Camila"
-    server.prompt_processor(pesona_name)
+    server.prompt_processor(persona_name)
 
     # send response back if needed.
     socket.SendData("nice") 

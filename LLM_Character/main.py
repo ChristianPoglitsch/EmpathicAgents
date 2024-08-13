@@ -15,14 +15,12 @@ def start_server(sock:UdpComms,
                  model:LLM_API):
 
     while True:
-        print("we be listening chat")
-        print("drop W in chat gang")
         time.sleep(1)
         byte_data = sock.ReadReceivedData()
         if not byte_data:
             continue  
 
-        value = dispatcher.validate_data(byte_data)
+        value = dispatcher.validate_data(str(byte_data))
         if value is None:
             continue
 

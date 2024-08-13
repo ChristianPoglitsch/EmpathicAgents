@@ -1,5 +1,8 @@
 """ Short term memory """
 
+import sys
+sys.path.append('../../')
+
 from datetime import datetime
 class Scratch: 
     def __init__(self, name, f_saved): 

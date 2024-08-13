@@ -1,37 +1,9 @@
 import json
+import sys
+sys.path.append('../../../')
 
-
-class ConceptNode: 
-  def __init__(self,
-               node_id, node_count, type_count, node_type, depth,
-               created, expiration, 
-               s, p, o, 
-               description, embedding_key, poignancy, keywords, filling): 
-    self.node_id = node_id
-    self.node_count = node_count
-    self.type_count = type_count
-    self.type = node_type # thought / chat
-    self.depth = depth
-
-    self.created = created
-    self.expiration = expiration
-    self.last_accessed = self.created
-
-    self.subject = s
-    self.predicate = p
-    self.object = o
-
-    self.description = description
-    self.embedding_key = embedding_key
-    self.poignancy = poignancy
-    self.keywords = keywords
-    self.filling = filling
-
-
-def spo_summary(self): 
-  return (self.subject, self.predicate, self.object)
-
-
+from LLM_Character.persona.memory_structures.concept_node import ConceptNode
+#FIXME: kzat hier deze hier proberen te saven naar disk gegeven data uit unity...
 class AssociativeMemory: 
   def __init__(self, f_saved:str): 
     self.id_to_node:dict[str, ConceptNode]= dict()
@@ -93,7 +65,7 @@ class AssociativeMemory:
 
   def add_chat(self, created, expiration, s, p, o, 
                      description, keywords, poignancy, 
-                     embedding_pair, filling) -> None: 
+                     embedding_pair, filling) : 
     # Setting up the node ID and counts.
     node_count = len(self.id_to_node.keys()) + 1
     type_count = len(self.seq_chat) + 1
