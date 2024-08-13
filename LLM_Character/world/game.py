@@ -7,7 +7,7 @@ sys.path.append('../../')
 from LLM_Character.persona.persona import Persona
 from LLM_Character.llm_api import LLM_API 
 from LLM_Character.util import copyanything
-from LLM_Character.world.validation_dataclass import LocationData, SetupData 
+from LLM_Character.world.validation_dataclass import OneLocationData, SetupData 
 
 # TODO move this variable to env file. 
 FS_STORAGE = "storage"
@@ -107,7 +107,7 @@ class ReverieServer:
 
 
 
-  def update_processor(self, curr_location:dict[str, LocationData]):
+  def update_processor(self, curr_location:dict[str, OneLocationData]):
     sim_folder = f"{FS_STORAGE}/{self.sim_code}"
 
     movements = { "persona": dict(), 

@@ -36,36 +36,19 @@ class LocationData(BaseModel):
 
 class OneLocationData(BaseModel):
     world: str 
-    sectors: list[Sector] 
+    sectors: Sector 
 
     @field_validator('sectors')
     def check_current_location(cls, value):
-        if len(value) != 1:
-            raise ValueError('current location must contain exactly one sector.')
-        sector = next(iter(value))
-        sector_arenas = sector.arenas
-        if sector_arenas is None or len(sector_arenas) != 1:
-            raise ValueError('sector in current location must contain exactly one arena.')
-        return value
-
-class LocationOfCharacterData(BaseModel):
-    character_name:list[str]
-    current_location: OneLocationData
-
-    @field_validator('current_location')
-    def check_current_location(cls, value):
-        sectors = value.sectors
-        if len(sectors) != 1:
-            raise ValueError('current location must contain exactly one sector.')
-        sector = next(iter(sectors.values()))
-        sector_arenas = sector.arenas
+        sector_arenas = value.arenas
         if sector_arenas is None or len(sector_arenas) != 1:
             raise ValueError('sector in current location must contain exactly one arena.')
         return value
 
 class UpdateMessage(BaseMessage):
     type: str
-    data:list[LocationOfCharacterData]
+    # dict of persona names and their location
+    data:  dict[str, OneLocationData]
 
 
 # ---------------------------------------------------------------------------
@@ -153,7 +136,8 @@ class SetupData(BaseModel):
     meta:MetaData
     personas: dict[str, PersonaData]
     # NOTE: this extra field represent the entire possible virtual world (which can be moddeled after real places), it represent
-    # the maze class that is in the original generative agent paper. 
+    # the maze class that is in the original generative agent paper.
+    # is not needed now, untill we decide to include perceiving into the agent.  
     virtual_world: LocationData
 
 class SetupMessage(BaseMessage):
