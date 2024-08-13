@@ -1,9 +1,13 @@
 """ Short term memory """
 
 import sys
+import datetime
+import json
 sys.path.append('../../')
 
-from datetime import datetime
+from LLM_Character.world.validation_dataclass import  ScratchData
+from LLM_Character.util import check_if_file_exists
+
 class Scratch: 
     def __init__(self, name, f_saved): 
       # PERSONA HYPERPARAMETERS
@@ -41,10 +45,186 @@ class Scratch:
       self.act_description = None
       self.act_event = (self.name, None, None)
 
+      if check_if_file_exists(f_saved): 
+            # If we have a bootstrap file, load that here. 
+            scratch_load = json.load(open(f_saved))
+
+            if scratch_load["curr_time"]: 
+              self.curr_time = datetime.datetime.strptime(scratch_load["curr_time"],
+                                                        "%B %d, %Y, %H:%M:%S")
+            else: 
+              self.curr_time = None
+            self.curr_location = scratch_load["curr_location"]
+            self.daily_plan_req = scratch_load["daily_plan_req"]
+
+            self.name = scratch_load["name"]
+            self.first_name = scratch_load["first_name"]
+            self.last_name = scratch_load["last_name"]
+            self.age = scratch_load["age"]
+            self.innate = scratch_load["innate"]
+            self.learned = scratch_load["learned"]
+            self.currently = scratch_load["currently"]
+            self.lifestyle = scratch_load["lifestyle"]
+            self.living_area = scratch_load["living_area"]
+
+            # NOTE maybe needed, dont know yet where it they are used; 
+            # self.concept_forget = scratch_load["concept_forget"]
+            # self.daily_reflection_time = scratch_load["daily_reflection_time"]
+            # self.daily_reflection_size = scratch_load["daily_reflection_size"]
+            # self.overlap_reflect_th = scratch_load["overlap_reflect_th"]
+            # self.kw_strg_event_reflect_th = scratch_load["kw_strg_event_reflect_th"]
+            # self.kw_strg_thought_reflect_th = scratch_load["kw_strg_thought_reflect_th"]
+
+            self.recency_w = scratch_load["recency_w"]
+            self.relevance_w = scratch_load["relevance_w"]
+            self.importance_w = scratch_load["importance_w"]
+            self.recency_decay = scratch_load["recency_decay"]
+            # self.importance_trigger_max = scratch_load["importance_trigger_max"]
+            # self.importance_trigger_curr = scratch_load["importance_trigger_curr"]
+            # self.importance_ele_n = scratch_load["importance_ele_n"]
+            # self.thought_count = scratch_load["thought_count"]
+
+            self.daily_req = scratch_load["daily_req"]
+            self.f_daily_schedule = scratch_load["f_daily_schedule"]
+            self.f_daily_schedule_hourly_org = scratch_load["f_daily_schedule_hourly_org"]
+
+            self.act_address = scratch_load["act_address"]
+            if scratch_load["act_start_time"]: 
+              self.act_start_time = datetime.datetime.strptime(
+                                                    scratch_load["act_start_time"],
+                                                    "%B %d, %Y, %H:%M:%S")
+            else: 
+              self.curr_time = None
+            self.act_duration = scratch_load["act_duration"]
+            self.act_description = scratch_load["act_description"]
+            # NOTE ik denk niet dat dit hetzelfde is als een event uit Associative memory, klopt dit? idk, check
+            # wnr dit intialised is, als in perceived, dan nu allesinds niet nodig. 
+            self.act_event = tuple(scratch_load["act_event"])
+
+            # self.chatting_with = scratch_load["chatting_with"]
+            # self.chat = scratch_load["chat"]
+            # self.chatting_with_buffer = scratch_load["chatting_with_buffer"]
+            # if scratch_load["chatting_end_time"]: 
+            #   self.chatting_end_time = datetime.datetime.strptime(
+            #                                       scratch_load["chatting_end_time"],
+            #                                       "%B %d, %Y, %H:%M:%S")
+            # else:
+            #   self.chatting_end_time = None
+
+    @staticmethod
+    def save_as(f_saved:str, data:ScratchData):
+      scratch = dict() 
+      scratch["curr_time"] = data.curr_time.strftime("%B %d, %Y, %H:%M:%S")
+      scratch["curr_location"] = data.curr_location
+      scratch["daily_plan_req"] = data.daily_plan_req
+
+      scratch["name"] = data.name
+      scratch["first_name"] = data.first_name
+      scratch["last_name"] = data.last_name
+      scratch["age"] = data.age
+      scratch["innate"] = data.innate
+      scratch["learned"] = data.learned
+      scratch["currently"] = data.currently
+      scratch["lifestyle"] = data.lifestyle
+      scratch["living_area"] = data.living_area
+
+      # scratch["concept_forget"] = data.concept_forget
+      # scratch["daily_reflection_time"] = data.daily_reflection_time
+      # scratch["daily_reflection_size"] = data.daily_reflection_size
+      # scratch["overlap_reflect_th"] = data.overlap_reflect_th
+      # scratch["kw_strg_event_reflect_th"] = data.kw_strg_event_reflect_th
+      # scratch["kw_strg_thought_reflect_th"] = data.kw_strg_thought_reflect_th
+
+      scratch["recency_w"] = data.recency_w
+      scratch["relevance_w"] = data.relevance_w
+      scratch["importance_w"] = data.importance_w
+      scratch["recency_decay"] = data.recency_decay
+      scratch["importance_trigger_max"] = data.importance_trigger_max
+      scratch["importance_trigger_curr"] = data.importance_trigger_curr
+      scratch["importance_ele_n"] = data.importance_ele_n
+      scratch["thought_count"] = data.thought_count
+
+      scratch["daily_req"] = data.daily_req
+      scratch["f_daily_schedule"] = data.f_daily_schedule
+      scratch["f_daily_schedule_hourly_org"] = data.f_daily_schedule_hourly_org
+
+      scratch["act_address"] = data.act_address
+      scratch["act_start_time"] = (data.act_start_time
+                                      .strftime("%B %d, %Y, %H:%M:%S"))
+      scratch["act_duration"] = data.act_duration
+      scratch["act_description"] = data.act_description
+      scratch["act_event"] = data.act_event
+
+      scratch["chatting_with"] = data.chatting_with
+      scratch["chat"] = data.chat
+      scratch["chatting_with_buffer"] = data.chatting_with_buffer
+      if data.chatting_end_time: 
+        scratch["chatting_end_time"] = (data.chatting_end_time
+                                          .strftime("%B %d, %Y, %H:%M:%S"))
+      else: 
+        scratch["chatting_end_time"] = None
+
+      with open(f_saved, "w") as outfile:
+        json.dump(scratch, outfile, indent=2)     
 
 
+
+    def save(self, out_json):
+      scratch = dict() 
+      scratch["curr_time"] = self.curr_time.strftime("%B %d, %Y, %H:%M:%S")
+      scratch["curr_location"] = self.curr_location
+      scratch["daily_plan_req"] = self.daily_plan_req
+
+      scratch["name"] = self.name
+      scratch["first_name"] = self.first_name
+      scratch["last_name"] = self.last_name
+      scratch["age"] = self.age
+      scratch["innate"] = self.innate
+      scratch["learned"] = self.learned
+      scratch["currently"] = self.currently
+      scratch["lifestyle"] = self.lifestyle
+      scratch["living_area"] = self.living_area
+
+      # scratch["concept_forget"] = self.concept_forget
+      # scratch["daily_reflection_time"] = self.daily_reflection_time
+      # scratch["daily_reflection_size"] = self.daily_reflection_size
+      # scratch["overlap_reflect_th"] = self.overlap_reflect_th
+      # scratch["kw_strg_event_reflect_th"] = self.kw_strg_event_reflect_th
+      # scratch["kw_strg_thought_reflect_th"] = self.kw_strg_thought_reflect_th
+
+      scratch["recency_w"] = self.recency_w
+      scratch["relevance_w"] = self.relevance_w
+      scratch["importance_w"] = self.importance_w
+      scratch["recency_decay"] = self.recency_decay
+      scratch["importance_trigger_max"] = self.importance_trigger_max
+      scratch["importance_trigger_curr"] = self.importance_trigger_curr
+      scratch["importance_ele_n"] = self.importance_ele_n
+      scratch["thought_count"] = self.thought_count
+
+      scratch["daily_req"] = self.daily_req
+      scratch["f_daily_schedule"] = self.f_daily_schedule
+      scratch["f_daily_schedule_hourly_org"] = self.f_daily_schedule_hourly_org
+
+      scratch["act_address"] = self.act_address
+      scratch["act_start_time"] = (self.act_start_time
+                                      .strftime("%B %d, %Y, %H:%M:%S"))
+      scratch["act_duration"] = self.act_duration
+      scratch["act_description"] = self.act_description
+      scratch["act_event"] = self.act_event
+
+      scratch["chatting_with"] = self.chatting_with
+      scratch["chat"] = self.chat
+      scratch["chatting_with_buffer"] = self.chatting_with_buffer
+      if self.chatting_end_time: 
+        scratch["chatting_end_time"] = (self.chatting_end_time
+                                          .strftime("%B %d, %Y, %H:%M:%S"))
+      else: 
+        scratch["chatting_end_time"] = None
+
+      with open(out_json, "w") as outfile:
+        json.dump(scratch, outfile, indent=2) 
+    
     # --- SETTERS -----
-
     def add_new_action(self, 
                        action_address, 
                        action_duration,
@@ -87,44 +267,34 @@ class Scratch:
       return False
 
     # --- GETTERS -----
-    def get_str_curr_date_str(self) -> str:
-      return ""
+    # TODO delete the getters that you dont need. 
 
-    def get_str_iss(self) -> str:
-      return "" 
+    def get_f_daily_schedule_hourly_org(self, advance=0):
+      # We first calculate teh number of minutes elapsed today. 
+      today_min_elapsed = 0
+      today_min_elapsed += self.curr_time.hour * 60
+      today_min_elapsed += self.curr_time.minute
+      today_min_elapsed += advance
 
-    def get_str_lifestyle(self) -> str:
-      return ""
+      x = 0
+      for task, duration in self.f_daily_schedule: 
+        x += duration
+      x = 0
+      for task, duration in self.f_daily_schedule_hourly_org: 
+        x += duration
 
-    def get_str_firstname(self) -> str: 
-      return ""
+      # We then calculate the current index based on that. 
+      curr_index = 0
+      elapsed = 0
+      for task, duration in self.f_daily_schedule: 
+        elapsed += duration
+        if elapsed > today_min_elapsed: 
+          return curr_index
+        curr_index += 1
 
-    def get_curr_location(self):
-      return {}
-
-    def get_living_area(self):
-      return {}
-
-    def get_str_name(self) -> str:
-      return ""
-
-    def get_str_daily_plan_req(self) -> str: 
-      return ""
-
-    def get_f_daily_schedule_hourly_org(self):
-      return self.f_daily_schedule_hourly_org[:]
+      return curr_index
 
     def get_f_daily_schedule_hourly_org_index(self, advance=0):
-      """
-      We get the current index of self.f_daily_schedule_hourly_org. 
-      It is otherwise the same as get_f_daily_schedule_index. 
-
-      INPUT
-        advance: Integer value of the number minutes we want to look into the 
-                 future. This allows us to get the index of a future timeframe.
-      OUTPUT 
-        an integer value for the current index of f_daily_schedule.
-      """
       # We first calculate teh number of minutes elapsed today. 
       today_min_elapsed = 0
       today_min_elapsed += self.curr_time.hour * 60
@@ -139,3 +309,103 @@ class Scratch:
           return curr_index
         curr_index += 1
       return curr_index
+    def get_str_curr_date_str(self) -> str:
+      return ""
+
+    def get_str_iss(self) -> str:
+      commonset = ""
+      commonset += f"Name: {self.name}\n"
+      commonset += f"Age: {self.age}\n"
+      commonset += f"Innate traits: {self.innate}\n"
+      commonset += f"Learned traits: {self.learned}\n"
+      commonset += f"Currently: {self.currently}\n"
+      commonset += f"Lifestyle: {self.lifestyle}\n"
+      commonset += f"Daily plan requirement: {self.daily_plan_req}\n"
+      commonset += f"Current Date: {self.curr_time.strftime('%A %B %d')}\n"
+      return commonset
+
+    def get_str_name(self): 
+      return self.name
+
+
+    def get_str_firstname(self): 
+      return self.first_name
+
+
+    def get_str_lastname(self): 
+      return self.last_name
+
+
+    def get_str_age(self): 
+      return str(self.age)
+
+
+    def get_str_innate(self): 
+      return self.innate
+
+
+    def get_str_learned(self): 
+      return self.learned
+
+
+    def get_str_currently(self): 
+      return self.currently
+
+
+    def get_str_lifestyle(self): 
+      return self.lifestyle
+
+
+    def get_str_daily_plan_req(self): 
+      return self.daily_plan_req
+
+
+    def get_str_curr_date_str(self): 
+      return self.curr_time.strftime("%A %B %d")
+
+
+    def get_curr_event(self):
+      if not self.act_address: 
+        return (self.name, None, None)
+      else: 
+        return self.act_event
+
+
+    def get_curr_event_and_desc(self): 
+      if not self.act_address: 
+        return (self.name, None, None, None)
+      else: 
+        return (self.act_event[0], 
+                self.act_event[1], 
+                self.act_event[2],
+                self.act_description)
+
+    def act_summary_str(self):
+      start_datetime_str = self.act_start_time.strftime("%A %B %d -- %H:%M %p")
+      ret = f"[{start_datetime_str}]\n"
+      ret += f"Activity: {self.name} is {self.act_description}\n"
+      ret += f"Address: {self.act_address}\n"
+      ret += f"Duration in minutes (e.g., x min): {str(self.act_duration)} min\n"
+      return ret
+
+
+    def get_str_daily_schedule_summary(self): 
+      ret = ""
+      curr_min_sum = 0
+      for row in self.f_daily_schedule: 
+        curr_min_sum += row[1]
+        hour = int(curr_min_sum/60)
+        minute = curr_min_sum%60
+        ret += f"{hour:02}:{minute:02} || {row[0]}\n"
+      return ret
+
+
+    def get_str_daily_schedule_hourly_org_summary(self): 
+      ret = ""
+      curr_min_sum = 0
+      for row in self.f_daily_schedule_hourly_org: 
+        curr_min_sum += row[1]
+        hour = int(curr_min_sum/60)
+        minute = curr_min_sum%60
+        ret += f"{hour:02}:{minute:02} || {row[0]}\n"
+      return ret

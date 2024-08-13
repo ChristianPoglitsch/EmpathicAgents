@@ -11,7 +11,7 @@ from LLM_Character.world.game import ReverieServer
 # maybe this handler calls a function once again from reverieServer???
 # OR dispatcher in reverieserver gives an instance of itself as argument. nah  
 
-class SystemDispatcher(BaseDispatcher):
+class UpdateDispatcher(BaseDispatcher):
     def handler(self, data:SystemMessage, server:ReverieServer):
         #     # TODO normally, you click on the unity character. so person_name should be provided in the byte_data message.
         #     # but we will hardcode it for now.

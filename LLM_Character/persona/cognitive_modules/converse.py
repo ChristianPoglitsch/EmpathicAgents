@@ -27,7 +27,7 @@ from LLM_Character.messages_dataclass import AIMessages
 # curr_convo.add_message_role(message, "user")
 # curr_convo.add_message_role(next_line, persona.scratch.name)
 
-def open_convo_session(user_persona, character_persona, message:str,  model:LLM_API): 
+def open_convo_session(user_persona, character_persona, message:str,  model:LLM_API) -> str: 
 
   # generate_convo(maze, init_persona, target_persona)
   curr_loc = user_persona.scratch.curr_location

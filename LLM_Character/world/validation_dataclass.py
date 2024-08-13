@@ -110,15 +110,12 @@ class ScratchData(BaseModel):
     chatting_with_buffer: dict
     chatting_end_time: str 
 
-class EmbeddingData(BaseModel):
-    embedding_key: str
-    embedding_vector: list[float]
-
 class KwStrengthData(BaseModel):
     kw_strength_event: dict[str, int]
     kw_strength_thought: dict[str, int]
 
 class Node(BaseModel):
+    node_id: int
     node_count: int
     type_count: int
     type: str
@@ -135,9 +132,9 @@ class Node(BaseModel):
     filling: list[str]
 
 class AssociativeMemoryData(BaseModel):
-    embeddings: list[EmbeddingData]
+    embeddings: dict[str, list[float]]
     kw_strenght: KwStrengthData
-    nodes: dict[str, Node] 
+    nodes: dict[str, Node]
 
 class PersonaData(BaseModel):
     scratch_data:ScratchData

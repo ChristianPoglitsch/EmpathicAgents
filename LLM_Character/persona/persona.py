@@ -67,7 +67,7 @@ class Persona:
     self.plan(personas, new_day)
     self.reflect()
 
-  def open_convo_session(self, data): 
+  def open_convo_session(self, data) -> str: 
     open_convo_session(self.scratch, data)
 
 

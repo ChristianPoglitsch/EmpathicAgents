@@ -12,7 +12,7 @@ sys.path.append('../')
 
 from LLM_Character.messages_dataclass import AIMessages, AIMessage
 from LLM_Character.llm_comms.llm_abstract import LLMComms
-from LLM_Character.utils import API_KEY
+from LLM_Character.util import API_KEY
 
 
 # tiktoken is a fast BPE tokeniser for use with OpenAI's models.

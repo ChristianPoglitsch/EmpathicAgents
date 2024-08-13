@@ -1,12 +1,10 @@
 import json
-import os 
 from typing import Union 
-from dataclasses import asdict
 import sys
 sys.path.append('../../')
 
-
 from LLM_Character.world.validation_dataclass import LocationData, Sector, Arena, GameObject 
+from LLM_Character.util import check_if_file_exists
 
 class MemoryTree: 
     def __init__(self, f_saved): 
@@ -24,9 +22,9 @@ class MemoryTree:
 
         final_tree = {data.world: tree}
 
-        memory_tree_instance = MemoryTree(f_saved)
-        memory_tree_instance.tree = final_tree
-        memory_tree_instance.save(f_saved)
+        with open(f_saved, "w") as outfile:
+            json.dump(final_tree, outfile) 
+    
 
     def save(self, out_json):
         with open(out_json, "w") as outfile:
@@ -48,10 +46,6 @@ class MemoryTree:
         except: 
           x = ", ".join(list(self.tree[world][sector][arena.lower()]))
         return x
-
-
-def check_if_file_exists(curr_file): 
-    return os.path.isfile(curr_file) 
 
 def _process_sector(sector: Sector) -> dict:
     sector_tree = {}
