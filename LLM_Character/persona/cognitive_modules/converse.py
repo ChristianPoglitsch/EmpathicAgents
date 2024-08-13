@@ -3,10 +3,10 @@ import sys
 sys.path.append('../../')
 
 from LLM_Character.llm_api import LLM_API 
-
-from LLM_Character.persona.cognitive_modules.retrieve import retrieve 
 from LLM_Character.persona.prompt_modules.converse_prompts.summarize_ideas import run_prompt_summarize_ideas
 from LLM_Character.persona.prompt_modules.converse_prompts.generate_line import run_prompt_generate_next_conv_line
+from LLM_Character.persona.memory_structures.scratch.scratch import Scratch
+from LLM_Character.persona.cognitive_modules.retrieve import retrieve 
 from LLM_Character.messages_dataclass import AIMessages
 
 # FIXME no need for curr_convo, you should extract that from memory. 
@@ -27,12 +27,18 @@ from LLM_Character.messages_dataclass import AIMessages
 # curr_convo.add_message_role(message, "user")
 # curr_convo.add_message_role(next_line, persona.scratch.name)
 
-def open_convo_session(user_persona, character_persona, message:str,  model:LLM_API) -> str: 
+def open_convo_session(character_scratch:Scratch, data_user, message:str,  model:LLM_API) -> str: 
+  # you dont necessarily need to create a Persona class after the user, but there is some data that needs to be given from unity about the user.
+  # we will group this data in data_user. 
+  # this can also be stored on our end as well, but certain things needs to be updated from unity, from example, curr_location. 
+  # this could be sent here and updated here, or with update prompt. 
+  # or we can construct a special Persona object without any descirption such as iss, or whatever, no names, ec, only scratch memory? 
+  # in that case, it would be better off to construct a whole new class for the user altogetehr i guess... ?
 
-  # generate_convo(maze, init_persona, target_persona)
-  curr_loc = user_persona.scratch.curr_location
-  curr_chat = user_persona.scratch.chatting_buffer
-  focal_points = [f"{character_persona.scratch.name}"]
+  curr_loc = data_user.curr_location
+  curr_chat = data_user.chatting_buffer
+
+  focal_points = [f"{character_scratch.name}"]
   retrieved = retrieve(user_persona, focal_points, model, 50)
   relationship = generate_summarize_agent_relationship(user_persona, character_persona, retrieved)
   

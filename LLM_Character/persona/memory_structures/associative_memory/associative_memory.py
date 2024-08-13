@@ -3,7 +3,7 @@ import sys
 import datetime
 sys.path.append('../../../')
 
-from LLM_Character.persona.memory_structures.concept_node import ConceptNode
+from LLM_Character.persona.memory_structures.associative_memory.concept_node import ConceptNode
 from LLM_Character.world.validation_dataclass import AssociativeMemoryData 
 
 # NOTE add_event for now not needed since we dont have perceive yet. 

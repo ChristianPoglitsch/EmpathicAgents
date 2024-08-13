@@ -5,8 +5,8 @@ from numpy.linalg import norm
 from numpy import dot
 
 from LLM_Character.llm_api import LLM_API
-from LLM_Character.persona.memory_structures.associative_memory import AssociativeMemory, ConceptNode
-from LLM_Character.persona.memory_structures.scratch import Scratch
+from LLM_Character.persona.memory_structures.associative_memory.associative_memory import AssociativeMemory, ConceptNode
+from LLM_Character.persona.memory_structures.scratch.scratch import Scratch
 
 def retrieve(scratch:Scratch, a_mem: AssociativeMemory, focal_points: list[str], model:LLM_API, n_count=30):
     retrieved = dict()

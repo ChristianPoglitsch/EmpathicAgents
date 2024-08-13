@@ -4,7 +4,7 @@ sys.path.append('../../../../')
 
 from LLM_Character.llm_api import LLM_API 
 import LLM_Character.persona.prompt_modules.prompt as p 
-from LLM_Character.persona.memory_structures.scratch import Scratch
+from LLM_Character.persona.memory_structures.scratch.scratch import Scratch
 COUNTER_LIMIT = 5
 
 def _get_all_indices(curr_f_org_index:int, amount_activities:int):

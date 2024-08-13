@@ -99,8 +99,8 @@ class ReverieServer:
       persona.save(save_folder)
 
 
-  def prompt_processor(self, persona_name:str, message:str) -> str:
-    return self.personas[persona_name].open_convo_session(message)
+  def prompt_processor(self, persona_name:str, message:str, model:LLM_API) -> str:
+    return self.personas[persona_name].open_convo_session(message, model)
     #FIXME: could be dispabled, to not increase time while chatting, or you could, idk which one is better.  
     # self.step += 1
     # self.curr_time += datetime.timedelta(seconds=self.sec_per_step)

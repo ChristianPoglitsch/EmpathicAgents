@@ -10,8 +10,8 @@ from LLM_Character.persona.prompt_modules.planning_prompts.long_term_planning.da
 from LLM_Character.persona.prompt_modules.planning_prompts.long_term_planning.revise_identity  import run_prompt_revise_identity
 # from LLM_Character.persona.prompt_modules.planning_prompts.long_term_planning.hourly_schedule import run_prompt_hourly_schedule
 
-from LLM_Character.persona.memory_structures.scratch import Scratch
-from LLM_Character.persona.memory_structures.associative_memory import AssociativeMemory
+from LLM_Character.persona.memory_structures.scratch.scratch import Scratch
+from LLM_Character.persona.memory_structures.associative_memory.associative_memory import AssociativeMemory
 
 def _long_term_planning(scratch:Scratch, a_mem:AssociativeMemory, new_day:Union[str,None], model:LLM_API): 
   wake_up_hour = generate_wake_up_hour(scratch, model)

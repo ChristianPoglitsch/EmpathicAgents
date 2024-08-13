@@ -2,8 +2,8 @@ import sys
 sys.path.append('../../')
 
 from LLM_Character.persona.memory_structures.spatial_memory import MemoryTree
-from LLM_Character.persona.memory_structures.associative_memory import AssociativeMemory
-from LLM_Character.persona.memory_structures.scratch import Scratch
+from LLM_Character.persona.memory_structures.associative_memory.associative_memory import AssociativeMemory
+from LLM_Character.persona.memory_structures.scratch.scratch import Scratch
 from LLM_Character.world.validation_dataclass import PersonaData 
 
 from LLM_Character.persona.cognitive_modules.plan import plan
@@ -67,8 +67,8 @@ class Persona:
     self.plan(personas, new_day)
     self.reflect()
 
-  def open_convo_session(self, data) -> str: 
-    open_convo_session(self.scratch, data)
+  def open_convo_session(self, data, model) -> str: 
+    return open_convo_session(self.scratch, data, model)
 
 
 

@@ -45,6 +45,12 @@ class Scratch:
       self.act_description = None
       self.act_event = (self.name, None, None)
 
+      self.chatting_with = None 
+      self.chat = None
+      self.chatting_with_buffer = None 
+      self.chatting_end_time = None                  
+
+      # FIXME: gevallenonderscheid tussen user object en persona object. 
       if check_if_file_exists(f_saved): 
             # If we have a bootstrap file, load that here. 
             scratch_load = json.load(open(f_saved))

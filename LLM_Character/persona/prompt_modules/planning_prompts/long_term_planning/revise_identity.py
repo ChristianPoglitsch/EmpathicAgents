@@ -8,7 +8,7 @@ sys.path.append('../../../../')
 
 from LLM_Character.llm_api import LLM_API  
 import LLM_Character.persona.prompt_modules.prompt as p 
-import LLM_Character.persona.memory_structures.scratch as Scratch
+import LLM_Character.persona.memory_structures.scratch.scratch as Scratch
 
 COUNTER_LIMIT = 5
 

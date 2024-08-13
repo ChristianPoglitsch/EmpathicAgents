@@ -2,8 +2,8 @@ import datetime
 import sys
 sys.path.append('../../')
 
-from LLM_Character.persona.memory_structures.associative_memory import AssociativeMemory
-from LLM_Character.persona.memory_structures.scratch import Scratch
+from LLM_Character.persona.memory_structures.associative_memory.associative_memory import AssociativeMemory
+from LLM_Character.persona.memory_structures.scratch.scratch import Scratch
 
 from LLM_Character.llm_api import LLM_API 
 # FIXME: eerst conversation fixen en dan reflection, reflection laatste.

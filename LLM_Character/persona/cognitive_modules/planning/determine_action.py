@@ -3,7 +3,7 @@ import sys
 sys.path.append('../../../')
 
 from LLM_Character.llm_api import LLM_API 
-from LLM_Character.persona.memory_structures.scratch import Scratch
+from LLM_Character.persona.memory_structures.scratch.scratch import Scratch
 from LLM_Character.persona.memory_structures.spatial_memory import MemoryTree
 from LLM_Character.persona.prompt_modules.planning_prompts.determine_action.task_decomp import run_prompt_task_decomp
 from LLM_Character.persona.prompt_modules.planning_prompts.determine_action.event_triple import run_prompt_event_triple

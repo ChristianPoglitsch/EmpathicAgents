@@ -214,7 +214,7 @@ example_setup_data = SetupData(
 example_update_message = UpdateMessage(
     type="update",
     data=[
-        LocationOfCharacterData(
+        OneLocationData(
             character_name=["Alice"],
             current_location=OneLocationData(
                 world="WorldA",
@@ -229,7 +229,7 @@ example_update_message = UpdateMessage(
                 ]
             )
         ),
-        LocationOfCharacterData(
+        OneLocationData(
             character_name=["Bob"],
             current_location=OneLocationData(
                 world="WorldA",
