@@ -2,7 +2,10 @@ import json
 import datetime
 from typing import Optional, Dict, Any
 
-class BaseScratch:
+from LLM_Character.util import check_if_file_exists
+
+
+class UserScratch:
     def __init__(self, name: str, f_saved: str):
         self.name = name
         self.curr_time = None
@@ -63,3 +66,66 @@ class BaseScratch:
         }
         with open(out_json, "w") as outfile:
             json.dump(data, outfile, indent=2)
+    
+    def add_new_action(self, 
+                       action_address, 
+                       action_duration,
+                       action_description,
+                       action_event,
+                       chatting_with, 
+                       chat, 
+                       chatting_with_buffer,
+                       chatting_end_time,
+                       act_start_time=None): 
+      self.act_address = action_address
+      self.act_duration = action_duration
+      self.act_description = action_description
+      self.act_event = action_event
+
+      self.chatting_with = chatting_with
+      self.chat = chat 
+      if chatting_with_buffer: 
+        self.chatting_with_buffer.update(chatting_with_buffer)
+      self.chatting_end_time = chatting_end_time
+
+      self.act_start_time = self.curr_time
+
+    def act_check_finished(self): 
+      if not self.act_address: 
+        return True
+
+      x = self.act_start_time
+      
+      if x.second != 0: 
+        x = x.replace(second=0)
+        x = (x + datetime.timedelta(minutes=1))
+      end_time = (x + datetime.timedelta(minutes=self.act_duration))
+      
+      # FIXME: why not <= ???, you depend on the while true loop in the reverie.  
+      if end_time.strftime("%H:%M:%S") == self.curr_time.strftime("%H:%M:%S"): 
+        return True
+      return False
+    
+    def get_curr_event(self):
+      if not self.act_address: 
+        return (self.name, None, None)
+      else: 
+        return self.act_event
+
+
+    def get_curr_event_and_desc(self): 
+      if not self.act_address: 
+        return (self.name, None, None, None)
+      else: 
+        return (self.act_event[0], 
+                self.act_event[1], 
+                self.act_event[2],
+                self.act_description)
+
+    def act_summary_str(self):
+      start_datetime_str = self.act_start_time.strftime("%A %B %d -- %H:%M %p")
+      ret = f"[{start_datetime_str}]\n"
+      ret += f"Activity: {self.name} is {self.act_description}\n"
+      ret += f"Address: {self.act_address}\n"
+      ret += f"Duration in minutes (e.g., x min): {str(self.act_duration)} min\n"
+      return ret

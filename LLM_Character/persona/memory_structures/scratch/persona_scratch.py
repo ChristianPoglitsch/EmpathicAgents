@@ -7,8 +7,14 @@ sys.path.append('../../')
 
 from LLM_Character.world.validation_dataclass import  ScratchData
 from LLM_Character.util import check_if_file_exists
+from LLM_Character.persona.memory_structures.scratch.user_scratch import BaseScratch
 
-class Scratch: 
+
+# FIXME: curr_location and living_area moeten bepaalde formaten hebben, 
+# ze moeten een dicionary zijn met keys world, sector, arena en gameobject indien beschikbaar.
+
+
+class PersonaScratch: 
     def __init__(self, name, f_saved): 
       # PERSONA HYPERPARAMETERS
 
@@ -118,7 +124,7 @@ class Scratch:
             #   self.chatting_end_time = None
 
     @staticmethod
-    def save_as(f_saved:str, data:ScratchData):
+    def save_as(f_saved:str, data:PersonaScratchData):
       scratch = dict() 
       scratch["curr_time"] = data.curr_time.strftime("%B %d, %Y, %H:%M:%S")
       scratch["curr_location"] = data.curr_location

@@ -3,12 +3,14 @@ sys.path.append('../../')
 
 from numpy.linalg import norm
 from numpy import dot
+from typing import Union
 
 from LLM_Character.llm_api import LLM_API
 from LLM_Character.persona.memory_structures.associative_memory.associative_memory import AssociativeMemory, ConceptNode
-from LLM_Character.persona.memory_structures.scratch.scratch import Scratch
+from LLM_Character.persona.memory_structures.scratch.persona_scratch import PersonaScratch
+from LLM_Character.persona.memory_structures.scratch.user_scratch import UserScratch
 
-def retrieve(scratch:Scratch, a_mem: AssociativeMemory, focal_points: list[str], model:LLM_API, n_count=30):
+def retrieve(scratch: Union[PersonaScratch | UserScratch], a_mem: AssociativeMemory, focal_points: list[str], model:LLM_API, n_count=30):
     retrieved = dict()
     for focal_pt in focal_points:
         nodes = _retrieve_recent_sorted_nodes(a_mem)
@@ -54,7 +56,7 @@ def _retrieve_recent_sorted_nodes(a_mem: AssociativeMemory):
     return nodes
 
 
-def extract_recency(scratch:Scratch, nodes:list[ConceptNode]):
+def extract_recency(scratch:PersonaScratch, nodes:list[ConceptNode]):
     recency_vals = [scratch.recency_decay ** i
                     for i in range(1, len(nodes) + 1)]
 

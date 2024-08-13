@@ -120,7 +120,7 @@ class AssociativeMemoryData(BaseModel):
     nodes: dict[str, Node]
 
 class PersonaData(BaseModel):
-    scratch_data:ScratchData
+    scratch_data:PersonaScratchData
     spatial_data:LocationData
     as_mem_data:AssociativeMemoryData
 

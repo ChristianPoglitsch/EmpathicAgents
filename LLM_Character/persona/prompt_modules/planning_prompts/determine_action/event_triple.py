@@ -7,10 +7,10 @@ sys.path.append('../../../../')
 
 from LLM_Character.llm_api import LLM_API 
 import LLM_Character.persona.prompt_modules.prompt as p 
-from LLM_Character.persona.memory_structures.scratch.scratch import Scratch
+from LLM_Character.persona.memory_structures.scratch.persona_scratch import PersonaScratch
 COUNTER_LIMIT = 5
 
-def _create_prompt_input(scratch:Scratch, action_description:str): 
+def _create_prompt_input(scratch:PersonaScratch, action_description:str): 
     p_name = scratch.get_str_name()
 
     if "(" in action_description: 
@@ -34,19 +34,19 @@ def _validate_response(response):
     except: return False
     return True 
 
-def _get_fail_safe(scratch:Scratch): 
+def _get_fail_safe(scratch:PersonaScratch): 
     p_name = scratch.get_str_name()
     fs = (p_name, "is", "idle")
     return fs
 
-def _get_valid_output(scratch:Scratch, model, prompt, counter_limit):
+def _get_valid_output(scratch:PersonaScratch, model, prompt, counter_limit):
     for _ in range(counter_limit):
         output = model.query_text(prompt)
         if _validate_response(output):
             return _clean_up_response(output)
     return _get_fail_safe(scratch)
 
-def run_prompt_event_triple(scratch:Scratch, 
+def run_prompt_event_triple(scratch:PersonaScratch, 
                              model:LLM_API, 
                              action_description:str,
                              verbose=False):

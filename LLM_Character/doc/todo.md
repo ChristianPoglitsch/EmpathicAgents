@@ -2,6 +2,9 @@
 
 would recommend converting from udp to tcp, as the communication doesnt happen frequently, and you want your initial data to be sent in without data loss.
 
+find a better way to represent userScratch and personaScratch, because now there is duplicated code. 
+
+
 # emotional state
 
 6 emotions, store in the persona. attached to persona, 

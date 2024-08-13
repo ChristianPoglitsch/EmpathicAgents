@@ -6,12 +6,12 @@ import sys
 sys.path.append('../../../../')
 
 from LLM_Character.llm_api import LLM_API  
-from LLM_Character.persona.memory_structures.scratch.scratch import Scratch
+from LLM_Character.persona.memory_structures.scratch.persona_scratch import PersonaScratch
 import LLM_Character.persona.prompt_modules.prompt as p 
 
 COUNTER_LIMIT = 5
 
-def _create_prompt_input(scratch:Scratch, wake_up_hour:int)-> list[str]:
+def _create_prompt_input(scratch:PersonaScratch, wake_up_hour:int)-> list[str]:
     prompt_input = []
     prompt_input += [scratch.get_str_iss()]
     prompt_input += [scratch.get_str_lifestyle()]
@@ -54,7 +54,7 @@ def _get_valid_output(model, prompt, counter_limit):
             return _clean_up_response(output)
     return _get_fail_safe()
 
-def run_prompt_daily_plan(scratch:Scratch, wake_up_hour:int, model:LLM_API, verbose=False):
+def run_prompt_daily_plan(scratch:PersonaScratch, wake_up_hour:int, model:LLM_API, verbose=False):
     prompt_template = "LLM_Character/persona/prompt_template/daily_planning.txt"
     prompt_input = _create_prompt_input(scratch, wake_up_hour)
     prompt = p.generate_prompt(prompt_input, prompt_template)

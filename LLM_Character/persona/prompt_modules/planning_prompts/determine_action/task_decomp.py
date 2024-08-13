@@ -4,7 +4,7 @@ sys.path.append('../../../../')
 
 from LLM_Character.llm_api import LLM_API 
 import LLM_Character.persona.prompt_modules.prompt as p 
-from LLM_Character.persona.memory_structures.scratch.scratch import Scratch
+from LLM_Character.persona.memory_structures.scratch.persona_scratch import PersonaScratch
 COUNTER_LIMIT = 5
 
 def _get_all_indices(curr_f_org_index:int, amount_activities:int):
@@ -45,7 +45,7 @@ def _get_curr_time_and_summary(time,
     summ_str = summ_str[:-2] + "."
     return summ_str, curr_time_range
 
-def _create_prompt_input(scratch:Scratch, task, duration): 
+def _create_prompt_input(scratch:PersonaScratch, task, duration): 
     commonset = scratch.get_str_iss()
     firstname = scratch.get_str_firstname()
     fullname = scratch.get_str_name()
@@ -143,7 +143,7 @@ def _get_valid_output(model, prompt, counter_limit):
             return _clean_up_response(prompt, output)
     return _get_fail_safe()
 
-def run_prompt_task_decomp(scratch:Scratch, 
+def run_prompt_task_decomp(scratch:PersonaScratch, 
                              model:LLM_API, 
                              task,
                              duration,

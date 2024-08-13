@@ -10,10 +10,10 @@ from LLM_Character.persona.prompt_modules.planning_prompts.long_term_planning.da
 from LLM_Character.persona.prompt_modules.planning_prompts.long_term_planning.revise_identity  import run_prompt_revise_identity
 # from LLM_Character.persona.prompt_modules.planning_prompts.long_term_planning.hourly_schedule import run_prompt_hourly_schedule
 
-from LLM_Character.persona.memory_structures.scratch.scratch import Scratch
+from LLM_Character.persona.memory_structures.scratch.persona_scratch import PersonaScratch
 from LLM_Character.persona.memory_structures.associative_memory.associative_memory import AssociativeMemory
 
-def _long_term_planning(scratch:Scratch, a_mem:AssociativeMemory, new_day:Union[str,None], model:LLM_API): 
+def _long_term_planning(scratch:PersonaScratch, a_mem:AssociativeMemory, new_day:Union[str,None], model:LLM_API): 
   wake_up_hour = generate_wake_up_hour(scratch, model)
 
   if new_day == "First day": 
@@ -33,7 +33,7 @@ def _long_term_planning(scratch:Scratch, a_mem:AssociativeMemory, new_day:Union[
                             thought, keywords, thought_poignancy, 
                             thought_embedding_pair, None)
 
-def revise_identity(scratch:Scratch, a_mem:AssociativeMemory, model:LLM_API): 
+def revise_identity(scratch:PersonaScratch, a_mem:AssociativeMemory, model:LLM_API): 
   p_name = scratch.name
   focal_points = [f"{p_name}'s plan for {scratch.get_str_curr_date_str()}.",
                   f"Important recent events for {p_name}'s life."]
@@ -45,7 +45,7 @@ def revise_identity(scratch:Scratch, a_mem:AssociativeMemory, model:LLM_API):
   scratch.daily_plan_req = new_daily_req
 
 #FIXME: try to make the code more readable instead of adding comments.  
-def make_hourly_schedule(scratch:Scratch, wake_up_hour): 
+def make_hourly_schedule(scratch:PersonaScratch, wake_up_hour): 
   hour_str = ["00:00 AM", "01:00 AM", "02:00 AM", "03:00 AM", "04:00 AM", 
               "05:00 AM", "06:00 AM", "07:00 AM", "08:00 AM", "09:00 AM", 
               "10:00 AM", "11:00 AM", "12:00 PM", "01:00 PM", "02:00 PM", 
@@ -83,7 +83,7 @@ def make_hourly_schedule(scratch:Scratch, wake_up_hour):
 
   return n_m1_hourly_compressed
 
-def generate_thought_plan(scratch:Scratch, model:LLM_API):
+def generate_thought_plan(scratch:PersonaScratch, model:LLM_API):
   thought = f"This is {scratch.name}'s plan for {scratch.curr_time.strftime('%A %B %d')}:"
   for i in scratch.daily_req: 
     thought += f" {i},"
@@ -97,10 +97,10 @@ def generate_thought_plan(scratch:Scratch, model:LLM_API):
   thought_embedding_pair = (thought, model.semantic_meaning(thought))
   return created, expiration, s, p, o, thought, keywords, thought_poignancy, thought_embedding_pair 
 
-def generate_wake_up_hour(scratch:Scratch, model):
+def generate_wake_up_hour(scratch:PersonaScratch, model):
   return int(run_prompt_wake_up(scratch, model)[0])
 
-def generate_first_daily_plan(scratch:Scratch, wake_up_hour): 
+def generate_first_daily_plan(scratch:PersonaScratch, wake_up_hour): 
   return run_prompt_daily_plan(scratch, wake_up_hour)[0]
 
 def generate_hourly_schedule(persona, curr_hour_str, n_activity, hour_str):

@@ -3,7 +3,7 @@ sys.path.append('../../')
 
 from LLM_Character.persona.memory_structures.spatial_memory import MemoryTree
 from LLM_Character.persona.memory_structures.associative_memory.associative_memory import AssociativeMemory
-from LLM_Character.persona.memory_structures.scratch.scratch import Scratch
+from LLM_Character.persona.memory_structures.scratch.persona_scratch import PersonaScratch
 from LLM_Character.world.validation_dataclass import PersonaData 
 
 from LLM_Character.persona.cognitive_modules.plan import plan
@@ -13,7 +13,7 @@ from LLM_Character.persona.cognitive_modules.converse import open_convo_session
 class Persona: 
   s_mem:MemoryTree
   a_mem:AssociativeMemory
-  scratch:Scratch
+  scratch:PersonaScratch
   
   def __init__(self, name, folder_mem_saved:str):
     f_s_mem_saved = f"{folder_mem_saved}/spatial_memory.json"

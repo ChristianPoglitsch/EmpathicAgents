@@ -1,14 +1,15 @@
 import datetime
 import sys
+from typing import Union
 sys.path.append('../../')
 
 from LLM_Character.persona.memory_structures.associative_memory.associative_memory import AssociativeMemory
-from LLM_Character.persona.memory_structures.scratch.scratch import Scratch
+from LLM_Character.persona.memory_structures.scratch.persona_scratch import PersonaScratch
 
 from LLM_Character.llm_api import LLM_API 
 # FIXME: eerst conversation fixen en dan reflection, reflection laatste.
 
-def reflect(scratch: Scratch, a_mem: AssociativeMemory):
+def reflect(scratch: PersonaScratch, a_mem: AssociativeMemory):
   if reflection_trigger(scratch, a_mem): 
     run_reflect(scratch, a_mem)
     reset_reflection_counter(scratch, a_mem)
@@ -55,7 +56,7 @@ def reflect(scratch: Scratch, a_mem: AssociativeMemory):
 
 
 
-def reflection_trigger(scratch:Scratch , a_mem:AssociativeMemory): 
+def reflection_trigger(scratch:PersonaScratch , a_mem:AssociativeMemory): 
   print (scratch.name, "persona.scratch.importance_trigger_curr::", scratch.importance_trigger_curr)
   print (scratch.importance_trigger_max)
 
@@ -65,7 +66,7 @@ def reflection_trigger(scratch:Scratch , a_mem:AssociativeMemory):
   return False
 
 
-def run_reflect(scratch:Scratch, a_mem:AssociativeMemory):
+def run_reflect(scratch:PersonaScratch, a_mem:AssociativeMemory):
   # Reflection requires certain focal points. Generate that first. 
   focal_points = generate_focal_points(persona, 3)
   # Retrieve the relevant Nodes object for each of the focal points. 

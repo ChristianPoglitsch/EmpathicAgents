@@ -3,7 +3,7 @@ import sys
 sys.path.append('../../../')
 
 from LLM_Character.llm_api import LLM_API 
-from LLM_Character.persona.memory_structures.scratch.scratch import Scratch
+from LLM_Character.persona.memory_structures.scratch.persona_scratch import PersonaScratch
 from LLM_Character.persona.memory_structures.spatial_memory import MemoryTree
 from LLM_Character.persona.prompt_modules.planning_prompts.determine_action.task_decomp import run_prompt_task_decomp
 from LLM_Character.persona.prompt_modules.planning_prompts.determine_action.event_triple import run_prompt_event_triple
@@ -11,7 +11,7 @@ from LLM_Character.persona.prompt_modules.planning_prompts.determine_action.acti
 from LLM_Character.persona.prompt_modules.planning_prompts.determine_action.action_arena import run_prompt_action_arena
 from LLM_Character.persona.prompt_modules.planning_prompts.determine_action.action_game_object import run_prompt_action_game_object
 
-def _determine_action(scratch:Scratch, s_mem:MemoryTree, model:LLM_API): 
+def _determine_action(scratch:PersonaScratch, s_mem:MemoryTree, model:LLM_API): 
   curr_index = scratch.get_f_daily_schedule_index()
   curr_index_60 = scratch.get_f_daily_schedule_index(advance=60)
 
@@ -71,21 +71,21 @@ def determine_decomp(act_desp, act_dura):
       return False
   return True
 
-def generate_task_decomp(scratch:Scratch,  model:LLM_API, task, duration): 
+def generate_task_decomp(scratch:PersonaScratch,  model:LLM_API, task, duration): 
   return run_prompt_task_decomp(scratch, model, task, duration)[0]
 
-def generate_action_sector(scratch:Scratch, s_mem:MemoryTree,  model:LLM_API, act_desp:str): 
+def generate_action_sector(scratch:PersonaScratch, s_mem:MemoryTree,  model:LLM_API, act_desp:str): 
   return run_prompt_action_sector(scratch, s_mem, model, act_desp)[0]
 
-def generate_action_arena(scratch:Scratch, s_mem:MemoryTree,  model:LLM_API, act_desp:str, act_world:str, act_sector:str): 
+def generate_action_arena(scratch:PersonaScratch, s_mem:MemoryTree,  model:LLM_API, act_desp:str, act_world:str, act_sector:str): 
   return run_prompt_action_arena(scratch, s_mem,act_desp, model, act_world, act_sector)[0]
 
-def generate_action_game_object(scratch:Scratch, s_mem:MemoryTree, model:LLM_API, act_desp:str, act_world:str, act_sector:str, act_arena:str):
+def generate_action_game_object(scratch:PersonaScratch, s_mem:MemoryTree, model:LLM_API, act_desp:str, act_world:str, act_sector:str, act_arena:str):
   if not s_mem.get_str_accessible_arena_game_objects(act_world, act_sector, act_arena): 
     return "<random>"
   return run_prompt_action_game_object(scratch, s_mem, model, act_desp, act_world, act_sector, act_arena)[0]
 
-def generate_action_event_triple(scratch:Scratch, act_desp:str): 
+def generate_action_event_triple(scratch:PersonaScratch, act_desp:str): 
   return run_prompt_event_triple(scratch, act_desp)[0]
 
 if __name__ == "__main__":

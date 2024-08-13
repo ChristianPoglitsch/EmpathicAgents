@@ -7,11 +7,11 @@ sys.path.append('../../../../')
 
 from LLM_Character.llm_api import LLM_API 
 import LLM_Character.persona.prompt_modules.prompt as p 
-from LLM_Character.persona.memory_structures.scratch.scratch import Scratch
+from LLM_Character.persona.memory_structures.scratch.persona_scratch import PersonaScratch
 from LLM_Character.persona.memory_structures.spatial_memory import MemoryTree
 COUNTER_LIMIT = 5
 
-def _create_prompt_input(scratch:Scratch, s_mem:MemoryTree, action_description:str, act_sector:str): 
+def _create_prompt_input(scratch:PersonaScratch, s_mem:MemoryTree, action_description:str, act_sector:str): 
     name = scratch.get_str_name()
 
     # NOTE world < sectors < arenas < gameobjects
@@ -63,7 +63,7 @@ def _get_valid_output(model, prompt, counter_limit):
             return _clean_up_response(output)
     return _get_fail_safe()
 
-def run_prompt_action_arena(scratch:Scratch, s_mem:MemoryTree, model:LLM_API, action_description:str,action_sector:str, verbose=False):
+def run_prompt_action_arena(scratch:PersonaScratch, s_mem:MemoryTree, model:LLM_API, action_description:str,action_sector:str, verbose=False):
     prompt_template = "LLM_Character/persona/prompt_template/action_sector.txt"
     prompt_input = _create_prompt_input(scratch, s_mem,  action_description, action_sector)
     prompt = p.generate_prompt(prompt_input, prompt_template)

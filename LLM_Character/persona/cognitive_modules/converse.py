@@ -5,7 +5,10 @@ sys.path.append('../../')
 from LLM_Character.llm_api import LLM_API 
 from LLM_Character.persona.prompt_modules.converse_prompts.summarize_ideas import run_prompt_summarize_ideas
 from LLM_Character.persona.prompt_modules.converse_prompts.generate_line import run_prompt_generate_next_conv_line
-from LLM_Character.persona.memory_structures.scratch.scratch import Scratch
+from LLM_Character.persona.prompt_modules.converse_prompts.summarize_relationship import run_prompt_summarize_relationship 
+from LLM_Character.persona.memory_structures.associative_memory.associative_memory import AssociativeMemory,  ConceptNode
+from LLM_Character.persona.memory_structures.scratch.persona_scratch import PersonaScratch
+from LLM_Character.persona.memory_structures.scratch.user_scratch import UserScratch 
 from LLM_Character.persona.cognitive_modules.retrieve import retrieve 
 from LLM_Character.messages_dataclass import AIMessages
 
@@ -27,32 +30,74 @@ from LLM_Character.messages_dataclass import AIMessages
 # curr_convo.add_message_role(message, "user")
 # curr_convo.add_message_role(next_line, persona.scratch.name)
 
-def open_convo_session(character_scratch:Scratch, data_user, message:str,  model:LLM_API) -> str: 
-  # you dont necessarily need to create a Persona class after the user, but there is some data that needs to be given from unity about the user.
-  # we will group this data in data_user. 
-  # this can also be stored on our end as well, but certain things needs to be updated from unity, from example, curr_location. 
-  # this could be sent here and updated here, or with update prompt. 
-  # or we can construct a special Persona object without any descirption such as iss, or whatever, no names, ec, only scratch memory? 
-  # in that case, it would be better off to construct a whole new class for the user altogetehr i guess... ?
 
-  curr_loc = data_user.curr_location
-  curr_chat = data_user.chatting_buffer
-
+# you dont necessarily need to create a Persona class after the user, but there is some data that needs to be given from unity about the user.
+# we will group this data in data_user. 
+# this can also be stored on our end as well, but certain things needs to be updated from unity, from example, curr_location. 
+# this could be sent here and updated here, or with update prompt. 
+# or we can construct a special Persona object without any descirption such as iss, or whatever, no names, ec, only scratch memory? 
+# in that case, it would be better off to construct a whole new class for the user altogetehr i guess... ?
+def chatting(user_scratch: UserScratch , user_amem:AssociativeMemory, character_scratch:PersonaScratch, message:str,  model:LLM_API) -> str: 
   focal_points = [f"{character_scratch.name}"]
-  retrieved = retrieve(user_persona, focal_points, model, 50)
-  relationship = generate_summarize_agent_relationship(user_persona, character_persona, retrieved)
+  retrieved = retrieve(user_scratch, user_amem, focal_points, model, 50)
+  relationship = generate_summarize_agent_relationship(user_scratch, character_scratch, model, retrieved)
   
+  #FIXME vervang curr_chat met scratch.chat? and scratch.chat in AI_Messages opgeslagen?  
+  curr_chat = [] 
   last_chat = ""
   for i in curr_chat[-4:]:
     last_chat += ": ".join(i) + "\n"
-
   if last_chat: 
     focal_points = [f"{relationship}", 
-                    f"{character_persona.scratch.name} is {character_persona.scratch.act_description}", last_chat]
+                    f"{character_scratch.name} is {character_scratch.scratch.act_description}", 
+                    last_chat]
   else: 
     focal_points = [f"{relationship}", 
-                    f"{character_persona.scratch.name} is {character_persona.scratch.act_description}"]
+                    f"{character_scratch.name} is {character_scratch.scratch.act_description}"]
+    retrieved = retrieve(user_scratch, user_amem, focal_points, model, 15)
+    #FIXME is this function only to be used when starting a conversation or also later ???
+    utt, end = generate_one_utterance(user_scratch, character_scratch, model, retrieved, curr_chat)
 
+
+
+
+
+
+def generate_summarize_agent_relationship(user_scratch: UserScratch , 
+                                          character_scratch:PersonaScratch,
+                                          model: LLM_API, 
+                                          retrieved:dict[str, list[ConceptNode]]):
+  all_embedding_keys = list()
+  for _, val in retrieved.items(): 
+    for i in val: 
+      all_embedding_keys += [i.embedding_key]
+  all_embedding_key_str =""
+  for i in all_embedding_keys: 
+    all_embedding_key_str += f"{i}\n"
+
+  summarized_relationship = run_prompt_summarize_relationship(
+                              user_scratch,
+                              character_scratch,
+                              model,
+                              all_embedding_key_str)[0]
+  return summarized_relationship
+
+def generate_one_utterance(uscratch: UserScratch , 
+                           cscratch:PersonaScratch,
+                           model: LLM_API, 
+                           retrieved:dict[str, list[ConceptNode]],
+                           curr_chat:list[str, str],
+                           ):
+  curr_context = (f"{uscratch.name} " + 
+              f"was {uscratch.act_description} " + 
+              f"when {uscratch.name} " + 
+              f"saw {cscratch.name} " + 
+              f"in the middle of {cscratch.act_description}.\n")
+  curr_context += (f"{uscratch.name} " +
+              f"is initiating a conversation with " +
+              f"{cscratch.name}.")
+  x = run_gpt_generate_iterative_chat_utt(maze, init_persona, target_persona, retrieved, curr_context, curr_chat)[0]
+  return x["utterance"], x["end"]
 
 def agent_chat(init_persona, target_persona): 
   curr_chat = []

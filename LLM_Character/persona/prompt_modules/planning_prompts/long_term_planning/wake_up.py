@@ -8,11 +8,11 @@ sys.path.append('../../../../')
 
 from LLM_Character.llm_api import LLM_API  
 from LLM_Character.persona.prompt_modules.prompt import generate_prompt 
-from LLM_Character.persona.memory_structures.scratch.scratch import Scratch 
+from LLM_Character.persona.memory_structures.scratch.persona_scratch import PersonaScratch 
 
 COUNTER_LIMIT = 5
 
-def _create_prompt_input(scratch:Scratch)-> list[str]:
+def _create_prompt_input(scratch:PersonaScratch)-> list[str]:
     prompt_input = [scratch.get_str_iss(),
                 scratch.get_str_lifestyle(),
                 scratch.get_str_firstname()]
@@ -29,7 +29,7 @@ def _validate_response(response:str) -> bool:
         return False
     return True
 
-def run_prompt_wake_up(scratch:Scratch, model:LLM_API, verbose=False):
+def run_prompt_wake_up(scratch:PersonaScratch, model:LLM_API, verbose=False):
     prompt_template = "LLM_Character/persona/prompt_template/wake_up_hour.txt"
     prompt_input = _create_prompt_input(scratch)
     prompt = generate_prompt(prompt_input, prompt_template)
