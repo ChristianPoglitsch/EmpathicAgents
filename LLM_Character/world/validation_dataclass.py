@@ -53,7 +53,7 @@ class UpdateMessage(BaseMessage):
 
 # ---------------------------------------------------------------------------
 # class data sent from unity to python endpoint for sending intial setup data.
-class ScratchData(BaseModel):
+class PersonaScratchData(BaseModel):
     curr_time: str
     daily_plan_req:str
     name:str
@@ -81,6 +81,29 @@ class ScratchData(BaseModel):
     f_daily_schedule_hourly_org:list[str]
     # there may be some parameters that could be added. 
     # ... see json file in generative agent repo
+
+    act_address: OneLocationData 
+    act_start_time: str 
+    act_duration: str  
+    act_description: str 
+    act_event: Tuple[str, str, str] # not sure 
+    chatting_with: str 
+    chat: list[list[str]] # converted to AI_Messages, or in the same format as AI_messages, nonetheless, it will be converted to some kind of list for serialisabiility.  
+    # maybe make a different class for thsi chat type altogether, based on AI_Messages? idk 
+    chatting_with_buffer: dict
+    chatting_end_time: str 
+
+class UserScratchData(BaseModel):
+    curr_time: str
+    name:str
+    
+    recency_w:int
+    relevance_w:int
+    importance_w:int
+    recency_decay:int
+    importance_trigger_max:int
+    importance_trigger_curr:int
+    importance_ele_n:int
 
     act_address: OneLocationData 
     act_start_time: str 
@@ -124,6 +147,10 @@ class PersonaData(BaseModel):
     spatial_data:LocationData
     as_mem_data:AssociativeMemoryData
 
+class UserData(BaseModel):
+    scratch_data: UserScratchData
+    as_mem_data:AssociativeMemoryData
+
 class MetaData(BaseModel):
     fork_sim_code:str
     sim_code:str
@@ -135,6 +162,7 @@ class MetaData(BaseModel):
 class SetupData(BaseModel):
     meta:MetaData
     personas: dict[str, PersonaData]
+    users: dict[str, UserData] 
     # NOTE: this extra field represent the entire possible virtual world (which can be moddeled after real places), it represent
     # the maze class that is in the original generative agent paper.
     # is not needed now, untill we decide to include perceiving into the agent.  

@@ -5,12 +5,26 @@ from typing import Union
 sys.path.append('../../')
 
 from LLM_Character.persona.persona import Persona
+from LLM_Character.persona.user import User 
 from LLM_Character.llm_api import LLM_API 
 from LLM_Character.util import copyanything
 from LLM_Character.world.validation_dataclass import OneLocationData, SetupData 
 
 # TODO move this variable to env file. 
 FS_STORAGE = "storage"
+
+# TODO: BIG CHANGE: 
+# do not send chat data from unity, only names, and id's, all the rest is stored here ....
+# at least for user data, since 
+# like data, where to load it from etc,..
+# heb een default for sim, called "Default", en de bij unity geven ze dan gwn een simcode mee, 
+# en wij forken dan gwn altijd van default, 
+# en volgende setup messages, kunnen ze dan bepaalde waarden veranderen etc. 
+# naast de simcode geven ze ook de username mee, en thats it denk ik, derest wordt gewoon gecloned van default folders...
+# maar setupmessage zou nog steeds bestaan als het nodig zou zijn om dingen te vereanderen, maar basically, da zorgt er voor
+# da we geen save_as nodig meer hebben, denk ik.
+#FIXME: some refactoring is needed, a lot of duplicate code is present. 
+
 
 class ReverieServer:
   def __init__(self,
@@ -43,6 +57,13 @@ class ReverieServer:
         persona_folder = f"{sim_folder}/personas/{persona_name}"
         curr_persona = Persona(persona_name, persona_folder)
         self.personas[persona_name] = curr_persona
+      
+      self.users:dict[str, User] = dict()
+      for user_name in reverie_meta['user_names']:
+        user_folder = f"{sim_code}/users/{user_name}"
+        curr_user = User(user_name, user_folder)
+        self.users[user_name] = curr_user
+
 
   def loads(self, data: SetupData):
     self.save_as(data)
@@ -63,6 +84,12 @@ class ReverieServer:
       curr_persona = Persona(persona_name, persona_folder)
       self.personas[persona_name] = curr_persona
 
+    self.users:dict[str, User] = dict()
+    for user_name in reverie_meta['user_names']:
+      user_folder = f"{sim_folder}/users/{user_name}"
+      curr_user = User(user_name, user_folder)
+      self.users[user_name] = curr_user
+      
   def save_as(self, data: SetupData): 
     sim_folder = f"{FS_STORAGE}/{data.meta.sim_code}"
 
@@ -78,8 +105,12 @@ class ReverieServer:
       outfile.write(json.dumps(reverie_meta, indent=2))
 
     for persona_name in data.meta.persona_names : 
-      save_folder = f"{sim_folder}/personas/{persona_name}/bootstrap_memory"
+      save_folder = f"{sim_folder}/personas/{persona_name}/"
       Persona.save_as(save_folder, data.personas[persona_name])
+    
+    for user_name in data.meta.user_names: 
+      save_folder = f"{sim_folder}/personas/{user_name}/"
+      User.save_as(save_folder, data.users[user_name])
 
   def save(self): 
     sim_folder = f"{FS_STORAGE}/{self.sim_code}"
@@ -99,12 +130,14 @@ class ReverieServer:
       persona.save(save_folder)
 
 
-  def prompt_processor(self, persona_name:str, message:str, model:LLM_API) -> str:
-    return self.personas[persona_name].open_convo_session(message, model)
-    #FIXME: could be dispabled, to not increase time while chatting, or you could, idk which one is better.  
+  def prompt_processor(self, user_name:str, persona_name:str, message:str, model:LLM_API) -> str:
+    user = self.users[user_name]
+    uscratch = user.scratch
+    uamem = user.a_mem
+    return self.personas[persona_name].open_convo_session(uscratch, uamem, message, model)
+    #FIXME: could be disabled, to not increase time while chatting, or you could, idk which one is better.  
     # self.step += 1
     # self.curr_time += datetime.timedelta(seconds=self.sec_per_step)
-
 
 
   def update_processor(self, curr_location:dict[str, OneLocationData]):

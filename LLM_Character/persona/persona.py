@@ -1,14 +1,17 @@
 import sys
 sys.path.append('../../')
 
+from LLM_Character.llm_api import LLM_API
+from LLM_Character.persona.memory_structures.scratch import user_scratch
 from LLM_Character.persona.memory_structures.spatial_memory import MemoryTree
 from LLM_Character.persona.memory_structures.associative_memory.associative_memory import AssociativeMemory
 from LLM_Character.persona.memory_structures.scratch.persona_scratch import PersonaScratch
-from LLM_Character.world.validation_dataclass import PersonaData 
+from LLM_Character.persona.memory_structures.scratch.user_scratch import UserScratch 
+from LLM_Character.world.validation_dataclass import PersonaData, PromptData 
 
 from LLM_Character.persona.cognitive_modules.plan import plan
 from LLM_Character.persona.cognitive_modules.reflect import reflect
-from LLM_Character.persona.cognitive_modules.converse import open_convo_session 
+from LLM_Character.persona.cognitive_modules.converse import chatting 
 
 class Persona: 
   s_mem:MemoryTree
@@ -67,9 +70,10 @@ class Persona:
     self.plan(personas, new_day)
     self.reflect()
 
-  def open_convo_session(self, data, model) -> str: 
-    return open_convo_session(self.scratch, data, model)
+  def open_convo_session(self, user_scratch:UserScratch, user_mem: AssociativeMemory, message:str, model:LLM_API) -> str: 
+    return chatting(user_scratch, user_mem, self.scratch, message, model)
 
+# def chatting(user_scratch: UserScratch , user_amem:AssociativeMemory, character_scratch:PersonaScratch, message:str,  model:LLM_API) -> str: 
 
 
 

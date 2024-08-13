@@ -12,6 +12,13 @@ from LLM_Character.persona.memory_structures.scratch.user_scratch import UserScr
 from LLM_Character.persona.cognitive_modules.retrieve import retrieve 
 from LLM_Character.messages_dataclass import AIMessages
 
+
+
+
+# FIXME: hier zat ik dus. 
+
+
+
 # FIXME no need for curr_convo, you should extract that from memory. 
 # personas.scratch.chat should be AIMessages.
 
