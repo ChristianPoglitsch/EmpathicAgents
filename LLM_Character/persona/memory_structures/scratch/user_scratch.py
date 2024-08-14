@@ -2,6 +2,7 @@ import json
 import datetime
 from typing import Optional, Dict, Any
 
+from LLM_Character.messages_dataclass import AIMessages
 from LLM_Character.util import check_if_file_exists
 
 
@@ -20,10 +21,9 @@ class UserScratch:
         self.act_description = None
         self.act_event = (self.name, None, None)
         self.chatting_with = None
-        self.chat = None
-        self.chatting_with_buffer = None
+        self.chat = AIMessages()
+        self.chatting_with_buffer:dict[str, int] = dict() 
         self.chatting_end_time = None
-
         if check_if_file_exists(f_saved):
             self.load(f_saved)
 

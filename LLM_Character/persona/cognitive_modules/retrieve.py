@@ -10,7 +10,11 @@ from LLM_Character.persona.memory_structures.associative_memory.associative_memo
 from LLM_Character.persona.memory_structures.scratch.persona_scratch import PersonaScratch
 from LLM_Character.persona.memory_structures.scratch.user_scratch import UserScratch
 
-def retrieve(scratch: Union[PersonaScratch | UserScratch], a_mem: AssociativeMemory, focal_points: list[str], model:LLM_API, n_count=30):
+def retrieve(scratch: PersonaScratch, 
+             a_mem: AssociativeMemory, 
+             focal_points: list[str], 
+             model:LLM_API, 
+             n_count=30):
     retrieved = dict()
     for focal_pt in focal_points:
         nodes = _retrieve_recent_sorted_nodes(a_mem)
@@ -47,7 +51,7 @@ def retrieve(scratch: Union[PersonaScratch | UserScratch], a_mem: AssociativeMem
 def _retrieve_recent_sorted_nodes(a_mem: AssociativeMemory):
     # FIXME: WHY NOT RETRIEVE FROM SEQ_CHAT ?
     nodes = []
-    for i in a_mem.seq_thought:
+    for i in a_mem.seq_thought + a_mem.seq_chat:
         if "idle" not in i.embedding_key:
             nodes += [[i.last_accessed, i]]
 

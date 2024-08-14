@@ -132,9 +132,10 @@ class ReverieServer:
 
   def prompt_processor(self, user_name:str, persona_name:str, message:str, model:LLM_API) -> str:
     user = self.users[user_name]
-    uscratch = user.scratch
-    uamem = user.a_mem
-    return self.personas[persona_name].open_convo_session(uscratch, uamem, message, model)
+    return self.personas[persona_name].open_convo_session(user.scratch, 
+                                                          user.a_mem, 
+                                                          message, 
+                                                          model)
     #FIXME: could be disabled, to not increase time while chatting, or you could, idk which one is better.  
     # self.step += 1
     # self.curr_time += datetime.timedelta(seconds=self.sec_per_step)

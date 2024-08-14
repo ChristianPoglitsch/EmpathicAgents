@@ -15,7 +15,9 @@ class PromptDispatcher(BaseDispatcher) :
     # FIXME: sender must also be known, at least the persona constructed around him, which is needed in conversing i think ? maybe not, after all its a single player sim.  
     persona_message = data.data.message
     persona_name = data.data.persona_name
-    response = server.prompt_processor(persona_name, persona_message, model)
+    user_name = data.data.user_name
+
+    response = server.prompt_processor(user_name, persona_name, persona_message, model)
     data.data.value = data.data.value + 1
     data.data.message = response 
     obj = data.model_dump_json()

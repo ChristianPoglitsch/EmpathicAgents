@@ -1,12 +1,12 @@
 """ Module providing dataclasses responsible for storing messages. """
 
 import json
-from typing import List
+from typing import List, Union
 
 class AIMessage:
     """A single message of a chat."""
 
-    def __init__(self, message: str, role: str, **kwargs: dict):
+    def __init__(self, sender:str, message:str, role: str, class_type:str):
         """
         Initializes the AIMessage instance.
 
@@ -18,8 +18,8 @@ class AIMessage:
         """
         self.message = message
         self.role = role
-        class_type = kwargs.get("class_type", "MessageAI")
-        self.class_type = class_type
+        self.sender = sender
+        self.class_type= class_type 
 
     def get_message_formatted(self) -> dict[str, str]:
         """
@@ -30,19 +30,25 @@ class AIMessage:
             with `class_type`, `role`, and `content`.
         """
         return {
-            "class_type": self.class_type,
-            "role": self.role,
+            "sender": self.sender, 
             "content": self.message,
+            "role": self.role,
+            "class_type": self.class_type,
         }
 
-    def print_message(self) -> str:
+    def print_message_role(self) -> str:
         """
         Formats the message as a string with the format `[role] content \\n`.
-
         Returns:
             str: The formatted message string.
         """
         return "[" + self.role + "] " + self.message + "\n"
+
+    def print_message_sender(self) -> str : 
+        """
+        Formats the message as a string with the format `sender: content \\n`.
+        """
+        return self.sender + ": " + self.message
 
     def get_user_message(self) -> str:
         """
@@ -89,16 +95,7 @@ class AIMessages:
     def __init__(self):
         self.messages: List[AIMessage] = []
 
-    def add_message(self, message: AIMessage):
-        """
-        Adds an AIMessage instance to the chat history.
-
-        Args:
-            message (AIMessage): The message to add to the chat history.
-        """
-        self.messages.append(message)
-
-    def add_message_role(self, message: str, role: str):
+    def add_message(self, message: str, sender:str, role: str, class_type:str):
         """
         Creates an AIMessage instance with the given `message` and `role`.
 
@@ -109,7 +106,7 @@ class AIMessages:
         Returns:
             AIMessage: The created AIMessage instance.
         """
-        self.messages.append(AIMessage(message, role))
+        self.messages.append(AIMessage(sender, message, role, class_type))
 
     def get_messages(self) -> List[AIMessage]:
         """
@@ -133,7 +130,7 @@ class AIMessages:
             message_list.append(item.get_message_formatted())
         return message_list
 
-    def prints_messages(self):
+    def prints_messages_role(self):
         """
         Represents the messages of this chat as a single string,
         with each message formatted as `[role] content \\n`.
@@ -143,7 +140,20 @@ class AIMessages:
         """
         m = ""
         for item in self.messages:
-            m = m + item.print_message()
+            m = m + item.print_message_role()
+        return m
+
+    def prints_messages_sender(self):
+        """
+        Represents the messages of this chat as a single string,
+        with each message formatted as `sender : content \\n`.
+
+        Returns:
+            str: A string containing all the messages formatted.
+        """
+        m = ""
+        for item in self.messages:
+            m = m + item.print_message_sender()
         return m
 
     def get_user_message(self) -> AIMessage:

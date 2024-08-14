@@ -10,6 +10,7 @@ class BaseMessage(BaseModel):
 # class data sent from unity to python endpoint for sending chat messages. 
 class PromptData(BaseModel):
     persona_name:str
+    user_name:str
     message: str
     value: int
 

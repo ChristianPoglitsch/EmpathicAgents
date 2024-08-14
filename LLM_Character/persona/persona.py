@@ -26,7 +26,7 @@ class Persona:
     self.a_mem = AssociativeMemory(f_a_mem_saved)
 
     scratch_saved = f"{folder_mem_saved}/scratch.json"
-    self.scratch = Scratch(name, scratch_saved)
+    self.scratch = PersonaScratch(name, scratch_saved)
   
   @staticmethod
   def save_as(folder_mem_saved:str, data:PersonaData):
@@ -37,7 +37,7 @@ class Persona:
     AssociativeMemory.save_as(f_a_mem_saved, data.as_mem_data) 
 
     scratch_saved = f"{folder_mem_saved}/scratch.json"
-    Scratch.save_as(scratch_saved, data.scratch_data)
+    PersonaScratch.save_as(scratch_saved, data.scratch_data)
 
 
   def save(self, save_folder): 
@@ -70,10 +70,17 @@ class Persona:
     self.plan(personas, new_day)
     self.reflect()
 
-  def open_convo_session(self, user_scratch:UserScratch, user_mem: AssociativeMemory, message:str, model:LLM_API) -> str: 
-    return chatting(user_scratch, user_mem, self.scratch, message, model)
-
-# def chatting(user_scratch: UserScratch , user_amem:AssociativeMemory, character_scratch:PersonaScratch, message:str,  model:LLM_API) -> str: 
+  def open_convo_session(self, 
+                        user_scratch:UserScratch, 
+                        user_mem: AssociativeMemory, 
+                        message:str,
+                        model:LLM_API): 
+    return chatting(user_scratch, 
+                    user_mem, 
+                    self.scratch, 
+                    self.a_mem,
+                    message, 
+                    model)
 
 
 

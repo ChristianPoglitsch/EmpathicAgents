@@ -2,6 +2,8 @@ import json
 import sys
 from typing import Union
 
+from LLM_Character.messages_dataclass import AIMessage
+
 sys.path.append('../../../')
 
 from LLM_Character.llm_api import LLM_API 
@@ -12,22 +14,28 @@ from LLM_Character.persona.memory_structures.associative_memory.associative_memo
 from LLM_Character.persona.memory_structures.associative_memory.concept_node import ConceptNode  
 COUNTER_LIMIT = 5
 
-def _create_prompt_input(uscratch:UserScratch, ua_mem:AssociativeMemory, cscratch:PersonaScratch, retrieved:dict[str, list[ConceptNode]], curr_context:str, curr_chat:str): 
+def _create_prompt_input(uscratch:UserScratch, 
+                         cscratch:PersonaScratch, 
+                         ca_mem:AssociativeMemory, 
+                         retrieved:dict[str, list[ConceptNode]], 
+                         curr_context:str, 
+                         curr_chat:list[AIMessage]): 
+
     prev_convo_insert = "\n"
-    if ua_mem.seq_chat:
-        for i in ua_mem.seq_chat: 
-            if i.object == cscratch.name: 
-                v1 = int((uscratch.curr_time - i.created).total_seconds()/60)
-                prev_convo_insert += f'{str(v1)} minutes ago, {uscratch.name} and {cscratch.name} were already {i.description} This context takes place after that conversation.'
+    if ca_mem.seq_chat:
+        for i in ca_mem.seq_chat: 
+            if i.object == uscratch.name: 
+                v1 = int((cscratch.curr_time - i.created).total_seconds()/60)
+                prev_convo_insert += f'{str(v1)} minutes ago, {cscratch.name} and {uscratch.name} were already {i.description} This context takes place after that conversation.'
                 break
     if prev_convo_insert == "\n": 
         prev_convo_insert = ""
-    if ua_mem.seq_chat: 
-        if int((uscratch.curr_time - ua_mem.seq_chat[-1].created).total_seconds()/60) > 480: 
+    if ca_mem.seq_chat: 
+        if int((cscratch.curr_time - ca_mem.seq_chat[-1].created).total_seconds()/60) > 480: 
             prev_convo_insert = ""
 
-    curr_sector = f"{uscratch.curr_location['sector']}"
-    curr_arena= f"{uscratch.curr_location['arena']}"
+    curr_sector = f"{cscratch.curr_location['sector']}"
+    curr_arena= f"{cscratch.curr_location['arena']}"
     curr_location = f"{curr_arena} in {curr_sector}"
 
     retrieved_str = ""
@@ -37,25 +45,26 @@ def _create_prompt_input(uscratch:UserScratch, ua_mem:AssociativeMemory, cscratc
 
     convo_str = ""
     for i in curr_chat:
-        convo_str += ": ".join(i) + "\n"
+        convo_str += i.print_message_sender()
+    
     if convo_str == "": 
         convo_str = "[The conversation has not started yet -- start it!]"
 
-    init_iss = f"Here is Here is a brief description of {uscratch.name}.\n{uscratch.get_str_iss()}"
+    init_iss = f"Here is Here is a brief description of {cscratch.name}.\n{cscratch.get_str_iss()}"
     prompt_input = [init_iss, 
-                    uscratch.name, 
+                    cscratch.name, 
                     retrieved_str, 
                     prev_convo_insert,
                     curr_location, 
                     curr_context, 
-                    uscratch.name, 
-                    cscratch.name,
+                    cscratch.name, 
+                    uscratch.name,
                     convo_str, 
-                    uscratch.name, 
+                    cscratch.name, 
+                    uscratch.name,
                     cscratch.name,
-                    uscratch.name,
-                    uscratch.name,
-                    uscratch.name]
+                    cscratch.name,
+                    cscratch.name]
     return prompt_input
 
 def _clean_up_response(response:str) -> Union[None, dict[str,str]]:
@@ -103,17 +112,16 @@ def _get_valid_output(model, prompt, counter_limit):
           return success
     return _get_fail_safe()
 
-# FIXME: COULD BE BETTER, the prompt is a mess. 
 def run_prompt_iterative_chat(uscratch:UserScratch, 
-                              uamem:AssociativeMemory, 
                               cscratch:PersonaScratch, 
+                              camem:AssociativeMemory, 
                               model:LLM_API, 
                               retrieved:dict[str, list[ConceptNode]], 
                               curr_context:str, 
-                              curr_chat:str, 
+                              curr_chat:list[AIMessage], 
                               verbose=False) -> Union[str, dict[str, str]]:
     prompt_template = "persona/prompt_template/iterative_convo.txt" 
-    prompt_input = _create_prompt_input(uscratch, uamem, cscratch, retrieved, curr_context, curr_chat)
+    prompt_input = _create_prompt_input(uscratch, cscratch, camem, retrieved, curr_context, curr_chat)
     prompt = p.generate_prompt(prompt_input, prompt_template)
     output = _get_valid_output(model, prompt, COUNTER_LIMIT)
     return output 

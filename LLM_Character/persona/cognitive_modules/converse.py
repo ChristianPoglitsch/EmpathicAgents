@@ -9,46 +9,32 @@ from LLM_Character.persona.prompt_modules.converse_prompts.summarize_relationshi
 from LLM_Character.persona.prompt_modules.converse_prompts.generate_iterative_chat import run_prompt_iterative_chat 
 from LLM_Character.persona.prompt_modules.converse_prompts.summarize_conversation import run_prompt_summarize_conversation
 from LLM_Character.persona.prompt_modules.converse_prompts.decomp_schedule import run_prompt_decomp_schedule
+from LLM_Character.persona.prompt_modules.converse_prompts.poignancy_chat import run_prompt_poignancy_chat
 
 from LLM_Character.persona.memory_structures.associative_memory.associative_memory import AssociativeMemory,  ConceptNode
 from LLM_Character.persona.memory_structures.scratch.persona_scratch import PersonaScratch
 from LLM_Character.persona.memory_structures.scratch.user_scratch import UserScratch 
 
 from LLM_Character.persona.cognitive_modules.retrieve import retrieve 
-from LLM_Character.messages_dataclass import AIMessages
+from LLM_Character.persona.cognitive_modules.reflect import reflect 
+from LLM_Character.messages_dataclass import AIMessage, AIMessages
 
 
-# FIXME no need for curr_convo, you should extract that from memory. 
-# personas.scratch.chat should be AIMessages.
+def chatting(user_scratch: UserScratch , 
+             character_scratch:PersonaScratch, 
+             character_mem:AssociativeMemory, 
+             message:str,  
+             model:LLM_API):
 
-# NOTE too naive
-# retrieved = retrieve(persona, [message], model, 50)[message]
-# summarized_idea = generate_summarize_ideas(persona, retrieved, message)
-#
-# next_line = generate_next_line(persona, curr_convo, summarized_idea)
-
-# TODO add chat to memory
-# curr_convo.add_message_role(message, "user")
-# curr_convo.add_message_role(next_line, persona.scratch.name)
-
-
-def chatting(user_scratch: UserScratch , character_mem:AssociativeMemory, character_scratch:PersonaScratch, message:str,  model:LLM_API) : 
-  # TODO add message to curr_chat ? or to scratch.chat probably better.
-
-  # TODO mogelijke verbetering: aadd message as focal point 
-  # retrieved = retrieve(persona, [message], model, 50)[message]
-  # hieronder wordt enkel informatie over degene die de message heeft gesuurd retrieved, maar er wordt
-  # niets gertrieved over de message zelf zoals hierboven.
-
+  # YOU WANT TO CREATE A MESSAGE DIRECTED TO USER! 
   focal_points = [f"{user_scratch.name}"]
   retrieved = retrieve(character_scratch, character_mem, focal_points, model, 50)
   relationship = generate_summarize_agent_relationship(user_scratch, character_scratch, model, retrieved)
-  
-  # FIXME vervang curr_chat met scratch.chat? and scratch.chat in AI_Messages opgeslagen?  
-  curr_chat = [] 
+ 
+  curr_chat = user_scratch.chat.get_messages() 
   last_chat = ""
   for i in curr_chat[-4:]:
-    last_chat += ": ".join(i) + "\n"
+    last_chat += i.print_message_sender()
   
   if last_chat: 
     focal_points = [f"{relationship}", 
@@ -58,34 +44,48 @@ def chatting(user_scratch: UserScratch , character_mem:AssociativeMemory, charac
     focal_points = [f"{relationship}", 
                     f"{character_scratch.name} is {character_scratch.act_description}"]
   
-  retrieved = retrieve(user_scratch, character_mem, focal_points, model, 15)
-  utt, end = generate_one_utterance(user_scratch, character_mem, character_scratch, model, retrieved, curr_chat)
+  # NOTE add message as focal point 
+  focal_points = [f"{user_scratch.name}", message]
+  retrieved = retrieve(character_scratch, character_mem, focal_points, model, 15)
+  utt, end = generate_one_utterance(user_scratch, 
+                                    character_scratch, 
+                                    character_mem, 
+                                    model, 
+                                    retrieved, 
+                                    curr_chat[-8:])
 
-
-  curr_chat += [[character_scratch.name, utt]]
+  user_scratch.chat.add_message(message, user_scratch.name, "User", "MessageAI")
+  user_scratch.chat.add_message(utt, character_scratch.name, "Assistant", "MessageAI") 
   
+  if end:
+    user_scratch.chat = AIMessages()
 
-  if end: 
     convo_summary = generate_convo_summary(init_persona, convo)
-
-    all_utt = ""
-    for row in curr_chat: 
-      speaker = row[0]
-      utt = row[1]
-      all_utt += f"{speaker}: {utt}\n"
-
-    convo_length = math.ceil(int(len(all_utt)/8) / 30)
+    last_chat = ""
+    for i in curr_chat:
+      last_chat += i.print_message_sender()
   
     inserted_act = convo_summary
-    inserted_act_dur = duration_min
-
-    act_address = f"<persona> {character_scratch.name}"
-    act_event = (user_scratch.name, "chat with", character_scratch.name)
-    chatting_with = character_scratch.name
+    inserted_act_dur = math.ceil(int(len(last_chat)/8) / 30) 
+    
+    
+    act_address = f"<persona> {user_scratch.name}"
+    act_event = (character_scratch.name, "chat with", user_scratch.name)
+    chatting_with = user_scratch.name
     chatting_with_buffer = {}
-    chatting_with_buffer[character_scratch.name] = 800
-
+    chatting_with_buffer[user_scratch.name] = 800
+    
+    curr_time = character_scratch.curr_time
+    if curr_time.second != 0: 
+      temp_curr_time = curr_time + datetime.timedelta(seconds=60 - curr_time.second)
+      chatting_end_time = temp_curr_time + datetime.timedelta(minutes=inserted_act_dur)
+    else: 
+      chatting_end_time = curr_time + datetime.timedelta(minutes=inserted_act_dur)
+    
+    act_start_time = character_scratch.act_start_time # FIXME not sure
+    
     _create_react(character_scratch, 
+                  model,
                   inserted_act, 
                   inserted_act_dur,
                   act_address, 
@@ -95,17 +95,11 @@ def chatting(user_scratch: UserScratch , character_mem:AssociativeMemory, charac
                   chatting_with_buffer, 
                   chatting_end_time, 
                   act_start_time)
-
-    # FIXME: add this event to memory stream
-    # add chat to memory stream.
-
-    # if end:
-    # TODO empty curr_chat or scratch.chat
-      # return end_chat, send message to unity to disable chat modus for example. 
-    return curr_chat, convo_length
+    
+    p_event = reflect(character_scratch, character_mem)
+    remember_chat(character_scratch, character_mem, p_event, model)
   return utt
   
-
 def generate_summarize_agent_relationship(user_scratch: UserScratch , 
                                           character_scratch:PersonaScratch,
                                           model: LLM_API, 
@@ -126,22 +120,21 @@ def generate_summarize_agent_relationship(user_scratch: UserScratch ,
   return summarized_relationship
 
 def generate_one_utterance(uscratch: UserScratch,
-                           uamem: AssociativeMemory,
                            cscratch:PersonaScratch,
+                           camem: AssociativeMemory,
                            model: LLM_API, 
                            retrieved:dict[str, list[ConceptNode]],
-                           curr_chat,
-                           ):
-  curr_context = (f"{uscratch.name} " + 
-              f"was {uscratch.act_description} " + 
-              f"when {uscratch.name} " + 
-              f"saw {cscratch.name} " + 
-              f"in the middle of {cscratch.act_description}.\n")
-  curr_context += (f"{uscratch.name} " +
+                           curr_chat:list[AIMessage]):
+  # FIXME dont know if this context will always work, check later when everything is in place. 
+  curr_context = (f"{cscratch.name} " + 
+              f"was {cscratch.act_description} " + 
+              f"when {cscratch.name} " + 
+              f"saw {uscratch.name} " + 
+              f"in the middle of {uscratch.act_description}.\n")
+  curr_context += (f"{cscratch.name} " +
               f"is initiating a conversation with " +
-              f"{cscratch.name}.")
-  x = run_prompt_iterative_chat(uscratch, uamem, cscratch, model, retrieved, curr_context, curr_chat)
-  #FIXME: if x is not a string..... 
+              f"{uscratch.name}.")
+  x = run_prompt_iterative_chat(uscratch, cscratch, camem, model, retrieved, curr_context, curr_chat)
   return x['utterance'], x['end']
 
 
@@ -150,7 +143,8 @@ def generate_convo_summary(persona, convo):
   return convo_summary
 
 
-def _create_react(cscratch:PersonaScratch, 
+def _create_react(cscratch:PersonaScratch,
+                  model:LLM_API,
                   inserted_act, 
                   inserted_act_dur,
                   act_address, 
@@ -190,8 +184,12 @@ def _create_react(cscratch:PersonaScratch,
     dur_sum += dur
     count += 1
 
-  ret = generate_new_decomp_schedule(cscratch, inserted_act, inserted_act_dur, 
-                                       start_hour, end_hour)
+  ret = generate_new_decomp_schedule(cscratch,
+                                     model,
+                                     inserted_act, 
+                                     inserted_act_dur, 
+                                     start_hour, 
+                                     end_hour)
   cscratch.f_daily_schedule[start_index:end_index] = ret
   cscratch.add_new_action(act_address,
                            inserted_act_dur,
@@ -203,7 +201,12 @@ def _create_react(cscratch:PersonaScratch,
                            chatting_end_time,
                            act_start_time)
 
-def generate_new_decomp_schedule(cscratch, inserted_act, inserted_act_dur,  start_hour, end_hour): 
+def generate_new_decomp_schedule(cscratch, 
+                                 model:LLM_API,
+                                 inserted_act, 
+                                 inserted_act_dur,  
+                                 start_hour, 
+                                 end_hour): 
   today_min_pass = (int(cscratch.curr_time.hour) * 60 + int(cscratch.curr_time.minute) + 1)
   main_act_dur = []
   truncated_act_dur = []
@@ -243,4 +246,44 @@ def generate_new_decomp_schedule(cscratch, inserted_act, inserted_act_dur,  star
                                     start_time_hour,
                                     end_time_hour,
                                     inserted_act,
-                                    inserted_act_dur)[0]
+                                    inserted_act_dur,
+                                    model)[0]
+
+
+def remember_chat(cscratch: PersonaScratch, ca_mem:AssociativeMemory, p_event, model):
+  s, p, o, desc = p_event
+  desc = f"{s.split(':')[-1]} is {desc}"
+  p_event = (s, p, o)
+
+  keywords = set()
+  sub = p_event[0]
+  obj = p_event[2]
+  if ":" in p_event[0]: 
+    sub = p_event[0].split(":")[-1]
+  if ":" in p_event[2]: 
+    obj = p_event[2].split(":")[-1]
+  keywords.update([sub, obj])
+
+  if p_event[0] == f"{cscratch.name}" and p_event[1] == "chat with": 
+    curr_event = cscratch.act_event
+
+    if cscratch.act_description in ca_mem.embeddings: 
+      chat_embedding = ca_mem.embeddings[cscratch.act_description]
+    else: 
+      chat_embedding = model.get_embedding(cscratch.act_description)
+
+    chat_embedding_pair = (cscratch.act_description, chat_embedding)
+    chat_poignancy = generate_poig_score(cscratch)
+    ca_mem.add_chat(cscratch.curr_time, 
+                    None,
+                    curr_event[0], 
+                    curr_event[1], 
+                    curr_event[2], 
+                    cscratch.act_description, 
+                    keywords, 
+                    chat_poignancy, 
+                    chat_embedding_pair, 
+                    cscratch.chat)
+
+def generate_poig_score(scratch:PersonaScratch) : 
+    return run_prompt_poignancy_chat(scratch)[0]
