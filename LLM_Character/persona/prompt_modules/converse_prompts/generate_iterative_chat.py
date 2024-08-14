@@ -1,5 +1,6 @@
 import json
 import sys
+from typing import Union
 
 sys.path.append('../../../')
 
@@ -57,12 +58,13 @@ def _create_prompt_input(uscratch:UserScratch, ua_mem:AssociativeMemory, cscratc
                     uscratch.name]
     return prompt_input
 
-def _clean_up_response(response:str):
-    response = extract_first_json_dict(response)
-
+def _clean_up_response(response:str) -> Union[None, dict[str,str]]:
+    obj = extract_first_json_dict(response)
+    if not obj :
+        return None
     cleaned_dict = dict()
     cleaned = []
-    for _, val in response.items(): 
+    for _, val in obj.items(): 
       cleaned += [val]
     cleaned_dict["utterance"] = cleaned[0]
     cleaned_dict["end"] = True
@@ -70,7 +72,7 @@ def _clean_up_response(response:str):
       cleaned_dict["end"] = False
     return cleaned_dict
 
-def extract_first_json_dict(data_str):
+def extract_first_json_dict(data_str:str) -> Union[None, dict[str,str]]:
     start_idx = data_str.find('{')
     end_idx = data_str.find('}', start_idx) + 1
 
@@ -102,14 +104,19 @@ def _get_valid_output(model, prompt, counter_limit):
     return _get_fail_safe()
 
 # FIXME: COULD BE BETTER, the prompt is a mess. 
-def run_prompt_summarize_relationship(uscratch:UserScratch, cscratch:PersonaScratch, model:LLM_API, statements:str, verbose=False):
-    prompt_template = "persona/prompt_template/summarize_chat_relationship.txt" 
-    prompt_input = _create_prompt_input(uscratch, cscratch, statements)
+def run_prompt_iterative_chat(uscratch:UserScratch, 
+                              uamem:AssociativeMemory, 
+                              cscratch:PersonaScratch, 
+                              model:LLM_API, 
+                              retrieved:dict[str, list[ConceptNode]], 
+                              curr_context:str, 
+                              curr_chat:str, 
+                              verbose=False) -> Union[str, dict[str, str]]:
+    prompt_template = "persona/prompt_template/iterative_convo.txt" 
+    prompt_input = _create_prompt_input(uscratch, uamem, cscratch, retrieved, curr_context, curr_chat)
     prompt = p.generate_prompt(prompt_input, prompt_template)
     output = _get_valid_output(model, prompt, COUNTER_LIMIT)
-
-    return output, [output, prompt, prompt_input]
-
+    return output 
 
 if __name__ == "__main__":
     from LLM_Character.llm_comms.llm_local import LocalComms
@@ -122,4 +129,4 @@ if __name__ == "__main__":
     modelc.init(model_id)
 
     model = LLM_API(modelc)
-    run_prompt_summarize_relationship(person, model, "i will drive to the broeltorens.", "kortrijk" )
+    # run_prompt_iterative_chat(Null,Null, Null, Null, Null, "", "")
