@@ -12,11 +12,7 @@ from LLM_Character.persona.memory_structures.scratch.user_scratch import UserScr
 
 COUNTER_LIMIT = 5
 
-def _create_prompt_input(conversation): 
-    convo_str = ""
-    for row in conversation: 
-      convo_str += f'{row[0]}: "{row[1]}"\n'
-
+def _create_prompt_input(convo_str:str): 
     prompt_input = [convo_str]
     return prompt_input
 
@@ -42,7 +38,7 @@ def _get_valid_output(model, prompt, counter_limit):
     return _get_fail_safe()
 
 def run_prompt_summarize_conversation(model:LLM_API, 
-                                      conversation, 
+                                      conversation:str, 
                                       verbose=False):
     prompt_template = "persona/prompt_template/summarize_conversation.txt" 
     prompt_input = _create_prompt_input(conversation)

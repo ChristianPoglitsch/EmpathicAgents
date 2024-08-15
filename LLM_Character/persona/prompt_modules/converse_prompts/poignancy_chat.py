@@ -11,11 +11,12 @@ from LLM_Character.persona.memory_structures.scratch.persona_scratch import Pers
 COUNTER_LIMIT = 5
 
 
-def _create_prompt_input(scratch:PersonaScratch): 
+def _create_prompt_input(scratch:PersonaScratch,
+                         description:str): 
     prompt_input = [scratch.name,
                     scratch.get_str_iss(),
                     scratch.name,
-                    scratch.act_description]
+                    description]
     return prompt_input
 
 def _clean_up_response(response:str):
@@ -38,11 +39,12 @@ def _get_valid_output(model, prompt, counter_limit):
           return success
     return _get_fail_safe()
 
-def run_prompt_poignancy_chat(cscratch:PersonaScratch, 
-                                model:LLM_API, 
-                                verbose=False):
+def run_prompt_poignancy_chat(cscratch:PersonaScratch,
+                              description:str,
+                              model:LLM_API, 
+                              verbose=False):
     prompt_template = "persona/prompt_template/poignancy_chat.txt"
-    prompt_input = _create_prompt_input(cscratch) 
+    prompt_input = _create_prompt_input(cscratch, description) 
 #   example_output = "5" ########
 #   special_instruction = "The output should ONLY contain ONE integer value on the scale of 1 to 10." ########
     prompt = p.generate_prompt(prompt_input, prompt_template)

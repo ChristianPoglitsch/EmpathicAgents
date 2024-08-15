@@ -5,6 +5,7 @@ import datetime
 import json
 sys.path.append('../../')
 
+from LLM_Character.messages_dataclass import AIMessages
 from LLM_Character.world.validation_dataclass import  ScratchData
 from LLM_Character.util import check_if_file_exists
 from LLM_Character.persona.memory_structures.scratch.user_scratch import BaseScratch
@@ -52,7 +53,7 @@ class PersonaScratch:
       self.act_event = (self.name, None, None)
 
       self.chatting_with = None 
-      self.chat = None
+      self.chat = AIMessages() 
       self.chatting_with_buffer = None 
       self.chatting_end_time = None                  
 

@@ -1,6 +1,8 @@
 import json
+from os import walk
 import sys
 import datetime
+from typing import Union
 sys.path.append('../../../')
 
 from LLM_Character.persona.memory_structures.associative_memory.concept_node import ConceptNode
@@ -255,9 +257,7 @@ class AssociativeMemory:
     ret = set(ret)
     return ret
 
-  def get_last_chat(self, target_persona_name): 
-    if target_persona_name.lower() in self.kw_to_chat: 
+  def get_last_chat(self, target_persona_name:Union[str, None]) -> Union[ConceptNode, None]: 
+    if target_persona_name and target_persona_name.lower() in self.kw_to_chat: 
       return self.kw_to_chat[target_persona_name.lower()][0]
-    else: 
-      return False
-
+    return None
