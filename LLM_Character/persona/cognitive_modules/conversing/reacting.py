@@ -2,7 +2,7 @@ import datetime
 import sys
 import math
 
-sys.path.append('../../')
+sys.path.append('../../../../')
 
 from LLM_Character.llm_api import LLM_API 
 
@@ -14,7 +14,7 @@ from LLM_Character.persona.memory_structures.scratch.persona_scratch import Pers
 from LLM_Character.persona.memory_structures.scratch.user_scratch import UserScratch 
 
 from LLM_Character.persona.cognitive_modules.retrieve import retrieve 
-from LLM_Character.messages_dataclass import AIMessage
+from LLM_Character.messages_dataclass import AIMessage, AIMessages
 
 def _generate_response(user_scratch: UserScratch, 
                        character_scratch:PersonaScratch, 
@@ -27,7 +27,7 @@ def _generate_response(user_scratch: UserScratch,
   retrieved = retrieve(character_scratch, character_mem, focal_points, model, 50)
   relationship = generate_summarize_agent_relationship(user_scratch, character_scratch, model, retrieved)
  
-  curr_chat = user_scratch.chat.get_messages() 
+  curr_chat = user_scratch.chat.get_messages()
   last_chat = ""
   for i in curr_chat[-4:]:
     last_chat += i.print_message_sender()
@@ -64,6 +64,9 @@ def generate_summarize_agent_relationship(user_scratch: UserScratch ,
   for i in all_embedding_keys: 
     all_embedding_key_str += f"{i}\n"
 
+  if all_embedding_key_str == "":
+    all_embedding_key_str = "There is no statements to share." 
+  
   summarized_relationship = run_prompt_summarize_relationship(
                               user_scratch,
                               character_scratch,
@@ -81,8 +84,10 @@ def generate_one_utterance(uscratch: UserScratch,
   curr_context = (f"{cscratch.name} " + 
               f"was {cscratch.act_description} " + 
               f"when {cscratch.name} " + 
-              f"saw {uscratch.name} " + 
-              f"in the middle of {uscratch.act_description}.\n")
+              f"saw {uscratch.name} " +
+              # FIXME for now, the user doesnt have any plans. 
+              # f"in the middle of {uscratch.act_description}.\n")
+              f".\n")
   curr_context += (f"{cscratch.name} " +
               f"is initiating a conversation with " +
               f"{uscratch.name}.")

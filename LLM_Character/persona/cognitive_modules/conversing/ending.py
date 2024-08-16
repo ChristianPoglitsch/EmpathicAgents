@@ -1,6 +1,7 @@
 import datetime
 import sys
-sys.path.append('../../')
+import math
+sys.path.append('../../../../')
 
 from LLM_Character.llm_api import LLM_API 
 from LLM_Character.persona.prompt_modules.converse_prompts.decomp_schedule import run_prompt_decomp_schedule
@@ -15,11 +16,17 @@ from LLM_Character.persona.prompt_modules.converse_prompts.decomp_schedule impor
 def _end_conversation(user_scratch: UserScratch,
                            character_scratch:PersonaScratch, 
                            model:LLM_API):
-    convo = user_scratch.chat.get_messages() 
-
+    
     convo = user_scratch.chat.prints_messages_sender()
+    
+    print("convo")
+    print(convo)
+    
     convo_summary = generate_convo_summary(convo, model)
-  
+    
+    print("convo_summary")
+    print(convo_summary)
+    
     inserted_act = convo_summary
     inserted_act_dur = math.ceil(int(len(convo)/8) / 30) 
     
@@ -71,38 +78,40 @@ def _create_react(cscratch:PersonaScratch,
   for i in range (cscratch.get_f_daily_schedule_hourly_org_index()): 
     min_sum += cscratch.f_daily_schedule_hourly_org[i][1]
   start_hour = int (min_sum/60)
+  
+  if cscratch.f_daily_schedule_hourly_org : # NOTE ibr: added
+    if (cscratch.f_daily_schedule_hourly_org[cscratch.get_f_daily_schedule_hourly_org_index()][1] >= 120):
+      end_hour = start_hour + cscratch.f_daily_schedule_hourly_org[cscratch.get_f_daily_schedule_hourly_org_index()][1]/60
 
-  if (cscratch.f_daily_schedule_hourly_org[cscratch.get_f_daily_schedule_hourly_org_index()][1] >= 120):
-    end_hour = start_hour + cscratch.f_daily_schedule_hourly_org[cscratch.get_f_daily_schedule_hourly_org_index()][1]/60
+    elif (cscratch.f_daily_schedule_hourly_org[cscratch.get_f_daily_schedule_hourly_org_index()][1] + 
+        cscratch.f_daily_schedule_hourly_org[cscratch.get_f_daily_schedule_hourly_org_index()+1][1]): 
+      end_hour = start_hour + ((cscratch.f_daily_schedule_hourly_org[cscratch.get_f_daily_schedule_hourly_org_index()][1] + 
+                cscratch.f_daily_schedule_hourly_org[cscratch.get_f_daily_schedule_hourly_org_index()+1][1])/60)
 
-  elif (cscratch.f_daily_schedule_hourly_org[cscratch.get_f_daily_schedule_hourly_org_index()][1] + 
-      cscratch.f_daily_schedule_hourly_org[cscratch.get_f_daily_schedule_hourly_org_index()+1][1]): 
-    end_hour = start_hour + ((cscratch.f_daily_schedule_hourly_org[cscratch.get_f_daily_schedule_hourly_org_index()][1] + 
-              cscratch.f_daily_schedule_hourly_org[cscratch.get_f_daily_schedule_hourly_org_index()+1][1])/60)
+    else: 
+      end_hour = start_hour + 2
+    end_hour = int(end_hour)
 
-  else: 
-    end_hour = start_hour + 2
-  end_hour = int(end_hour)
+    dur_sum = 0
+    count = 0 
+    start_index = None
+    end_index = None
+    for _, dur in cscratch.f_daily_schedule: 
+      if dur_sum >= start_hour * 60 and start_index == None:
+        start_index = count
+      if dur_sum >= end_hour * 60 and end_index == None: 
+        end_index = count
+      dur_sum += dur
+      count += 1
 
-  dur_sum = 0
-  count = 0 
-  start_index = None
-  end_index = None
-  for _, dur in cscratch.f_daily_schedule: 
-    if dur_sum >= start_hour * 60 and start_index == None:
-      start_index = count
-    if dur_sum >= end_hour * 60 and end_index == None: 
-      end_index = count
-    dur_sum += dur
-    count += 1
-
-  ret = generate_new_decomp_schedule(cscratch,
-                                     model,
-                                     inserted_act, 
-                                     inserted_act_dur, 
-                                     start_hour, 
-                                     end_hour)
-  cscratch.f_daily_schedule[start_index:end_index] = ret
+    ret = generate_new_decomp_schedule(cscratch,
+                                      model,
+                                      inserted_act, 
+                                      inserted_act_dur, 
+                                      start_hour, 
+                                      end_hour)
+    cscratch.f_daily_schedule[start_index:end_index] = ret
+  
   cscratch.add_new_action(act_address,
                            inserted_act_dur,
                            inserted_act,
