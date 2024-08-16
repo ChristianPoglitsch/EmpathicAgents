@@ -8,7 +8,7 @@ from LLM_Character.persona.cognitive_modules.retrieve import retrieve
 from LLM_Character.persona.prompt_modules.planning_prompts.long_term_planning.wake_up import run_prompt_wake_up 
 from LLM_Character.persona.prompt_modules.planning_prompts.long_term_planning.daily_plan import run_prompt_daily_plan
 from LLM_Character.persona.prompt_modules.planning_prompts.long_term_planning.revise_identity  import run_prompt_revise_identity
-# from LLM_Character.persona.prompt_modules.planning_prompts.long_term_planning.hourly_schedule import run_prompt_hourly_schedule
+from LLM_Character.persona.prompt_modules.planning_prompts.long_term_planning.hourly_schedule import run_prompt_hourly_schedule
 
 from LLM_Character.persona.memory_structures.scratch.persona_scratch import PersonaScratch
 from LLM_Character.persona.memory_structures.associative_memory.associative_memory import AssociativeMemory
@@ -103,8 +103,8 @@ def generate_wake_up_hour(scratch:PersonaScratch, model):
 def generate_first_daily_plan(scratch:PersonaScratch, wake_up_hour): 
   return run_prompt_daily_plan(scratch, wake_up_hour)[0]
 
-def generate_hourly_schedule(persona, curr_hour_str, n_activity, hour_str):
-  return None #run_prompt_hourly_schedule(persona, curr_hour_str, n_activity, hour_str)[0]
+def generate_hourly_schedule(scratch:PersonaScratch, curr_hour_str:str, n_activity:list[str], hour_str:list[str]):
+  return run_prompt_hourly_schedule(scratch, curr_hour_str, n_activity, hour_str)[0]
 
 if __name__ == "__main__":
   from LLM_Character.llm_comms.llm_local import LocalComms

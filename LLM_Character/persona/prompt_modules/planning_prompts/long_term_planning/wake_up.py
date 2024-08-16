@@ -3,10 +3,9 @@ Given the persona, returns an integer that indicates the hour when the
 persona wakes up.  
 """
 
-import sys
-sys.path.append('../../../../')
-
+from LLM_Character.util import BASE_DIR
 from LLM_Character.llm_api import LLM_API  
+from LLM_Character.messages_dataclass import AIMessages
 from LLM_Character.persona.prompt_modules.prompt import generate_prompt 
 from LLM_Character.persona.memory_structures.scratch.persona_scratch import PersonaScratch 
 
@@ -22,26 +21,30 @@ def _clean_up_response(response:str) -> int:
     cr = int(response.strip().lower().split("am")[0])
     return cr
  
-def _validate_response(response:str) -> bool:
+def _validate_response(output:str): 
     try: 
-        _clean_up_response(response)
-    except: 
-        return False
-    return True
+        return _clean_up_response(output)
+    except:
+      return None
+
+def _get_fail_safe() -> int: 
+    return 8 
+
+def _get_valid_output(model:LLM_API, prompt:AIMessages, counter_limit):
+    for _ in range(counter_limit):
+        output = model.query_text(prompt).strip()
+        success = _validate_response(output)
+        if success:
+          return success
+    return _get_fail_safe()
 
 def run_prompt_wake_up(scratch:PersonaScratch, model:LLM_API, verbose=False):
-    prompt_template = "LLM_Character/persona/prompt_template/wake_up_hour.txt"
+    prompt_template = BASE_DIR + "/LLM_Character/persona/prompt_modules/templates/wake_up_hour.txt" 
     prompt_input = _create_prompt_input(scratch)
     prompt = generate_prompt(prompt_input, prompt_template)
-    output = model.query_text(prompt)
-
-    # NOTE: REPEAT UNTIL IT SPITS OUT A RESPONSE WITH THE CORRECT FORMAT 
-    counter = 0
-    while not _validate_response(output) and counter < COUNTER_LIMIT: 
-        output = model.query_text(prompt)
-        counter += 1
-    output = _clean_up_response(output)
-
+    am = AIMessages()
+    am.add_message(prompt, None, "user", "system")  # NOTE not really user btw 
+    output = _get_valid_output(model, am, COUNTER_LIMIT)
     # if verbose: 
     # print_run_prompts(prompt_template, persona, gpt_param, 
     #                   prompt_input, prompt, output)

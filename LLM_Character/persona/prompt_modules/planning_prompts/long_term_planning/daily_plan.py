@@ -2,12 +2,10 @@
 The long term planning that spans a day. 
 """
 
-import sys
-sys.path.append('../../../../')
-
+from LLM_Character.util import BASE_DIR
 from LLM_Character.llm_api import LLM_API  
+from LLM_Character.persona.prompt_modules.prompt import generate_prompt 
 from LLM_Character.persona.memory_structures.scratch.persona_scratch import PersonaScratch
-import LLM_Character.persona.prompt_modules.prompt as p 
 
 COUNTER_LIMIT = 5
 
@@ -55,9 +53,9 @@ def _get_valid_output(model, prompt, counter_limit):
     return _get_fail_safe()
 
 def run_prompt_daily_plan(scratch:PersonaScratch, wake_up_hour:int, model:LLM_API, verbose=False):
-    prompt_template = "LLM_Character/persona/prompt_template/daily_planning.txt"
+    prompt_template = BASE_DIR + "/LLM_Character/persona/prompt_modules/templates/daily_planning.txt" 
     prompt_input = _create_prompt_input(scratch, wake_up_hour)
-    prompt = p.generate_prompt(prompt_input, prompt_template)
+    prompt = generate_prompt(prompt_input, prompt_template)
     output = _get_valid_output(model, prompt, COUNTER_LIMIT)
     output = ([f"wake up and complete the morning routine at {wake_up_hour}:00 am"] + output)
     return output, [output, prompt, prompt_input]
