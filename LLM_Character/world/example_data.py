@@ -14,7 +14,7 @@ example_setup_data = SetupData(
     ),
     personas={
         "Alice": PersonaData(
-            scratch_data=ScratchData(
+            scratch_data=PersonaScratchData(
                 curr_time="2024-08-13T12:00:00Z",
                 daily_plan_req="Complete project report",
                 name="Alice Smith",
@@ -102,7 +102,7 @@ example_setup_data = SetupData(
             )
         ),
         "Bob": PersonaData(
-            scratch_data=ScratchData(
+            scratch_data=PersonaScratchData(
                 curr_time="2024-08-13T12:00:00Z",
                 daily_plan_req="Prepare presentation",
                 name="Bob Johnson",

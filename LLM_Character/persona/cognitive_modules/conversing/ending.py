@@ -1,7 +1,5 @@
 import datetime
-import sys
 import math
-sys.path.append('../../../../')
 
 from LLM_Character.llm_api import LLM_API 
 from LLM_Character.persona.prompt_modules.converse_prompts.decomp_schedule import run_prompt_decomp_schedule
@@ -18,14 +16,7 @@ def _end_conversation(user_scratch: UserScratch,
                            model:LLM_API):
     
     convo = user_scratch.chat.prints_messages_sender()
-    
-    print("convo")
-    print(convo)
-    
     convo_summary = generate_convo_summary(convo, model)
-    
-    print("convo_summary")
-    print(convo_summary)
     
     inserted_act = convo_summary
     inserted_act_dur = math.ceil(int(len(convo)/8) / 30) 

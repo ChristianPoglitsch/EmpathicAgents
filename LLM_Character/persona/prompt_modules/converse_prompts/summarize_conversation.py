@@ -1,13 +1,7 @@
 # run_prompt_summarize_conversation
-import json
-import sys
-
-from LLM_Character.messages_dataclass import AIMessages
-
-
-sys.path.append('../../../')
-
+from LLM_Character.util import BASE_DIR
 from LLM_Character.llm_api import LLM_API 
+from LLM_Character.messages_dataclass import AIMessages
 from LLM_Character.persona.prompt_modules.prompt import generate_prompt 
 from LLM_Character.persona.memory_structures.scratch.persona_scratch import PersonaScratch
 from LLM_Character.persona.memory_structures.scratch.user_scratch import UserScratch
@@ -42,7 +36,7 @@ def _get_valid_output(model:LLM_API, prompt:AIMessages, counter_limit):
 def run_prompt_summarize_conversation(model:LLM_API, 
                                       conversation:str, 
                                       verbose=False):
-    prompt_template = "../prompt_modules/templates/summarize_conversation.txt" 
+    prompt_template = BASE_DIR + "/LLM_Character/persona/prompt_modules/templates/summarize_conversation.txt" 
     prompt_input = _create_prompt_input(conversation)
     prompt = generate_prompt(prompt_input, prompt_template)
     

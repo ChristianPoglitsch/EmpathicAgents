@@ -1,11 +1,8 @@
-import json
-import sys
 import datetime
 
-sys.path.append('../../../')
-
+from LLM_Character.util import BASE_DIR
 from LLM_Character.llm_api import LLM_API 
-import LLM_Character.persona.prompt_modules.prompt as p 
+from LLM_Character.persona.prompt_modules.prompt import generate_prompt 
 from LLM_Character.persona.memory_structures.scratch.persona_scratch import PersonaScratch
 
 COUNTER_LIMIT = 5
@@ -136,7 +133,7 @@ def run_prompt_decomp_schedule(cscratch:PersonaScratch,
                                 inserted_act_dur,
                                 model:LLM_API, 
                                 verbose=False):
-    prompt_template = "persona/prompt_template/decomp_schedule.txt"
+    prompt_template = BASE_DIR + "/LLM_Character/persona/prompt_modules/templates/decomp_schedule.txt" 
     prompt_input = _create_prompt_input(cscratch, 
                                         main_act_dur, 
                                         truncated_act_dur, 
@@ -144,7 +141,7 @@ def run_prompt_decomp_schedule(cscratch:PersonaScratch,
                                         end_time_hour, 
                                         inserted_act, 
                                         inserted_act_dur)
-    prompt = p.generate_prompt(prompt_input, prompt_template)
+    prompt = generate_prompt(prompt_input, prompt_template)
     output = _get_valid_output(model, prompt, main_act_dur, truncated_act_dur, COUNTER_LIMIT)
 
     return output, [output, prompt, prompt_input]

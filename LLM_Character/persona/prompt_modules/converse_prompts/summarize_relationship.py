@@ -1,10 +1,4 @@
-import json
-import sys
-
-
-
-sys.path.append('../../../')
-
+from LLM_Character.util import BASE_DIR
 from LLM_Character.llm_api import LLM_API 
 from LLM_Character.messages_dataclass import AIMessage, AIMessages
 from LLM_Character.persona.prompt_modules.prompt import generate_prompt 
@@ -39,7 +33,7 @@ def _get_valid_output(model:LLM_API, prompt:AIMessages, counter_limit):
 
 # FIXME: COULD BE BETTER, the prompt is a mess. 
 def run_prompt_summarize_relationship(uscratch:UserScratch, cscratch:PersonaScratch, model:LLM_API, statements:str, verbose=False):
-    prompt_template = "../prompt_modules/templates/summarize_chat_relationship.txt" 
+    prompt_template = BASE_DIR + "/LLM_Character/persona/prompt_modules/templates/summarize_chat_relationship.txt" 
     prompt_input = _create_prompt_input(uscratch, cscratch, statements)
     prompt = generate_prompt(prompt_input, prompt_template)
     am = AIMessages()

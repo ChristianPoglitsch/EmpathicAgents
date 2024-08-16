@@ -26,7 +26,8 @@ def _generate_response(user_scratch: UserScratch,
   focal_points = [f"{user_scratch.name}"]
   retrieved = retrieve(character_scratch, character_mem, focal_points, model, 50)
   relationship = generate_summarize_agent_relationship(user_scratch, character_scratch, model, retrieved)
- 
+  print("relationship")
+  print(relationship)
   curr_chat = user_scratch.chat.get_messages()
   last_chat = ""
   for i in curr_chat[-4:]:

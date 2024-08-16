@@ -1,10 +1,5 @@
-import json
-import sys
-import datetime
 
-
-sys.path.append('../../../')
-
+from LLM_Character.util import BASE_DIR
 from LLM_Character.llm_api import LLM_API 
 from LLM_Character.messages_dataclass import AIMessages
 from LLM_Character.persona.prompt_modules.prompt import generate_prompt  
@@ -44,7 +39,7 @@ def run_prompt_poignancy_chat(cscratch:PersonaScratch,
                               description:str,
                               model:LLM_API, 
                               verbose=False):
-    prompt_template = "../prompt_modules/templates/poignancy_chat.txt"
+    prompt_template = BASE_DIR + "/LLM_Character/persona/prompt_modules/templates/poignancy_chat.txt" 
     prompt_input = _create_prompt_input(cscratch, description) 
 #   example_output = "5" ########
 #   special_instruction = "The output should ONLY contain ONE integer value on the scale of 1 to 10." ########

@@ -1,17 +1,16 @@
 import json
-import sys
 from typing import Union
 
-
-sys.path.append('../../../')
-
+from LLM_Character.util import BASE_DIR
 from LLM_Character.llm_api import LLM_API 
+
+from LLM_Character.messages_dataclass import AIMessage, AIMessages
 from LLM_Character.persona.prompt_modules.prompt import generate_prompt 
 from LLM_Character.persona.memory_structures.scratch.persona_scratch import PersonaScratch
 from LLM_Character.persona.memory_structures.scratch.user_scratch import UserScratch
 from LLM_Character.persona.memory_structures.associative_memory.associative_memory import AssociativeMemory  
 from LLM_Character.persona.memory_structures.associative_memory.concept_node import ConceptNode  
-from LLM_Character.messages_dataclass import AIMessage, AIMessages
+
 COUNTER_LIMIT = 5
 
 def _create_prompt_input(uscratch:UserScratch, 
@@ -122,12 +121,16 @@ def run_prompt_iterative_chat(uscratch:UserScratch,
                               curr_context:str, 
                               curr_chat:list[AIMessage], 
                               verbose=False) -> Union[str, dict[str, str]]:
-    prompt_template = "../prompt_modules/templates/iterative_convo.txt" 
+    prompt_template = BASE_DIR + "/LLM_Character/persona/prompt_modules/templates/iterative_convo.txt" 
     prompt_input = _create_prompt_input(uscratch, cscratch, camem, retrieved, curr_context, curr_chat)
     prompt = generate_prompt(prompt_input, prompt_template)
+    print("prompt")
+    print(prompt)
     am = AIMessages()
     am.add_message(prompt, None, "user", "system")
     output = _get_valid_output(model, am, COUNTER_LIMIT)
+    print("output")
+    print(output)
     return output 
 
 if __name__ == "__main__":

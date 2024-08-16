@@ -1,16 +1,11 @@
-import sys
-sys.path.append('../../../')
-
 from LLM_Character.llm_api import LLM_API 
 from LLM_Character.messages_dataclass import AIMessages
 
 from LLM_Character.persona.memory_structures.associative_memory.associative_memory import AssociativeMemory
 from LLM_Character.persona.memory_structures.scratch.persona_scratch import PersonaScratch
 from LLM_Character.persona.memory_structures.scratch.user_scratch import UserScratch 
-
 from LLM_Character.persona.cognitive_modules.conversing.reacting import _generate_response 
 from LLM_Character.persona.cognitive_modules.conversing.ending import _end_conversation 
-
 from LLM_Character.persona.prompt_modules.converse_prompts.poignancy_chat import run_prompt_poignancy_chat
 
 def chatting(user_scratch: UserScratch , 
@@ -74,11 +69,11 @@ if __name__ == "__main__":
   from LLM_Character.persona.persona import Persona
   from LLM_Character.persona.user import User 
   from LLM_Character.llm_comms.llm_local import LocalComms
-  
+  from LLM_Character.util import BASE_DIR
   print("starting take off ...")
   
-  person = Persona("Camila", "../../storage/initial/personas/Camila")
-  user = User("Louis", "../../storage/initial/users/Louis")
+  person = Persona("Camila", BASE_DIR + "/LLM_Character/storage/initial/personas/Camila")
+  user = User("Louis", BASE_DIR + "/LLM_Character/storage/initial/users/Louis")
   modelc = LocalComms()
   
   model_id = "mistralai/Mistral-7B-Instruct-v0.2"
@@ -87,8 +82,23 @@ if __name__ == "__main__":
   model = LLM_API(modelc)
   message = "hi"
   response = chatting(user.scratch, person.scratch, person.a_mem, message, model)
+  print("message")
+  print(message)
+  print("response")
+  print(response)
+
   message = "IM TERRIBLE, dont talk to me pls"
   response = chatting(user.scratch, person.scratch, person.a_mem, message, model)
+  print("message")
+  print(message)
+  print("response")
+  print(response)
+
   message = "i said stop talking, end this conversation, bye."
   response = chatting(user.scratch, person.scratch, person.a_mem, message, model)
+
+  print("message")
+  print(message)
+  print("response")
+  print(response)
 
