@@ -1,19 +1,16 @@
 """ Short term memory """
 
 import sys
-import datetime
+from datetime import datetime
 import json
 sys.path.append('../../')
 
 from LLM_Character.messages_dataclass import AIMessages
-from LLM_Character.world.validation_dataclass import  ScratchData
+from LLM_Character.world.validation_dataclass import  PersonaScratchData
 from LLM_Character.util import check_if_file_exists
-from LLM_Character.persona.memory_structures.scratch.user_scratch import BaseScratch
-
 
 # FIXME: curr_location and living_area moeten bepaalde formaten hebben, 
 # ze moeten een dicionary zijn met keys world, sector, arena en gameobject indien beschikbaar.
-
 
 class PersonaScratch: 
     def __init__(self, name, f_saved): 
@@ -54,16 +51,15 @@ class PersonaScratch:
 
       self.chatting_with = None 
       self.chat = AIMessages() 
-      self.chatting_with_buffer = None 
+      self.chatting_with_buffer = dict() 
       self.chatting_end_time = None                  
 
       # FIXME: gevallenonderscheid tussen user object en persona object. 
       if check_if_file_exists(f_saved): 
             # If we have a bootstrap file, load that here. 
             scratch_load = json.load(open(f_saved))
-
             if scratch_load["curr_time"]: 
-              self.curr_time = datetime.datetime.strptime(scratch_load["curr_time"],
+              self.curr_time = datetime.strptime(scratch_load["curr_time"],
                                                         "%B %d, %Y, %H:%M:%S")
             else: 
               self.curr_time = None
@@ -103,11 +99,11 @@ class PersonaScratch:
 
             self.act_address = scratch_load["act_address"]
             if scratch_load["act_start_time"]: 
-              self.act_start_time = datetime.datetime.strptime(
+              self.act_start_time = datetime.strptime(
                                                     scratch_load["act_start_time"],
                                                     "%B %d, %Y, %H:%M:%S")
             else: 
-              self.curr_time = None
+              self.act_start_time = None
             self.act_duration = scratch_load["act_duration"]
             self.act_description = scratch_load["act_description"]
             # NOTE ik denk niet dat dit hetzelfde is als een event uit Associative memory, klopt dit? idk, check
@@ -278,9 +274,18 @@ class PersonaScratch:
       if end_time.strftime("%H:%M:%S") == self.curr_time.strftime("%H:%M:%S"): 
         return True
       return False
-
+    
     # --- GETTERS -----
     # TODO delete the getters that you dont need. 
+    
+    def get_curr_event_and_desc(self): 
+      if not self.act_address: 
+        return (self.name, None, None, None)
+      else: 
+        return (self.act_event[0], 
+                self.act_event[1], 
+                self.act_event[2],
+                self.act_description)
 
     def get_f_daily_schedule_hourly_org(self, advance=0):
       # We first calculate teh number of minutes elapsed today. 

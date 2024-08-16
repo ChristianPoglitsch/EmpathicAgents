@@ -2,16 +2,16 @@ import json
 import sys
 from typing import Union
 
-from LLM_Character.messages_dataclass import AIMessage
 
 sys.path.append('../../../')
 
 from LLM_Character.llm_api import LLM_API 
-import LLM_Character.persona.prompt_modules.prompt as p 
+from LLM_Character.persona.prompt_modules.prompt import generate_prompt 
 from LLM_Character.persona.memory_structures.scratch.persona_scratch import PersonaScratch
 from LLM_Character.persona.memory_structures.scratch.user_scratch import UserScratch
 from LLM_Character.persona.memory_structures.associative_memory.associative_memory import AssociativeMemory  
 from LLM_Character.persona.memory_structures.associative_memory.concept_node import ConceptNode  
+from LLM_Character.messages_dataclass import AIMessage, AIMessages
 COUNTER_LIMIT = 5
 
 def _create_prompt_input(uscratch:UserScratch, 
@@ -45,7 +45,7 @@ def _create_prompt_input(uscratch:UserScratch,
 
     convo_str = ""
     for i in curr_chat:
-        convo_str += i.print_message_sender()
+        convo_str += i.print_message_sender() + "\n"
     
     if convo_str == "": 
         convo_str = "[The conversation has not started yet -- start it!]"
@@ -64,7 +64,9 @@ def _create_prompt_input(uscratch:UserScratch,
                     uscratch.name,
                     cscratch.name,
                     cscratch.name,
-                    cscratch.name]
+                    cscratch.name,
+                    uscratch.name
+                    ]
     return prompt_input
 
 def _clean_up_response(response:str) -> Union[None, dict[str,str]]:
@@ -102,7 +104,7 @@ def _validate_response(output:str):
       return None
 
 def _get_fail_safe(): 
-    return "..."
+    return {"utterance": "...", "end": False}
 
 def _get_valid_output(model, prompt, counter_limit):
     for _ in range(counter_limit):
@@ -120,10 +122,12 @@ def run_prompt_iterative_chat(uscratch:UserScratch,
                               curr_context:str, 
                               curr_chat:list[AIMessage], 
                               verbose=False) -> Union[str, dict[str, str]]:
-    prompt_template = "persona/prompt_template/iterative_convo.txt" 
+    prompt_template = "../prompt_modules/templates/iterative_convo.txt" 
     prompt_input = _create_prompt_input(uscratch, cscratch, camem, retrieved, curr_context, curr_chat)
-    prompt = p.generate_prompt(prompt_input, prompt_template)
-    output = _get_valid_output(model, prompt, COUNTER_LIMIT)
+    prompt = generate_prompt(prompt_input, prompt_template)
+    am = AIMessages()
+    am.add_message(prompt, None, "user", "system")
+    output = _get_valid_output(model, am, COUNTER_LIMIT)
     return output 
 
 if __name__ == "__main__":

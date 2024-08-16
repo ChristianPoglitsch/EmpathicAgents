@@ -4,9 +4,9 @@ sys.path.append('../')
 
 from LLM_Character.messages_dataclass import AIMessages, AIMessage
 
-from llm_comms.llm_abstract import LLMComms
-from llm_comms.llm_local import LocalComms
-from llm_comms.llm_openai import OpenAIComms
+from LLM_Character.llm_comms.llm_abstract import LLMComms
+from LLM_Character.llm_comms.llm_local import LocalComms
+from LLM_Character.llm_comms.llm_openai import OpenAIComms
 from sentence_transformers import util
 
 # in order to prevent the terminal to be cluttered from all the torch/transformers warnings. 
@@ -31,7 +31,7 @@ class LLM_API():
     def __init__(self, LLMComms:LLMComms):
         self._model = LLMComms
 
-    def query_text(self, message:str) -> str:
+    def query_text(self, message:AIMessages) -> str:
         return self._model.send_text(message)
 
     def query_chat(self, message:AIMessages) -> tuple[AIMessages, str]:
@@ -77,7 +77,7 @@ class LLM_API():
         cosine_scores = util.pytorch_cos_sim(embeddings1, embeddings2)
         return cosine_scores
     
-    def semantic_meaning(self, text:str) -> list[float]:
+    def get_embedding(self, text:str) -> list[float]:
         """
         retrieves the text embedding. 
         """

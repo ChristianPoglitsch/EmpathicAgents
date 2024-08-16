@@ -21,7 +21,7 @@ class AIMessage:
         self.sender = sender
         self.class_type= class_type 
 
-    def get_message_formatted(self) -> dict[str, str]:
+    def get_formatted(self) -> dict[str, str]:
         """
         Formats the message as a dictionary with fields `class_type`, `role`, and `content`.
 
@@ -30,10 +30,8 @@ class AIMessage:
             with `class_type`, `role`, and `content`.
         """
         return {
-            "sender": self.sender, 
             "content": self.message,
             "role": self.role,
-            "class_type": self.class_type,
         }
 
     def print_message_role(self) -> str:
@@ -107,7 +105,6 @@ class AIMessages:
             AIMessage: The created AIMessage instance.
         """
         self.messages.append(AIMessage(sender, message, role, class_type))
-
     def get_messages(self) -> List[AIMessage]:
         """
         Retrieves all the messages stored in this chat.
@@ -117,7 +114,7 @@ class AIMessages:
         """
         return self.messages
 
-    def get_messages_formatted(self) -> List[dict]:
+    def get_formatted(self) -> List[dict]:
         """
         Represents the messages of this chat as a list of
         dictionaries with fields `class_type`, `role`, and `content`.
@@ -127,7 +124,7 @@ class AIMessages:
         """
         message_list = []
         for item in self.messages:
-            message_list.append(item.get_message_formatted())
+            message_list.append(item.get_formatted())
         return message_list
 
     def prints_messages_role(self):
@@ -153,7 +150,7 @@ class AIMessages:
         """
         m = ""
         for item in self.messages:
-            m = m + item.print_message_sender()
+            m = m + item.print_message_sender() + "\n"
         return m
 
     def get_user_message(self) -> AIMessage:
@@ -201,7 +198,6 @@ class AIMessages:
                 )
                 messages_ai.add_message(message_ai)
         return messages_ai
-
 
     def  __len__(self):
         return  len(self.messages)

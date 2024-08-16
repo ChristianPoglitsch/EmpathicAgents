@@ -15,6 +15,7 @@ Variables:
 !<INPUT 11>! -- persona name
 !<INPUT 12>! -- persona name
 !<INPUT 13>! -- persona name
+!<INPUT 14>! -- target persona name
 <commentblockmarker>###</commentblockmarker>
 Context for the task: 
 
@@ -37,10 +38,13 @@ Current Context:
 !<INPUT 8>!
 
 ---
-Task: Given the above, what should !<INPUT 9>! say to !<INPUT 10>! next in the conversation? And did it end the conversation?
+Task: Given the above, what should !<INPUT 9>! say to !<INPUT 10>! next in the conversation? 
+Consider ending the conversation if it's clear that either you or the other person wishes to do so. 
+**Note that a conversation generally does not end on a question**. 
+It could but you have to consider the context.
 
 Output format: Output a json of the following format: 
 {
 "!<INPUT 11>!": "<!<INPUT 12>!'s utterance>",
-"Did the conversation end with !<INPUT 13>!'s utterance?": "<json Boolean>"
+"End the conversation with !<INPUT 13>!'s or with !<INPUT 14>!'sutterance? reason like a human being": "<json Boolean>"
 }

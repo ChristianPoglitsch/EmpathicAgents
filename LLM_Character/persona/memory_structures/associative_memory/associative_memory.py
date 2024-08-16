@@ -1,5 +1,6 @@
 import json
-from os import walk
+import os
+import io
 import sys
 import datetime
 from typing import Union
@@ -22,9 +23,8 @@ class AssociativeMemory:
     self.kw_to_chat:dict[str, list[ConceptNode]] = dict()
 
     self.kw_strength_thought:dict[str, int] = dict()
-
+    
     self.embeddings:dict[str, list[float]] = json.load(open(f_saved + "/embeddings.json"))
-
 
     # TODO check if file exists ...  
 

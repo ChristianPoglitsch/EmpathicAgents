@@ -1,5 +1,10 @@
 {
-  "curr_time": null, 
+  "curr_time": "February 13, 2023, 00:00:30", 
+  "curr_location" : {
+    "world": "Graz",
+    "sector" : "jakominiPlatz",
+    "arena" : "OperaHouse"
+  }, 
   "daily_plan_req": "Camila opens Hobbs Cafe at 8am everyday, and works at the counter until 8pm, at which point she closes the cafe.", 
   "name": "Camila", 
   "first_name": "Camila", 

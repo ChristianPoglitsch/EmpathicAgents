@@ -21,7 +21,7 @@ from torch import Tensor
 import time
 import os
 
-from typing import List, Optional
+from typing import List, Optional, Union
 
 # in order to prevent the terminal to be cluttered from all the torch/transformers warnings. 
 import warnings
@@ -176,7 +176,7 @@ class LocalComms(LLMComms):
     def _request(self, 
                 model: PreTrainedModel, 
                 tokenizer:PreTrainedTokenizer, 
-                messages:AIMessages,
+                message:Union[AIMessages, AIMessage],
                 max_length:int) -> str:
         """
         Generate a response from the model based on the input messages.
@@ -192,7 +192,7 @@ class LocalComms(LLMComms):
         startTime = time.process_time()
         
         device = "cuda"
-        inputs = tokenizer.apply_chat_template(messages.get_messages_formatted(), return_tensors="pt").to(device)  # tokenize=False)
+        inputs = tokenizer.apply_chat_template(message.get_formatted(), return_tensors="pt").to(device)  # tokenize=False)
 
         generation_config = GenerationConfig(
             do_sample=True,

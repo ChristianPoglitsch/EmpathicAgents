@@ -94,7 +94,7 @@ def generate_thought_plan(scratch:PersonaScratch, model:LLM_API):
   s, p, o = (scratch.name, "plan",scratch.curr_time.strftime('%A %B %d'))
   keywords = set(["plan"])
   thought_poignancy = 5
-  thought_embedding_pair = (thought, model.semantic_meaning(thought))
+  thought_embedding_pair = (thought, model.get_embedding(thought))
   return created, expiration, s, p, o, thought, keywords, thought_poignancy, thought_embedding_pair 
 
 def generate_wake_up_hour(scratch:PersonaScratch, model):

@@ -2,14 +2,15 @@ import json
 import sys
 import datetime
 
+
 sys.path.append('../../../')
 
 from LLM_Character.llm_api import LLM_API 
-import LLM_Character.persona.prompt_modules.prompt as p 
+from LLM_Character.messages_dataclass import AIMessages
+from LLM_Character.persona.prompt_modules.prompt import generate_prompt  
 from LLM_Character.persona.memory_structures.scratch.persona_scratch import PersonaScratch
 
 COUNTER_LIMIT = 5
-
 
 def _create_prompt_input(scratch:PersonaScratch,
                          description:str): 
@@ -31,7 +32,7 @@ def _validate_response(output:str):
 def  _get_fail_safe(): 
     return 4 
 
-def _get_valid_output(model, prompt, counter_limit):
+def _get_valid_output(model, prompt:AIMessages, counter_limit):
     for _ in range(counter_limit):
         output = model.query_text(prompt).strip()
         success = _validate_response(output)
@@ -43,12 +44,14 @@ def run_prompt_poignancy_chat(cscratch:PersonaScratch,
                               description:str,
                               model:LLM_API, 
                               verbose=False):
-    prompt_template = "persona/prompt_template/poignancy_chat.txt"
+    prompt_template = "../prompt_modules/templates/poignancy_chat.txt"
     prompt_input = _create_prompt_input(cscratch, description) 
 #   example_output = "5" ########
 #   special_instruction = "The output should ONLY contain ONE integer value on the scale of 1 to 10." ########
-    prompt = p.generate_prompt(prompt_input, prompt_template)
-    output = _get_valid_output(model, prompt, COUNTER_LIMIT)
+    prompt = generate_prompt(prompt_input, prompt_template)
+    am = AIMessages()
+    am.add_message(prompt, None, "user", "system") # NOTE: not really user btw
+    output = _get_valid_output(model, am, COUNTER_LIMIT)
 
     return output, [output, prompt, prompt_input]
 

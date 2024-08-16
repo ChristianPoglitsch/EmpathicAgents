@@ -64,7 +64,7 @@ def reflect(scratch: PersonaScratch, a_mem: AssociativeMemory, model:LLM_API):
                                 thought_embedding_pair, evidence)
 
 
-def reflection_trigger(scratch:Union[PersonaScratch, UserScratch], a_mem:AssociativeMemory): 
+def reflection_trigger(scratch:PersonaScratch, a_mem:AssociativeMemory): 
   if (scratch.importance_trigger_curr <= 0 and 
       [] != a_mem.seq_event + a_mem.seq_thought): 
     return True 

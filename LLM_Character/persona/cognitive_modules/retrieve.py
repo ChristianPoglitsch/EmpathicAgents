@@ -1,24 +1,34 @@
 import sys
+
+import torch
 sys.path.append('../../')
 
 from numpy.linalg import norm
 from numpy import dot
 from typing import Union
+from sentence_transformers import util
 
 from LLM_Character.llm_api import LLM_API
 from LLM_Character.persona.memory_structures.associative_memory.associative_memory import AssociativeMemory, ConceptNode
 from LLM_Character.persona.memory_structures.scratch.persona_scratch import PersonaScratch
 from LLM_Character.persona.memory_structures.scratch.user_scratch import UserScratch
 
+# FIXME:
+# PROBLEMS OBSERVED IN THIS CODE AND THAT ARE ALSO PRESENT IN THE ORIGINAL REPOSITORY:
+# if the dictionary is empty, normalize_dict_floats fails. 
+# is now temporarlily fixed by adding `if dict` in the function. 
+# a unit test is needed, or importing a function from stdlib could also help. 
+
+
 def retrieve(scratch: PersonaScratch, 
              a_mem: AssociativeMemory, 
              focal_points: list[str], 
              model:LLM_API, 
-             n_count=30):
+             n_count=30) -> dict[str, list[ConceptNode]]:
     retrieved = dict()
     for focal_pt in focal_points:
         nodes = _retrieve_recent_sorted_nodes(a_mem)
-
+        
         recency_out = extract_recency(scratch, nodes)
         recency_out = normalize_dict_floats(recency_out, 0, 1)
 
@@ -43,6 +53,8 @@ def retrieve(scratch: PersonaScratch,
                         for key in list(master_out.keys())]
 
         for n in master_nodes:
+            # print("description")
+            # print(n.description)
             n.last_accessed = scratch.curr_time
         retrieved[focal_pt] = master_nodes
     return retrieved
@@ -78,7 +90,7 @@ def extract_importance(nodes:list[ConceptNode]):
 
 
 def extract_relevance(a_mem:AssociativeMemory, nodes:list[ConceptNode], focal_pt:str, model: LLM_API):
-    focal_embedding = model.semantic_meaning(focal_pt)
+    focal_embedding = model.get_embedding(focal_pt)
     relevance_out = dict()
     for _, node in enumerate(nodes):
         node_embedding = a_mem.embeddings[node.embedding_key]
@@ -87,21 +99,23 @@ def extract_relevance(a_mem:AssociativeMemory, nodes:list[ConceptNode], focal_pt
 
 
 def cos_sim(a:list[float], b:list[float]):
-    return dot(a, b)/(norm(a)*norm(b))
+    return util.pytorch_cos_sim(a, b)
+    # return dot(a, b)/(norm(a)*norm(b))
 
 
 def normalize_dict_floats(d: dict, target_min: float, target_max: float):
-    min_val = min(val for val in d.values())
-    max_val = max(val for val in d.values())
-    range_val = max_val - min_val
+    if d:
+        min_val = min(val for val in d.values())
+        max_val = max(val for val in d.values())
+        range_val = max_val - min_val
 
-    if range_val == 0:
-        for key, val in d.items():
-            d[key] = (target_max - target_min)/2
-    else:
-        for key, val in d.items():
-            d[key] = ((val - min_val) * (target_max - target_min)
-                      / range_val + target_min)
+        if range_val == 0:
+            for key, val in d.items():
+                d[key] = (target_max - target_min)/2
+        else:
+            for key, val in d.items():
+                d[key] = ((val - min_val) * (target_max - target_min)
+                        / range_val + target_min)
     return d
 
 
