@@ -1,9 +1,7 @@
 """ Short term memory """
 
-import sys
-from datetime import datetime
 import json
-sys.path.append('../../')
+import datetime 
 
 from LLM_Character.messages_dataclass import AIMessages
 from LLM_Character.world.validation_dataclass import  PersonaScratchData
@@ -59,7 +57,7 @@ class PersonaScratch:
             # If we have a bootstrap file, load that here. 
             scratch_load = json.load(open(f_saved))
             if scratch_load["curr_time"]: 
-              self.curr_time = datetime.strptime(scratch_load["curr_time"],
+              self.curr_time = datetime.datetime.strptime(scratch_load["curr_time"],
                                                         "%B %d, %Y, %H:%M:%S")
             else: 
               self.curr_time = None
@@ -99,7 +97,7 @@ class PersonaScratch:
 
             self.act_address = scratch_load["act_address"]
             if scratch_load["act_start_time"]: 
-              self.act_start_time = datetime.strptime(
+              self.act_start_time = datetime.datetime.strptime(
                                                     scratch_load["act_start_time"],
                                                     "%B %d, %Y, %H:%M:%S")
             else: 
@@ -276,18 +274,7 @@ class PersonaScratch:
       return False
     
     # --- GETTERS -----
-    # TODO delete the getters that you dont need. 
-    
-    def get_curr_event_and_desc(self): 
-      if not self.act_address: 
-        return (self.name, None, None, None)
-      else: 
-        return (self.act_event[0], 
-                self.act_event[1], 
-                self.act_event[2],
-                self.act_description)
-
-    def get_f_daily_schedule_hourly_org(self, advance=0):
+    def get_f_daily_schedule_index(self, advance=0):
       # We first calculate teh number of minutes elapsed today. 
       today_min_elapsed = 0
       today_min_elapsed += self.curr_time.hour * 60
@@ -311,6 +298,18 @@ class PersonaScratch:
         curr_index += 1
 
       return curr_index
+
+    def get_curr_event_and_desc(self): 
+      if not self.act_address: 
+        return (self.name, None, None, None)
+      else: 
+        return (self.act_event[0], 
+                self.act_event[1], 
+                self.act_event[2],
+                self.act_description)
+
+    def get_f_daily_schedule_hourly_org(self, advance=0):
+      return self.f_daily_schedule_hourly_org
 
     def get_f_daily_schedule_hourly_org_index(self, advance=0):
       # We first calculate teh number of minutes elapsed today. 
@@ -374,6 +373,12 @@ class PersonaScratch:
       return self.lifestyle
 
 
+    def get_curr_location(self):
+      return self.curr_location
+
+    def get_living_area(self):
+      return self.living_area
+
     def get_str_daily_plan_req(self): 
       return self.daily_plan_req
 
@@ -397,6 +402,7 @@ class PersonaScratch:
                 self.act_event[1], 
                 self.act_event[2],
                 self.act_description)
+
 
     def act_summary_str(self):
       start_datetime_str = self.act_start_time.strftime("%A %B %d -- %H:%M %p")

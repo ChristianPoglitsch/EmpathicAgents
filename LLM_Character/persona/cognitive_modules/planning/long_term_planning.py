@@ -1,7 +1,5 @@
-import sys
 import datetime
 from typing import Union
-sys.path.append('../../../')
 
 from LLM_Character.llm_api import LLM_API 
 from LLM_Character.persona.cognitive_modules.retrieve import retrieve 
@@ -15,20 +13,32 @@ from LLM_Character.persona.memory_structures.associative_memory.associative_memo
 
 def _long_term_planning(scratch:PersonaScratch, a_mem:AssociativeMemory, new_day:Union[str,None], model:LLM_API): 
   wake_up_hour = generate_wake_up_hour(scratch, model)
+  
+  print("wake_up_hour")
+  print(wake_up_hour)
 
   if new_day == "First day": 
     scratch.daily_req = generate_first_daily_plan(scratch, wake_up_hour)
+    print(new_day)
+    print(scratch.daily_req)
 
   elif new_day == "New day":
     revise_identity(scratch, a_mem, model)
+    print(new_day)
+    print(scratch.currently)
+    print(scratch.daily_plan_req)
 
-  scratch.f_daily_schedule = make_hourly_schedule(scratch, wake_up_hour)
+  print("none")
+  scratch.f_daily_schedule = make_hourly_schedule(scratch, model, wake_up_hour)
+  print("nice")
   scratch.f_daily_schedule_hourly_org = (scratch.f_daily_schedule[:])
+  print("noice")
   
   (created, expiration,
   s, p, o, 
   thought, keywords, 
   thought_poignancy, thought_embedding_pair) = generate_thought_plan(scratch, model)
+  print("yea")
   a_mem.add_thought(created, expiration, s, p, o, 
                             thought, keywords, thought_poignancy, 
                             thought_embedding_pair, None)
@@ -45,25 +55,26 @@ def revise_identity(scratch:PersonaScratch, a_mem:AssociativeMemory, model:LLM_A
   scratch.daily_plan_req = new_daily_req
 
 #FIXME: try to make the code more readable instead of adding comments.  
-def make_hourly_schedule(scratch:PersonaScratch, wake_up_hour): 
+def make_hourly_schedule(scratch:PersonaScratch, model: LLM_API, wake_up_hour): 
   hour_str = ["00:00 AM", "01:00 AM", "02:00 AM", "03:00 AM", "04:00 AM", 
-              "05:00 AM", "06:00 AM", "07:00 AM", "08:00 AM", "09:00 AM", 
-              "10:00 AM", "11:00 AM", "12:00 PM", "01:00 PM", "02:00 PM", 
-              "03:00 PM", "04:00 PM", "05:00 PM", "06:00 PM", "07:00 PM",
-              "08:00 PM", "09:00 PM", "10:00 PM", "11:00 PM"]
+              # "05:00 AM", "06:00 AM", "07:00 AM", "08:00 AM", "09:00 AM", 
+              # "10:00 AM", "11:00 AM", "12:00 PM", "01:00 PM", "02:00 PM", 
+              # "03:00 PM", "04:00 PM", "05:00 PM", "06:00 PM", "07:00 PM",
+              # "08:00 PM", "09:00 PM", "10:00 PM", "11:00 PM"
+              ]
   n_m1_activity = []
   diversity_repeat_count = 3
   for i in range(diversity_repeat_count): 
     n_m1_activity_set = set(n_m1_activity)
     if len(n_m1_activity_set) < 5: 
       n_m1_activity = []
-      for count, curr_hour_str in enumerate(hour_str): 
+      for _, curr_hour_str in enumerate(hour_str): 
         if wake_up_hour > 0: 
           n_m1_activity += ["sleeping"]
           wake_up_hour -= 1
         else: 
           n_m1_activity += [generate_hourly_schedule(
-                          scratch, curr_hour_str, n_m1_activity, hour_str)]
+                          scratch, curr_hour_str, n_m1_activity, hour_str, model)]
   
   _n_m1_hourly_compressed = []
   prev = None 
@@ -103,8 +114,13 @@ def generate_wake_up_hour(scratch:PersonaScratch, model):
 def generate_first_daily_plan(scratch:PersonaScratch, wake_up_hour): 
   return run_prompt_daily_plan(scratch, wake_up_hour)[0]
 
-def generate_hourly_schedule(scratch:PersonaScratch, curr_hour_str:str, n_activity:list[str], hour_str:list[str]):
-  return run_prompt_hourly_schedule(scratch, curr_hour_str, n_activity, hour_str)[0]
+def generate_hourly_schedule(scratch:PersonaScratch, 
+                             curr_hour_str:str, 
+                             n_activity:list[str], 
+                             hour_str:list[str],
+                             model:LLM_API):
+  print("new request")
+  return run_prompt_hourly_schedule(scratch, curr_hour_str, n_activity, hour_str, model)[0]
 
 if __name__ == "__main__":
   from LLM_Character.llm_comms.llm_local import LocalComms

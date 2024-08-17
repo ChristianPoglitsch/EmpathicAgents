@@ -1,10 +1,11 @@
-import sys
 import datetime
-sys.path.append('../../../../')
 
 from LLM_Character.llm_api import LLM_API 
-import LLM_Character.persona.prompt_modules.prompt as p 
+from LLM_Character.messages_dataclass import AIMessages
+from LLM_Character.util import BASE_DIR
+from LLM_Character.persona.prompt_modules.prompt import generate_prompt 
 from LLM_Character.persona.memory_structures.scratch.persona_scratch import PersonaScratch
+
 COUNTER_LIMIT = 5
 
 def _get_all_indices(curr_f_org_index:int, amount_activities:int):
@@ -148,12 +149,16 @@ def run_prompt_task_decomp(scratch:PersonaScratch,
                              task,
                              duration,
                              verbose=False):
-    prompt_template = "LLM_Character/persona/prompt_template/task_decomp.txt"
+    prompt_template = BASE_DIR + "/LLM_Character/persona/prompt_modules/templates/task_decomp.txt" 
     prompt_input = _create_prompt_input(scratch, task, duration)
-    prompt = p.generate_prompt(prompt_input, prompt_template)
-    output = _get_valid_output(model, prompt, COUNTER_LIMIT)
-
+    prompt = generate_prompt(prompt_input, prompt_template)
     
+    am = AIMessages()
+    am.add_message(prompt, None, "user", "system")
+    
+    output = _get_valid_output(model, am, COUNTER_LIMIT)
+
+    print(output) 
     # FIXME: TRY TO REWRITE THIS JUNK AS WELL. 
     fin_output = []
     time_sum = 0

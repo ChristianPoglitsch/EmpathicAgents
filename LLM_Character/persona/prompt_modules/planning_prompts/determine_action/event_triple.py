@@ -2,12 +2,12 @@
 Given the action description, persona, 
 return the suitable tuple (subject, predicate, object) of the action description. 
 """
-import sys
-sys.path.append('../../../../')
 
 from LLM_Character.llm_api import LLM_API 
-import LLM_Character.persona.prompt_modules.prompt as p 
+from LLM_Character.messages_dataclass import AIMessages
+from LLM_Character.persona.prompt_modules.prompt import generate_prompt 
 from LLM_Character.persona.memory_structures.scratch.persona_scratch import PersonaScratch
+from LLM_Character.util import BASE_DIR
 COUNTER_LIMIT = 5
 
 def _create_prompt_input(scratch:PersonaScratch, action_description:str): 
@@ -50,10 +50,14 @@ def run_prompt_event_triple(scratch:PersonaScratch,
                              model:LLM_API, 
                              action_description:str,
                              verbose=False):
-    prompt_template = "LLM_Character/persona/prompt_template/generate_event_triple.txt"
+    prompt_template = BASE_DIR + "/LLM_Character/persona/prompt_modules/templates/generate_event_triple.txt" 
     prompt_input = _create_prompt_input(scratch, action_description)
-    prompt = p.generate_prompt(prompt_input, prompt_template)
-    output = _get_valid_output(scratch, model, prompt, COUNTER_LIMIT)
+    prompt = generate_prompt(prompt_input, prompt_template)
+    
+    am = AIMessages()
+    am.add_message(prompt, None, "user", "system")
+    
+    output = _get_valid_output(scratch, model, am, COUNTER_LIMIT)
 
     p_name = scratch.get_str_name()
     output = (p_name, output[0], output[1])

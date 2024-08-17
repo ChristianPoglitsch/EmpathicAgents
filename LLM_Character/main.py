@@ -9,6 +9,10 @@ from LLM_Character.messages_dataclass import AIMessages
 from LLM_Character.world.message_processor import MessageProcessor
 from LLM_Character.world.game import ReverieServer
 
+# TODO: 
+# there must be a way to add location to spatial memory, because now it is hardcoded which is less ideal. 
+    
+
 def start_server(sock:UdpComms,
                  server:ReverieServer,
                  dispatcher:MessageProcessor, 
@@ -23,7 +27,7 @@ def start_server(sock:UdpComms,
         value = dispatcher.validate_data(str(byte_data))
         if value is None:
             continue
-
+        
         dispatcher.dispatch(sock, server, model, value)
 
 

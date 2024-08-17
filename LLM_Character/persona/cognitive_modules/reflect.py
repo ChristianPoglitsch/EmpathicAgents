@@ -1,9 +1,5 @@
 import datetime
-from os import walk
-import sys
 from typing import Union
-
-sys.path.append('../../')
 
 from LLM_Character.persona.prompt_modules.converse_prompts.poignancy_chat import run_prompt_poignancy_chat
 from LLM_Character.persona.prompt_modules.reflect_prompts.planning_thought_convo import run_prompt_planning_thought_convo
@@ -142,12 +138,23 @@ def generate_action_event_triple(scratch, model, act_desp):
 
 if __name__ == "__main__":
   from LLM_Character.persona.persona import Persona
-  from llm_comms.llm_local import LocalComms
-  person = Persona("MIKE", "nice")
-  modelc = LocalComms()
+  from LLM_Character.llm_comms.llm_openai import OpenAIComms
+  from LLM_Character.llm_comms.llm_local import LocalComms
+  from LLM_Character.util import BASE_DIR
   
-  model_id = "mistralai/Mistral-7B-Instruct-v0.2"
+  print("starting take off ...")
+  
+  # modelc = LocalComms()
+  # model_id = "mistralai/Mistral-7B-Instruct-v0.2"
+  # modelc.init(model_id)
+  
+  modelc = OpenAIComms()
+  model_id = "gpt-4"
   modelc.init(model_id)
-
+  
   model = LLM_API(modelc)
+
+  person = Persona("Camila", BASE_DIR + "/LLM_Character/storage/initial/personas/Camila")
   reflect(person.scratch, person.a_mem, model)
+  
+  

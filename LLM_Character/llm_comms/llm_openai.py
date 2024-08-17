@@ -5,10 +5,7 @@ https://github.com/openai/openai-python
 https://github.com/joonspk-research/generative_agents
 
 """
-import sys
 from typing import List, Optional
-sys.path.append('../')
-
 
 from LLM_Character.messages_dataclass import AIMessages, AIMessage
 from LLM_Character.llm_comms.llm_abstract import LLMComms
@@ -70,7 +67,7 @@ class OpenAIComms(LLMComms):
         if len(aimessages) == 0:
             return None
 
-        prompt = aimessages.get_messages_formatted()
+        prompt = aimessages.get_formatted()
 
         return self._request(prompt)
 

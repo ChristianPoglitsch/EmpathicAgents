@@ -30,6 +30,21 @@ class MemoryTree:
         with open(out_json, "w") as outfile:
             json.dump(self.tree, outfile) 
     
+    def print_tree(self): 
+        def _print_tree(tree, depth):
+            dash = " >" * depth
+            if type(tree) == type(list()): 
+                if tree:
+                    print (dash, tree)
+                return 
+
+            for key, val in tree.items(): 
+                if key: 
+                    print (dash, key)
+                _print_tree(val, depth+1)
+        
+        _print_tree(self.tree, 0)
+     
     def get_str_accessible_sectors(self ,world:str):
         return ", ".join(list(self.tree[world].keys()))
     

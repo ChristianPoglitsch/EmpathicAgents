@@ -1,17 +1,8 @@
-import sys
-
-import torch
-sys.path.append('../../')
-
-from numpy.linalg import norm
-from numpy import dot
-from typing import Union
 from sentence_transformers import util
 
 from LLM_Character.llm_api import LLM_API
 from LLM_Character.persona.memory_structures.associative_memory.associative_memory import AssociativeMemory, ConceptNode
 from LLM_Character.persona.memory_structures.scratch.persona_scratch import PersonaScratch
-from LLM_Character.persona.memory_structures.scratch.user_scratch import UserScratch
 
 # FIXME:
 # PROBLEMS OBSERVED IN THIS CODE AND THAT ARE ALSO PRESENT IN THE ORIGINAL REPOSITORY:
@@ -124,14 +115,16 @@ def top_highest_x_values(d:dict, x:int):
                         key=lambda item: item[1],
                         reverse=True)[:x])
     return top_v
-
-
 if __name__ == "__main__":
+    from LLM_Character.persona.persona import Persona
+    from LLM_Character.llm_comms.llm_openai import OpenAIComms
+    from LLM_Character.llm_comms.llm_local import LocalComms
+    from LLM_Character.util import BASE_DIR
+    
+    from sentence_transformers import SentenceTransformer
     import datetime
-    from llm_comms.llm_local import LocalComms
-    from persona import Persona
 
-    person:Persona = Persona("FREDERIEK", "nice")
+    person = Persona("Camila", BASE_DIR + "/LLM_Character/storage/initial/personas/Camila")
     text = "Frederiek went to the shop"  
     created = datetime.datetime(21,3,4)
     expiration= None
@@ -140,18 +133,22 @@ if __name__ == "__main__":
     o = "shop"
     description = "frederiek went to the shop" 
     keywords = "shop" 
-    poignancy = 3 
-    embedding_pair = [description, [1,2,3]]
+    poignancy = 3
+    transformer = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
+    embedding_pair = [description, transformer.encode(description)]
     filling = None 
 
     person.a_mem.add_chat(created, expiration, s, p, o, description, keywords, poignancy, embedding_pair, filling)
     person.a_mem.add_thought(created, expiration, s, p, o, description, keywords, poignancy, embedding_pair, filling)
 	
-    modelc = LocalComms()
-
-    model_id = "mistralai/Mistral-7B-Instruct-v0.2"
+    # modelc = LocalComms()
+    # model_id = "mistralai/Mistral-7B-Instruct-v0.2"
+    # modelc.init(model_id)
+    
+    modelc = OpenAIComms()
+    model_id = "gpt-4"
     modelc.init(model_id)
-
+    
     model = LLM_API(modelc)
-    retrieved = retrieve(person, ["who is me?"], model)
-
+    retrieved = retrieve(person.scratch, person.a_mem, ["who is me?"], model)
+    print(retrieved)

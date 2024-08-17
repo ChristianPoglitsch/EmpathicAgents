@@ -1,7 +1,4 @@
 
-import sys
-sys.path.append('../../../')
-
 from LLM_Character.llm_api import LLM_API 
 from LLM_Character.persona.memory_structures.scratch.persona_scratch import PersonaScratch
 from LLM_Character.persona.memory_structures.spatial_memory import MemoryTree
@@ -38,20 +35,14 @@ def _determine_action(scratch:PersonaScratch, s_mem:MemoryTree, model:LLM_API):
                               generate_task_decomp(scratch, model, act_desp, act_dura))
 
   act_desp, act_dura = scratch.f_daily_schedule[curr_index] 
-
-  # FIXME: curr_location in persona needs to convert from using coordinates, to actually storing the dictionary as above. 
-  act_world = scratch.curr_location["world"]
-  act_sector = scratch.curr_tile["sector"]
+  act_world = scratch.get_curr_location()["world"]
   act_sector = generate_action_sector(scratch, s_mem, model, act_desp)
 
   act_arena = generate_action_arena(scratch, s_mem, model, act_desp, act_world, act_sector)
-  act_address = f"{act_world}:{act_sector}:{act_arena}"
-  
-  act_game_object = generate_action_game_object(scratch, s_mem, model, act_desp, act_address)
-  new_address = f"{act_world}:{act_sector}:{act_arena}:{act_game_object}"
-  
-  act_event = generate_action_event_triple(scratch, act_desp)
+  act_game_object = generate_action_game_object(scratch, s_mem, model, act_desp, act_world, act_sector, act_arena)
+  act_event = generate_action_event_triple(scratch, model, act_desp)
 
+  new_address = f"{act_world}:{act_sector}:{act_arena}:{act_game_object}"
   scratch.add_new_action(new_address, 
                                  int(act_dura), 
                                  act_desp, 
@@ -78,15 +69,15 @@ def generate_action_sector(scratch:PersonaScratch, s_mem:MemoryTree,  model:LLM_
   return run_prompt_action_sector(scratch, s_mem, model, act_desp)[0]
 
 def generate_action_arena(scratch:PersonaScratch, s_mem:MemoryTree,  model:LLM_API, act_desp:str, act_world:str, act_sector:str): 
-  return run_prompt_action_arena(scratch, s_mem,act_desp, model, act_world, act_sector)[0]
+  return run_prompt_action_arena(scratch, s_mem, model, act_desp, act_world, act_sector)[0]
 
 def generate_action_game_object(scratch:PersonaScratch, s_mem:MemoryTree, model:LLM_API, act_desp:str, act_world:str, act_sector:str, act_arena:str):
   if not s_mem.get_str_accessible_arena_game_objects(act_world, act_sector, act_arena): 
     return "<random>"
   return run_prompt_action_game_object(scratch, s_mem, model, act_desp, act_world, act_sector, act_arena)[0]
 
-def generate_action_event_triple(scratch:PersonaScratch, act_desp:str): 
-  return run_prompt_event_triple(scratch, act_desp)[0]
+def generate_action_event_triple(scratch:PersonaScratch, model:LLM_API, act_desp:str): 
+  return run_prompt_event_triple(scratch, model, act_desp)[0]
 
 if __name__ == "__main__":
   from persona import Persona

@@ -33,8 +33,8 @@ def _create_prompt_input(uscratch:UserScratch,
         if int((cscratch.curr_time - ca_mem.seq_chat[-1].created).total_seconds()/60) > 480: 
             prev_convo_insert = ""
 
-    curr_sector = f"{cscratch.curr_location['sector']}"
-    curr_arena= f"{cscratch.curr_location['arena']}"
+    curr_sector = f"{cscratch.get_curr_location()['sector']}"
+    curr_arena= f"{cscratch.get_curr_location()['arena']}"
     curr_location = f"{curr_arena} in {curr_sector}"
 
     retrieved_str = ""
