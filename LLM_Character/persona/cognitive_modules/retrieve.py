@@ -121,8 +121,17 @@ if __name__ == "__main__":
     from LLM_Character.llm_comms.llm_local import LocalComms
     from LLM_Character.util import BASE_DIR
     
-    from sentence_transformers import SentenceTransformer
     import datetime
+
+    # modelc = LocalComms()
+    # model_id = "mistralai/Mistral-7B-Instruct-v0.2"
+    # modelc.init(model_id)
+    
+    modelc = OpenAIComms()
+    model_id = "gpt-4"
+    modelc.init(model_id)
+    
+    model = LLM_API(modelc)
 
     person = Persona("Camila", BASE_DIR + "/LLM_Character/storage/initial/personas/Camila")
     text = "Frederiek went to the shop"  
@@ -134,21 +143,15 @@ if __name__ == "__main__":
     description = "frederiek went to the shop" 
     keywords = "shop" 
     poignancy = 3
-    transformer = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
-    embedding_pair = [description, transformer.encode(description)]
+    embedding_pair = [description, model.get_embedding(description)]
     filling = None 
 
-    person.a_mem.add_chat(created, expiration, s, p, o, description, keywords, poignancy, embedding_pair, filling)
+    # person.a_mem.add_chat(created, expiration, s, p, o, description, keywords, poignancy, embedding_pair, filling)
     person.a_mem.add_thought(created, expiration, s, p, o, description, keywords, poignancy, embedding_pair, filling)
-	
-    # modelc = LocalComms()
-    # model_id = "mistralai/Mistral-7B-Instruct-v0.2"
-    # modelc.init(model_id)
+    person.a_mem.add_event(created, expiration, s, p, o, description, keywords, poignancy, embedding_pair, filling)
     
-    modelc = OpenAIComms()
-    model_id = "gpt-4"
-    modelc.init(model_id)
-    
-    model = LLM_API(modelc)
     retrieved = retrieve(person.scratch, person.a_mem, ["who is me?"], model)
-    print(retrieved)
+    
+    print(len(retrieved["who is me?"]))
+    print(retrieved["who is me?"][0].description)
+    print(retrieved["who is me?"][1].description)
