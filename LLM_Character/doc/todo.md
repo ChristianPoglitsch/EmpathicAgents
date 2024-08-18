@@ -5,7 +5,13 @@
 * find a better way to represent userScratch and personaScratch, because now there is duplicated code. 
 
 * there must be a way to add location to spatial memory, because now it is hardcoded which is less ideal. 
-   
+
+* go through the repo and see if which events code i need to re-add. 
+
+* add seperate `end conversation` prompt instead of relying on the generate_one_utt
+since the problem is that you dont know the sentence generated and if that generated sentence ends the conversation or not.
+so use another prompt with some chat history and that generated new line and see if it ended it or not.  
+
 # emotional state
 
 6 emotions, store in the persona. attached to persona, 

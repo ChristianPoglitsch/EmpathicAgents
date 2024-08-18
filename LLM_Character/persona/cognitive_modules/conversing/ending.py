@@ -15,7 +15,7 @@ def _end_conversation(user_scratch: UserScratch,
                            character_scratch:PersonaScratch, 
                            model:LLM_API):
     
-    convo = user_scratch.chat.prints_messages_sender()
+    convo = user_scratch.chat
     convo_summary = generate_convo_summary(convo, model)
     
     inserted_act = convo_summary

@@ -1,9 +1,9 @@
-import sys
 import re
-sys.path.append('../../../../')
 
+from LLM_Character.util import BASE_DIR
 from LLM_Character.llm_api import LLM_API 
-import LLM_Character.persona.prompt_modules.prompt as p 
+from LLM_Character.messages_dataclass import AIMessages
+from LLM_Character.persona.prompt_modules.prompt import generate_prompt 
 from LLM_Character.persona.memory_structures.scratch.persona_scratch import PersonaScratch
 
 COUNTER_LIMIT = 5
@@ -46,10 +46,12 @@ def run_prompt_insight_and_evidence(
         all_utt:str , 
         verbose=False):
 
-    prompt_template = "persona/prompt_template/insight_and_evidence.txt"
+    prompt_template = BASE_DIR + "/LLM_Character/persona/prompt_modules/templates/insight_and_evidence.txt" 
     prompt_input = _create_prompt_input(n, all_utt)
-    prompt = p.generate_prompt(prompt_input, prompt_template)
-    output = _get_valid_output(model, prompt, n, COUNTER_LIMIT)
+    prompt = generate_prompt(prompt_input, prompt_template)
+    am = AIMessages()
+    am.add_message(prompt, None, "user", "system") # NOTE: not really user btw
+    output = _get_valid_output(model, am, n, COUNTER_LIMIT)
 
     return output, [output, prompt, prompt_input]
 

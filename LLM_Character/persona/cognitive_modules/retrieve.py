@@ -54,7 +54,7 @@ def retrieve(scratch: PersonaScratch,
 def _retrieve_recent_sorted_nodes(a_mem: AssociativeMemory):
     # FIXME: WHY NOT RETRIEVE FROM SEQ_CHAT ?
     nodes = []
-    for i in a_mem.seq_thought + a_mem.seq_chat:
+    for i in a_mem.seq_thought + a_mem.seq_event:
         if "idle" not in i.embedding_key:
             nodes += [[i.last_accessed, i]]
 

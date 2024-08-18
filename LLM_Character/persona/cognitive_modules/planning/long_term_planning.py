@@ -14,31 +14,21 @@ from LLM_Character.persona.memory_structures.associative_memory.associative_memo
 def _long_term_planning(scratch:PersonaScratch, a_mem:AssociativeMemory, new_day:Union[str,None], model:LLM_API): 
   wake_up_hour = generate_wake_up_hour(scratch, model)
   
-  print("wake_up_hour")
-  print(wake_up_hour)
-
   if new_day == "First day": 
     scratch.daily_req = generate_first_daily_plan(scratch, wake_up_hour)
-    print(new_day)
-    print(scratch.daily_req)
 
   elif new_day == "New day":
-    revise_identity(scratch, a_mem, model)
-    print(new_day)
-    print(scratch.currently)
-    print(scratch.daily_plan_req)
+    new_currently, new_daily_req = revise_identity(scratch, a_mem, model)
+    scratch.currently = new_currently
+    scratch.daily_plan_req = new_daily_req
 
-  print("none")
   scratch.f_daily_schedule = make_hourly_schedule(scratch, model, wake_up_hour)
-  print("nice")
   scratch.f_daily_schedule_hourly_org = (scratch.f_daily_schedule[:])
-  print("noice")
   
   (created, expiration,
   s, p, o, 
   thought, keywords, 
   thought_poignancy, thought_embedding_pair) = generate_thought_plan(scratch, model)
-  print("yea")
   a_mem.add_thought(created, expiration, s, p, o, 
                             thought, keywords, thought_poignancy, 
                             thought_embedding_pair, None)
@@ -50,10 +40,7 @@ def revise_identity(scratch:PersonaScratch, a_mem:AssociativeMemory, model:LLM_A
 
   retrieved = retrieve(scratch, a_mem, focal_points, model)
   _, _, new_currently, new_daily_req = run_prompt_revise_identity(scratch, model, retrieved)
-
-  scratch.currently = new_currently
-  scratch.daily_plan_req = new_daily_req
-
+  return new_currently, new_daily_req
 #FIXME: try to make the code more readable instead of adding comments.  
 def make_hourly_schedule(scratch:PersonaScratch, model: LLM_API, wake_up_hour): 
   hour_str = ["00:00 AM", "01:00 AM", "02:00 AM", "03:00 AM", "04:00 AM", 

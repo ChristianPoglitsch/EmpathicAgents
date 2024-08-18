@@ -64,19 +64,6 @@ class LLM_API():
 
         return messages, response
 
-    @DeprecationWarning
-    def semantic_relationship(self, text1:str, text2:str) -> int:
-        """ 
-        Calculates how close the two given texts are semantically.
-        """
-        #Compute embedding for both lists
-        embeddings1 = self._model.send_embedding(text1)
-        embeddings2 = self._model.send_embedding(text2)
-
-        #FIXME: Compute cosine-similarits, maybe can use this util for both openai and huggingface model, not sure yet. 
-        cosine_scores = util.pytorch_cos_sim(embeddings1, embeddings2)
-        return cosine_scores
-    
     def get_embedding(self, text:str) -> list[float]:
         """
         retrieves the text embedding. 

@@ -65,7 +65,7 @@ class LocalComms(LLMComms):
             
         #FIXME: change model !! cannot use mistral. 
         self._embedding_model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
-
+        
 
        
     def send_text(self, prompt:AIMessages, max_length=100) -> Optional[str]:
@@ -242,7 +242,8 @@ class LocalComms(LLMComms):
 
     def _requese_emb(self, keywords: str) -> Tensor:
         embeddings = self._embedding_model.encode(keywords, convert_to_tensor=True)
-        return embeddings
+        return embeddings.cpu().tolist()
+        # return embeddings
 # 
 #         OR
 # 

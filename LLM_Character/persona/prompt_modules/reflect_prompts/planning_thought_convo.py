@@ -1,8 +1,8 @@
-import sys
-sys.path.append('../../../../')
 
+from LLM_Character.util import BASE_DIR
 from LLM_Character.llm_api import LLM_API 
-import LLM_Character.persona.prompt_modules.prompt as p 
+from LLM_Character.messages_dataclass import AIMessages
+from LLM_Character.persona.prompt_modules.prompt import generate_prompt 
 from LLM_Character.persona.memory_structures.scratch.persona_scratch import PersonaScratch
 
 COUNTER_LIMIT = 5
@@ -35,10 +35,12 @@ def run_prompt_planning_thought_convo(
         model:LLM_API, 
         all_utt:str , 
         verbose=False):
-    prompt_template = "persona/prompt_template/planning_thought_convo.txt"
+    prompt_template = BASE_DIR + "/LLM_Character/persona/prompt_modules/templates/planning_thought_convo.txt" 
     prompt_input = _create_prompt_input(scratch, all_utt)
-    prompt = p.generate_prompt(prompt_input, prompt_template)
-    output = _get_valid_output(model, prompt, COUNTER_LIMIT)
+    prompt = generate_prompt(prompt_input, prompt_template)
+    am = AIMessages()
+    am.add_message(prompt, None, "user", "system") # NOTE: not really user btw
+    output = _get_valid_output(model, am, COUNTER_LIMIT)
 
     return output, [output, prompt, prompt_input]
 

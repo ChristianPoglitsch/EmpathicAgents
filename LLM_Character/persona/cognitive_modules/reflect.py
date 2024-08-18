@@ -8,11 +8,10 @@ from LLM_Character.persona.prompt_modules.reflect_prompts.focal_pt import run_pr
 from LLM_Character.persona.prompt_modules.reflect_prompts.insight_and_guidance import run_prompt_insight_and_evidence
 from LLM_Character.persona.prompt_modules.reflect_prompts.memo_convo import run_prompt_memo_convo
 
-from LLM_Character.persona.cognitive_modules.converse import generate_poig_score 
+from LLM_Character.persona.cognitive_modules.converse import generate_event_poig_score 
 from LLM_Character.persona.cognitive_modules.retrieve import retrieve
 from LLM_Character.persona.memory_structures.associative_memory.associative_memory import AssociativeMemory
 from LLM_Character.persona.memory_structures.scratch.persona_scratch import PersonaScratch
-from LLM_Character.persona.memory_structures.scratch.user_scratch import UserScratch
 
 from LLM_Character.llm_api import LLM_API 
 
@@ -21,23 +20,32 @@ from LLM_Character.llm_api import LLM_API
 def reflect(scratch: PersonaScratch, a_mem: AssociativeMemory, model:LLM_API):
   if reflection_trigger(scratch, a_mem): 
     run_reflect(scratch, a_mem, model)
-    reset_reflection_counter(scratch, a_mem)
+    reset_reflection_counter(scratch)
+  
+  if scratch.chatting_end_time:
+    # FIXME: maybe not the best idea to have a chatting_end_time anymore, since chats can be 
+    # cancelled by the user at any time. But between personas, it does make sense. 
+    # so maybe construct another reflect function only for chatting ?
+    # or not, when ending_conversation, dont calculate the catting_end_time, just take
+    # the curr time or something, then you dont need a new reflection method.  
+    
+    # print(scratch.curr_time)
+    # print(scratch.chatting_end_time) 
+    # print(scratch.curr_time + datetime.timedelta(0,10) == scratch.chatting_end_time)
 
-  if scratch.chatting_end_time: 
     if scratch.curr_time + datetime.timedelta(0,10) == scratch.chatting_end_time: 
-      
       all_utt = scratch.chat.prints_messages_sender() 
       last_chat = a_mem.get_last_chat(scratch.chatting_with)
       evidence = [last_chat.node_id]
 
-      planning_thought = generate_planning_thought_on_convo(model, all_utt)
+      planning_thought = generate_planning_thought_on_convo(scratch, all_utt, model)
       planning_thought = f"For {scratch.name}'s planning: {planning_thought}"
 
       created = scratch.curr_time
       expiration = scratch.curr_time + datetime.timedelta(days=30)
       s, p, o = generate_action_event_triple(scratch, model, planning_thought)
       keywords = set([s, p, o])
-      thought_poignancy = generate_poig_score(scratch, planning_thought, model)
+      thought_poignancy = generate_event_poig_score(scratch, planning_thought, model)
       thought_embedding_pair = (planning_thought, model.get_embedding(planning_thought))
 
       a_mem.add_thought(created, expiration, s, p, o, 
@@ -52,7 +60,7 @@ def reflect(scratch: PersonaScratch, a_mem: AssociativeMemory, model:LLM_API):
       expiration = scratch.curr_time + datetime.timedelta(days=30)
       s, p, o = generate_action_event_triple(scratch, model, planning_thought)
       keywords = set([s, p, o])
-      thought_poignancy = generate_poig_score(scratch, memo_thought, model)
+      thought_poignancy = generate_event_poig_score(scratch, memo_thought, model)
       thought_embedding_pair = (memo_thought, model.get_embedding(memo_thought))
 
       a_mem.add_thought(created, expiration, s, p, o, 
@@ -68,12 +76,11 @@ def reflection_trigger(scratch:PersonaScratch, a_mem:AssociativeMemory):
 
 
 def run_reflect(scratch:PersonaScratch, a_mem:AssociativeMemory, model:LLM_API):
-  focal_points = generate_focal_points(scratch, a_mem, 3)
+  focal_points = generate_focal_points(scratch, a_mem, model, 3)
   retrieved = retrieve(scratch, a_mem, focal_points, model)
 
   for _, nodes in retrieved.items(): 
     xx = [i.embedding_key for i in nodes]
-    for xxx in xx: print (xxx)
 
     thoughts = generate_insights_and_evidence(nodes, 5)
     for thought, evidence in thoughts.items(): 
@@ -89,9 +96,9 @@ def run_reflect(scratch:PersonaScratch, a_mem:AssociativeMemory, model:LLM_API):
                                 thought_embedding_pair, evidence)
 
 
-def generate_focal_points(scratch:PersonaScratch, a_mem:AssociativeMemory, n=3): 
+def generate_focal_points(scratch:PersonaScratch, a_mem:AssociativeMemory, model:LLM_API, n=3): 
   nodes = [[i.last_accessed, i]
-            for i in  a_mem.seq_thought # FIXME not chat again? 
+            for i in  a_mem.seq_thought + a_mem.seq_event  
             if "idle" not in i.embedding_key]
 
   nodes = sorted(nodes, key=lambda x: x[0])
@@ -100,14 +107,14 @@ def generate_focal_points(scratch:PersonaScratch, a_mem:AssociativeMemory, n=3):
   statements = ""
   for node in nodes[-1*scratch.importance_ele_n:]: 
     statements += node.embedding_key + "\n"
-  return run_prompt_generate_focal_pt(n, statements)[0]
+  return run_prompt_generate_focal_pt(model, n, statements)[0]
 
 def generate_insights_and_evidence(nodes, n=5): 
   statements = ""
   for count, node in enumerate(nodes): 
     statements += f'{str(count)}. {node.embedding_key}\n'
 
-  ret = run_prompt_insight_and_evidence(statements, n)[0]
+  ret = run_prompt_insight_and_evidence(model, n, statements)[0]
 
   try: 
     for thought, evi_raw in ret.items(): 
@@ -124,20 +131,22 @@ def reset_reflection_counter(scratch):
   scratch.importance_trigger_curr = persona_imt_max
   scratch.importance_ele_n = 0
 
-def generate_planning_thought_on_convo(persona, all_utt):
-  return run_prompt_planning_thought_convo(persona, all_utt)[0]
+def generate_planning_thought_on_convo(scratch, all_utt, model:LLM_API):
+  return run_prompt_planning_thought_convo(scratch, model, all_utt)[0]
 
 def generate_poig_score(scratch:PersonaScratch, description:str, model:LLM_API): 
     return run_prompt_poignancy_chat(scratch, description, model)[0]
 
 def generate_memo_on_convo(scratch:PersonaScratch, all_utt:str, model:LLM_API):
-  return run_prompt_memo_convo(scratch, all_utt, model)[0]
+  return run_prompt_memo_convo(scratch, model, all_utt)[0]
 
 def generate_action_event_triple(scratch, model, act_desp): 
   return run_prompt_event_triple(scratch, model, act_desp)[0]
 
 if __name__ == "__main__":
+  from LLM_Character.persona.cognitive_modules.converse import chatting
   from LLM_Character.persona.persona import Persona
+  from LLM_Character.persona.user import User 
   from LLM_Character.llm_comms.llm_openai import OpenAIComms
   from LLM_Character.llm_comms.llm_local import LocalComms
   from LLM_Character.util import BASE_DIR
@@ -155,6 +164,11 @@ if __name__ == "__main__":
   model = LLM_API(modelc)
 
   person = Persona("Camila", BASE_DIR + "/LLM_Character/storage/initial/personas/Camila")
+  user = User("Louis", BASE_DIR + "/LLM_Character/storage/initial/users/Louis")
+  
+  message = "bye bye see you tomorrow, end this conversation"
+  response = chatting(user.scratch, person.scratch, person.a_mem, message, model)
+
   reflect(person.scratch, person.a_mem, model)
   
   

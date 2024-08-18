@@ -1,8 +1,8 @@
-import sys
-sys.path.append('../../../../')
 
+from LLM_Character.messages_dataclass import AIMessages
+from LLM_Character.util import BASE_DIR
 from LLM_Character.llm_api import LLM_API 
-import LLM_Character.persona.prompt_modules.prompt as p 
+from LLM_Character.persona.prompt_modules.prompt import generate_prompt 
 from LLM_Character.persona.memory_structures.scratch.persona_scratch import PersonaScratch
 
 COUNTER_LIMIT = 5
@@ -36,12 +36,14 @@ def run_prompt_memo_convo(
         all_utt:str , 
         verbose=False):
 
-    prompt_template = "persona/prompt_template/memo_convo.txt"
+    prompt_template = BASE_DIR + "/LLM_Character/persona/prompt_modules/templates/memo_convo.txt" 
     prompt_input = _create_prompt_input(scratch, all_utt)
-    prompt = p.generate_prompt(prompt_input, prompt_template)
+    prompt = generate_prompt(prompt_input, prompt_template)
   # example_output = 'Jane Doe was interesting to talk to.' ########
   # special_instruction = 'The output should ONLY contain a string that summarizes anything interesting that the agent may have noticed' ########
-    output = _get_valid_output(model, prompt, COUNTER_LIMIT)
+    am = AIMessages()
+    am.add_message(prompt, None, "user", "system") # NOTE: not really user btw
+    output = _get_valid_output(model, am, COUNTER_LIMIT)
 
     return output, [output, prompt, prompt_input]
 

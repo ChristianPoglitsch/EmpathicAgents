@@ -1,3 +1,4 @@
+from typing import Tuple, Union
 from LLM_Character.llm_api import LLM_API 
 from LLM_Character.messages_dataclass import AIMessages
 
@@ -7,6 +8,7 @@ from LLM_Character.persona.memory_structures.scratch.user_scratch import UserScr
 from LLM_Character.persona.cognitive_modules.conversing.reacting import _generate_response 
 from LLM_Character.persona.cognitive_modules.conversing.ending import _end_conversation 
 from LLM_Character.persona.prompt_modules.converse_prompts.poignancy_chat import run_prompt_poignancy_chat
+from LLM_Character.persona.prompt_modules.converse_prompts.poignancy_event import run_prompt_poignancy_event
 
 def chatting(user_scratch: UserScratch , 
              character_scratch:PersonaScratch, 
@@ -21,7 +23,8 @@ def chatting(user_scratch: UserScratch ,
   if end:
     _end_conversation(user_scratch, character_scratch, model)   
     p_event = character_scratch.get_curr_event_and_desc()
-    _remember_chat(character_scratch, character_mem, p_event, model)
+    nodeid, keywords = _remember_chat(character_scratch, character_mem, p_event, model)
+    _prepare_reflect_chat(character_scratch, character_mem, p_event, keywords, [nodeid], model)    
     user_scratch.chat = AIMessages()
   return utt
 
@@ -49,8 +52,8 @@ def _remember_chat(cscratch: PersonaScratch, ca_mem:AssociativeMemory, p_event, 
       chat_embedding = model.get_embedding(cscratch.act_description)
 
     chat_embedding_pair = (cscratch.act_description, chat_embedding)
-    chat_poignancy = generate_poig_score(cscratch, model)
-    ca_mem.add_chat(cscratch.curr_time, 
+    chat_poignancy = generate_chat_poig_score(cscratch, model)
+    node = ca_mem.add_chat(cscratch.curr_time, 
                     None,
                     curr_event[0], 
                     curr_event[1], 
@@ -60,9 +63,43 @@ def _remember_chat(cscratch: PersonaScratch, ca_mem:AssociativeMemory, p_event, 
                     chat_poignancy, 
                     chat_embedding_pair, 
                     cscratch.chat)
+    return node.node_id, keywords
 
-def generate_poig_score(scratch:PersonaScratch, model: LLM_API) : 
+
+def generate_chat_poig_score(scratch:PersonaScratch, model: LLM_API) : 
     return run_prompt_poignancy_chat(scratch, scratch.act_description, model)[0]
+
+
+def _prepare_reflect_chat(scratch: PersonaScratch,
+                  a_mem: AssociativeMemory, 
+                  event: Tuple[str, str, str, str],
+                  keywords: set,
+                  chat_node_ids:list[str],
+                  model:LLM_API):
+  s, p, o, desc = event
+  desc_embedding_in = desc
+  if "(" in desc: 
+    desc_embedding_in = (desc_embedding_in.split("(")[1]
+                                          .split(")")[0]
+                                          .strip())
+  if desc_embedding_in in a_mem.embeddings: 
+    event_embedding = a_mem.embeddings[desc_embedding_in]
+  else: 
+    event_embedding = model.get_embedding(desc_embedding_in)
+  event_embedding_pair = (desc_embedding_in, event_embedding)
+    
+  event_poignancy = generate_event_poig_score(scratch, desc_embedding_in, model)
+  a_mem.add_event(scratch.curr_time, None,
+                      s, p, o, desc, keywords, event_poignancy, 
+                      event_embedding_pair, chat_node_ids)
+  scratch.importance_trigger_curr -= event_poignancy
+  scratch.importance_ele_n += 1
+
+
+def generate_event_poig_score(scratch:PersonaScratch, description:str, model:LLM_API):
+  return run_prompt_poignancy_event(scratch, description, model)[0]
+
+
 
 
 if __name__ == "__main__":

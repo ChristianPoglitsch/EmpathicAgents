@@ -169,8 +169,9 @@ class OpenAIComms(LLMComms):
             print("openAI request failed")
             print(e)       
             return None
-
-        return response.data
+        
+        embedding = response.data[0].embedding
+        return embedding 
 
     def _check_valid_model_chat(self,model:str):
         """
