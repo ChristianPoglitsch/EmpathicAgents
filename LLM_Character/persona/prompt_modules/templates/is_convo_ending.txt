@@ -1,0 +1,18 @@
+is_convo_ending.txt
+
+
+!<INPUT 0>! -- curr convo
+!<INPUT 1>! -- persona name
+
+<commentblockmarker>###</commentblockmarker>
+Task: determine wether the conversation has ended or not. 
+Here is an extract of a chat:
+
+!<INPUT 0>!
+
+
+Format your response in JSON with format 
+{
+"End the conversation with !<INPUT 1>!'s utterance?: "<json Boolean>"
+}
+No text outside JSON struct allowed. 

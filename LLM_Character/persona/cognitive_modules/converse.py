@@ -17,9 +17,10 @@ def chatting(user_scratch: UserScratch ,
              model:LLM_API):
 
   user_scratch.chat.add_message(message, user_scratch.name, "user", "MessageAI")
-  utt, end = _generate_response(user_scratch, character_scratch, character_mem, message, model)
+  utt, emotion, trust, end = _generate_response(user_scratch, character_scratch, character_mem, message, model)
   user_scratch.chat.add_message(utt, character_scratch.name, "assistant", "MessageAI")
-
+  print(emotion)
+  print(trust)
   if end:
     _end_conversation(user_scratch, character_scratch, model)   
     p_event = character_scratch.get_curr_event_and_desc()

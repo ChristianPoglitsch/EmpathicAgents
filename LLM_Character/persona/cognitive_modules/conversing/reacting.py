@@ -43,13 +43,13 @@ def _generate_response(user_scratch: UserScratch,
   # NOTE add message as focal point 
   focal_points = [f"{user_scratch.name}", message]
   retrieved = retrieve(character_scratch, character_mem, focal_points, model, 15)
-  utt, end = generate_one_utterance(user_scratch, 
+  utt, emotion, trust, end = generate_one_utterance(user_scratch, 
                                     character_scratch, 
                                     character_mem, 
                                     model, 
                                     retrieved, 
                                     curr_chat[-8:])
-  return utt, end
+  return utt, emotion, trust, end
 
 
 def generate_summarize_agent_relationship(user_scratch: UserScratch , 
@@ -91,8 +91,8 @@ def generate_one_utterance(uscratch: UserScratch,
   curr_context += (f"{cscratch.name} " +
               f"is initiating a conversation with " +
               f"{uscratch.name}.")
-  x = run_prompt_iterative_chat(uscratch, cscratch, camem, model, retrieved, curr_context, curr_chat)
-  return x['utterance'], x['end']
+  x,y = run_prompt_iterative_chat(uscratch, cscratch, camem, model, retrieved, curr_context, curr_chat)
+  return x['utterance'], x['emotion'], x['trust'], y['end']
 
 
 if __name__ == "__main__":

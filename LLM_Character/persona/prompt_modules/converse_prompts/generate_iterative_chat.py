@@ -1,3 +1,4 @@
+import copy
 import json
 from typing import Union
 
@@ -13,7 +14,7 @@ from LLM_Character.persona.memory_structures.associative_memory.concept_node imp
 
 COUNTER_LIMIT = 5
 
-def _create_prompt_input(uscratch:UserScratch, 
+def _create_prompt_input_1(uscratch:UserScratch, 
                          cscratch:PersonaScratch, 
                          ca_mem:AssociativeMemory, 
                          retrieved:dict[str, list[ConceptNode]], 
@@ -50,6 +51,7 @@ def _create_prompt_input(uscratch:UserScratch,
         convo_str = "[The conversation has not started yet -- start it!]"
 
     init_iss = f"Here is Here is a brief description of {cscratch.name}.\n{cscratch.get_str_iss()}"
+    # FIXME; fix this shit, use one placeholder for each value...
     prompt_input = [init_iss, 
                     cscratch.name, 
                     retrieved_str, 
@@ -64,11 +66,29 @@ def _create_prompt_input(uscratch:UserScratch,
                     cscratch.name,
                     cscratch.name,
                     cscratch.name,
-                    uscratch.name
+                    cscratch.name,
+                    cscratch.name,
+                    cscratch.name,
+                    cscratch.name,
+                    cscratch.name,
+                    cscratch.name,
+                    cscratch.name
                     ]
     return prompt_input
+def _create_prompt_input_2(cscratch:PersonaScratch, 
+                         curr_chat:list[AIMessage]): 
+    convo_str = ""
+    for i in curr_chat:
+        convo_str += i.print_message_sender() + "\n"
+    
+    if convo_str == "": 
+        convo_str = "[The conversation has not started yet -- start it!]"
 
-def _clean_up_response(response:str) -> Union[None, dict[str,str]]:
+    prompt_input = [convo_str, 
+                    cscratch.name]
+    return prompt_input
+
+def _clean_up_response_1(response:str) -> Union[None, dict[str,str]]:
     obj = extract_first_json_dict(response)
     if not obj :
         return None
@@ -77,8 +97,20 @@ def _clean_up_response(response:str) -> Union[None, dict[str,str]]:
     for _, val in obj.items(): 
       cleaned += [val]
     cleaned_dict["utterance"] = cleaned[0]
-    cleaned_dict["end"] = True
-    if "f" in str(cleaned[1]) or "F" in str(cleaned[1]): 
+    cleaned_dict["trust"] = cleaned[1]
+    cleaned_dict["emotion"] = cleaned[2]
+    return cleaned_dict
+
+def _clean_up_response_2(response:str) -> Union[None, dict[str,str]]:
+    obj = extract_first_json_dict(response)
+    if not obj :
+        return None
+    cleaned_dict = dict()
+    cleaned = []
+    for _, val in obj.items(): 
+      cleaned += [val]
+    cleaned_dict["end"] = True 
+    if "f" in str(cleaned[0]) or "F" in str(cleaned[0]): 
       cleaned_dict["end"] = False
     return cleaned_dict
 
@@ -96,19 +128,19 @@ def extract_first_json_dict(data_str:str) -> Union[None, dict[str,str]]:
     except json.JSONDecodeError:
         return None
 
-def _validate_response(output:str): 
+def _validate_response(output:str, clean_up_response:callable): 
     try: 
-        return _clean_up_response(output)
+        return clean_up_response(output)
     except:
       return None
 
 def _get_fail_safe(): 
     return {"utterance": "...", "end": False}
 
-def _get_valid_output(model, prompt, counter_limit):
+def _get_valid_output(model, prompt, clean_up_response:callable, counter_limit):
     for _ in range(counter_limit):
         output = model.query_text(prompt).strip()
-        success = _validate_response(output)
+        success = _validate_response(output, clean_up_response)
         if success:
           return success
     return _get_fail_safe()
@@ -122,16 +154,27 @@ def run_prompt_iterative_chat(uscratch:UserScratch,
                               curr_chat:list[AIMessage], 
                               verbose=False) -> Union[str, dict[str, str]]:
     prompt_template = BASE_DIR + "/LLM_Character/persona/prompt_modules/templates/iterative_convo.txt" 
-    prompt_input = _create_prompt_input(uscratch, cscratch, camem, retrieved, curr_context, curr_chat)
+    prompt_input = _create_prompt_input_1(uscratch, cscratch, camem, retrieved, curr_context, curr_chat)
     prompt = generate_prompt(prompt_input, prompt_template)
-    print("prompt")
-    print(prompt)
+    
     am = AIMessages()
     am.add_message(prompt, None, "user", "system")
-    output = _get_valid_output(model, am, COUNTER_LIMIT)
-    print("output")
-    print(output)
-    return output 
+   
+    output1 = _get_valid_output(model, am, _clean_up_response_1, COUNTER_LIMIT)
+
+    message = output1["utterence"]
+    new_chat = copy.deepcopy(curr_chat) # FIXME; provide a copy method inside the AImessages class. 
+    new_chat.add_message(message, cscratch.name, "user", "MessageAI") 
+    
+    prompt_template = BASE_DIR + "/LLM_Character/persona/prompt_modules/templates/is_convo_ending.txt" 
+    prompt_input = _create_prompt_input_2(cscratch, new_chat)
+    prompt = generate_prompt(prompt_input, prompt_template)
+    
+    am = AIMessages()
+    am.add_message(prompt, None, "user", "system")
+    
+    output2 = _get_valid_output(model, am, _clean_up_response_2, COUNTER_LIMIT)
+    return output1, output2 
 
 if __name__ == "__main__":
     from LLM_Character.llm_comms.llm_local import LocalComms
