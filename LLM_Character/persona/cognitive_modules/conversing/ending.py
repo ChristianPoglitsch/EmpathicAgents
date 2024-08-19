@@ -12,15 +12,14 @@ from LLM_Character.persona.prompt_modules.converse_prompts.decomp_schedule impor
 
 
 def _end_conversation(user_scratch: UserScratch,
-                           character_scratch:PersonaScratch, 
-                           model:LLM_API):
+                      character_scratch:PersonaScratch,
+                      model:LLM_API):
     
     convo = user_scratch.chat
     convo_summary = generate_convo_summary(convo, model)
     
     inserted_act = convo_summary
-    inserted_act_dur = math.ceil(int(len(convo)/8) / 30) 
-    
+    inserted_act_dur = character_scratch.curr_time - user_scratch.start_time_chatting  
     
     act_address = f"<persona> {user_scratch.name}"
     act_event = (character_scratch.name, "chat with", user_scratch.name)
@@ -28,14 +27,8 @@ def _end_conversation(user_scratch: UserScratch,
     chatting_with_buffer = {}
     chatting_with_buffer[user_scratch.name] = 800
     
-    curr_time = character_scratch.curr_time
-    if curr_time.second != 0: 
-      temp_curr_time = curr_time + datetime.timedelta(seconds=60 - curr_time.second)
-      chatting_end_time = temp_curr_time + datetime.timedelta(minutes=inserted_act_dur)
-    else: 
-      chatting_end_time = curr_time + datetime.timedelta(minutes=inserted_act_dur)
-    
-    act_start_time = character_scratch.act_start_time # FIXME not sure
+    chatting_end_time = character_scratch.curr_time
+    act_start_time = user_scratch.start_time_chatting  
 
     _create_react(character_scratch, 
                   model,

@@ -28,6 +28,10 @@ class PersonaScratch:
       self.lifestyle = None
       self.living_area = None
 
+      # EMOTIONAL STATE
+      self.curr_emotion:str = None 
+      self.curr_trust:dict[str, int] = dict() 
+
       # RETRIEVE VARIABLES
       self.recency_w = 1
       self.relevance_w = 1
@@ -38,7 +42,6 @@ class PersonaScratch:
       self.importance_trigger_max = 150
       self.importance_trigger_curr = self.importance_trigger_max
       self.importance_ele_n = 0 
-      # self.thought_count = 5
       
       # PERSONA PLANNING 
       self.daily_req = []
@@ -270,12 +273,8 @@ class PersonaScratch:
       scratch["lifestyle"] = data.lifestyle
       scratch["living_area"] = data.living_area
 
-      # scratch["concept_forget"] = data.concept_forget
-      # scratch["daily_reflection_time"] = data.daily_reflection_time
-      # scratch["daily_reflection_size"] = data.daily_reflection_size
-      # scratch["overlap_reflect_th"] = data.overlap_reflect_th
-      # scratch["kw_strg_event_reflect_th"] = data.kw_strg_event_reflect_th
-      # scratch["kw_strg_thought_reflect_th"] = data.kw_strg_thought_reflect_th
+      scratch["curr_emotion"] = data.curr_emotion
+      scratch["curr_trust"] = data.curr_trust
 
       scratch["recency_w"] = data.recency_w
       scratch["relevance_w"] = data.relevance_w
@@ -310,9 +309,7 @@ class PersonaScratch:
         json.dump(scratch, outfile, indent=2)     
 
     def load(self, f_saved:str):
-      # FIXME: gevallenonderscheid tussen user object en persona object. 
       if check_if_file_exists(f_saved): 
-            # If we have a bootstrap file, load that here. 
             scratch_load = json.load(open(f_saved))
             if scratch_load["curr_time"]: 
               self.curr_time = datetime.datetime.strptime(scratch_load["curr_time"],
@@ -332,22 +329,17 @@ class PersonaScratch:
             self.lifestyle = scratch_load["lifestyle"]
             self.living_area = scratch_load["living_area"]
 
-            # NOTE maybe needed, dont know yet where it they are used; 
-            # self.concept_forget = scratch_load["concept_forget"]
-            # self.daily_reflection_time = scratch_load["daily_reflection_time"]
-            # self.daily_reflection_size = scratch_load["daily_reflection_size"]
-            # self.overlap_reflect_th = scratch_load["overlap_reflect_th"]
-            # self.kw_strg_event_reflect_th = scratch_load["kw_strg_event_reflect_th"]
-            # self.kw_strg_thought_reflect_th = scratch_load["kw_strg_thought_reflect_th"]
+            self.curr_emotion = scratch_load["curr_emotion"] 
+            self.curr_trust = scratch_load["curr_trust"]
 
             self.recency_w = scratch_load["recency_w"]
             self.relevance_w = scratch_load["relevance_w"]
             self.importance_w = scratch_load["importance_w"]
             self.recency_decay = scratch_load["recency_decay"]
-            # self.importance_trigger_max = scratch_load["importance_trigger_max"]
-            # self.importance_trigger_curr = scratch_load["importance_trigger_curr"]
-            # self.importance_ele_n = scratch_load["importance_ele_n"]
-            # self.thought_count = scratch_load["thought_count"]
+            self.importance_trigger_max = scratch_load["importance_trigger_max"]
+            self.importance_trigger_curr = scratch_load["importance_trigger_curr"]
+            self.importance_ele_n = scratch_load["importance_ele_n"]
+            self.thought_count = scratch_load["thought_count"]
 
             self.daily_req = scratch_load["daily_req"]
             self.f_daily_schedule = scratch_load["f_daily_schedule"]
@@ -362,19 +354,17 @@ class PersonaScratch:
               self.act_start_time = None
             self.act_duration = scratch_load["act_duration"]
             self.act_description = scratch_load["act_description"]
-            # NOTE ik denk niet dat dit hetzelfde is als een event uit Associative memory, klopt dit? idk, check
-            # wnr dit intialised is, als in perceived, dan nu allesinds niet nodig. 
             self.act_event = tuple(scratch_load["act_event"])
 
-            # self.chatting_with = scratch_load["chatting_with"]
-            # self.chat = scratch_load["chat"]
-            # self.chatting_with_buffer = scratch_load["chatting_with_buffer"]
-            # if scratch_load["chatting_end_time"]: 
-            #   self.chatting_end_time = datetime.datetime.strptime(
-            #                                       scratch_load["chatting_end_time"],
-            #                                       "%B %d, %Y, %H:%M:%S")
-            # else:
-            #   self.chatting_end_time = None
+            self.chatting_with = scratch_load["chatting_with"]
+            self.chat = scratch_load["chat"]
+            self.chatting_with_buffer = scratch_load["chatting_with_buffer"]
+            if scratch_load["chatting_end_time"]: 
+              self.chatting_end_time = datetime.datetime.strptime(
+                                                  scratch_load["chatting_end_time"],
+                                                  "%B %d, %Y, %H:%M:%S")
+            else:
+              self.chatting_end_time = None
 
     def save(self, out_json):
       scratch = dict() 
@@ -391,13 +381,6 @@ class PersonaScratch:
       scratch["currently"] = self.currently
       scratch["lifestyle"] = self.lifestyle
       scratch["living_area"] = self.living_area
-
-      # scratch["concept_forget"] = self.concept_forget
-      # scratch["daily_reflection_time"] = self.daily_reflection_time
-      # scratch["daily_reflection_size"] = self.daily_reflection_size
-      # scratch["overlap_reflect_th"] = self.overlap_reflect_th
-      # scratch["kw_strg_event_reflect_th"] = self.kw_strg_event_reflect_th
-      # scratch["kw_strg_thought_reflect_th"] = self.kw_strg_thought_reflect_th
 
       scratch["recency_w"] = self.recency_w
       scratch["relevance_w"] = self.relevance_w

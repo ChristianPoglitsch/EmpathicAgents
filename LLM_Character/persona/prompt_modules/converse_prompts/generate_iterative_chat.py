@@ -29,10 +29,10 @@ def _create_prompt_input_1(uscratch:UserScratch,
                 prev_convo_insert += f'{str(v1)} minutes ago, {cscratch.name} and {uscratch.name} were already {i.description} This context takes place after that conversation.'
                 break
     if prev_convo_insert == "\n": 
-        prev_convo_insert = ""
+        prev_convo_insert = "You don't know each other"
     if ca_mem.seq_chat: 
         if int((cscratch.curr_time - ca_mem.seq_chat[-1].created).total_seconds()/60) > 480: 
-            prev_convo_insert = ""
+            prev_convo_insert = "You know each other"
 
     curr_sector = f"{cscratch.get_curr_location()['sector']}"
     curr_arena= f"{cscratch.get_curr_location()['arena']}"
@@ -50,29 +50,22 @@ def _create_prompt_input_1(uscratch:UserScratch,
     if convo_str == "": 
         convo_str = "[The conversation has not started yet -- start it!]"
 
-    init_iss = f"Here is Here is a brief description of {cscratch.name}.\n{cscratch.get_str_iss()}"
-    # FIXME; fix this shit, use one placeholder for each value...
+    if uscratch.name in cscratch.curr_trust.keys(): 
+        trust_str = str(cscratch.curr_trust[uscratch.name]) 
+    else:
+        trust_str = "5"
+
+    init_iss = f"Here is a brief description of {cscratch.name}.\n{cscratch.get_str_iss()}"
     prompt_input = [init_iss, 
                     cscratch.name, 
                     retrieved_str, 
                     prev_convo_insert,
                     curr_location, 
                     curr_context, 
-                    cscratch.name, 
                     uscratch.name,
-                    convo_str, 
-                    cscratch.name, 
-                    uscratch.name,
-                    cscratch.name,
-                    cscratch.name,
-                    cscratch.name,
-                    cscratch.name,
-                    cscratch.name,
-                    cscratch.name,
-                    cscratch.name,
-                    cscratch.name,
-                    cscratch.name,
-                    cscratch.name
+                    convo_str,
+                    cscratch.curr_emotion,
+                    trust_str 
                     ]
     return prompt_input
 def _create_prompt_input_2(cscratch:PersonaScratch, 
@@ -157,6 +150,9 @@ def run_prompt_iterative_chat(uscratch:UserScratch,
     prompt_input = _create_prompt_input_1(uscratch, cscratch, camem, retrieved, curr_context, curr_chat)
     prompt = generate_prompt(prompt_input, prompt_template)
     
+    # print("BEGIN 1") 
+    # print(prompt)
+
     am = AIMessages()
     am.add_message(prompt, None, "user", "system")
    
@@ -168,6 +164,9 @@ def run_prompt_iterative_chat(uscratch:UserScratch,
     prompt_template = BASE_DIR + "/LLM_Character/persona/prompt_modules/templates/is_convo_ending.txt" 
     prompt_input = _create_prompt_input_2(cscratch, new_chat)
     prompt = generate_prompt(prompt_input, prompt_template)
+    
+    # print("BEGIN 2") 
+    # print(prompt)
     
     am = AIMessages()
     am.add_message(prompt, None, "user", "system")

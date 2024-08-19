@@ -13,6 +13,8 @@ since the problem is that you dont know the sentence generated and if that gener
 
 * do not forget the look variable in the scratch class.
 
+* every open() function can rasie an exception, exception handling needs to be upgraded, since it is non existent at this moment. 
+
 # emotional state
 
 6 emotions, store in the persona. attached to persona, 

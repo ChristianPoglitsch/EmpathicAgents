@@ -9,13 +9,14 @@ load_dotenv()
 API_KEY = os.getenv('OPENAI_API_KEY')
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-def copyanything(src, dst):
+# https://eli.thegreenplace.net/2008/08/21/robust-exception-handling/
+#FIXME: needs proper error handling...
+def copyanything(src:str, dst:str):
+  """Raises exception"""
   try:
     shutil.copytree(src, dst)
-  except OSError as exc: # python >2.5
-    if exc.errno in (errno.ENOTDIR, errno.EINVAL):
-      shutil.copy(src, dst)
-    else: raise
+  except OSError as exc:
+      raise 
 
 def check_if_file_exists(curr_file): 
     return os.path.isfile(curr_file)

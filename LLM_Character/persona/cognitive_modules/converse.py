@@ -16,18 +16,29 @@ def chatting(user_scratch: UserScratch ,
              message:str,  
              model:LLM_API):
 
+  if len(user_scratch.chat) == 0:
+    user_scratch.start_time_chatting = character_scratch.curr_time
+
   user_scratch.chat.add_message(message, user_scratch.name, "user", "MessageAI")
   utt, emotion, trust, end = _generate_response(user_scratch, character_scratch, character_mem, message, model)
   user_scratch.chat.add_message(utt, character_scratch.name, "assistant", "MessageAI")
-  print(emotion)
-  print(trust)
+
+  character_scratch.curr_emotion = emotion
+  character_scratch.curr_trust[user_scratch.name] = int(trust)
+  
+  # print("iteration")
+  # print(message, "\n" , utt, emotion, trust, end)
+  
   if end:
     _end_conversation(user_scratch, character_scratch, model)   
     p_event = character_scratch.get_curr_event_and_desc()
     nodeid, keywords = _remember_chat(character_scratch, character_mem, p_event, model)
     _prepare_reflect_chat(character_scratch, character_mem, p_event, keywords, [nodeid], model)    
+    
     user_scratch.chat = AIMessages()
-  return utt
+    user_scratch.start_time_chatting = None
+
+  return utt, emotion, trust
 
 
 def _remember_chat(cscratch: PersonaScratch, ca_mem:AssociativeMemory, p_event, model:LLM_API):
@@ -111,8 +122,10 @@ if __name__ == "__main__":
   from LLM_Character.util import BASE_DIR
   print("starting take off ...")
   
-  person = Persona("Camila", BASE_DIR + "/LLM_Character/storage/initial/personas/Camila")
-  user = User("Louis", BASE_DIR + "/LLM_Character/storage/initial/users/Louis")
+  # person = Persona("Camila", BASE_DIR + "/LLM_Character/storage/initial/personas/Camila")
+  person = Persona("Florian", BASE_DIR + "/LLM_Character/storage/initial/personas/Florian")
+  user = User("Louis")
+  
   # modelc = LocalComms()
   # model_id = "mistralai/Mistral-7B-Instruct-v0.2"
   # modelc.init(model_id)
@@ -124,23 +137,23 @@ if __name__ == "__main__":
   model = LLM_API(modelc)
   message = "hi"
   response = chatting(user.scratch, person.scratch, person.a_mem, message, model)
-  print("message")
-  print(message)
-  print("response")
-  print(response)
+  # print("message")
+  # print(message)
+  # print("response")
+  # print(response)
 
   message = "IM TERRIBLE, dont talk to me pls"
   response = chatting(user.scratch, person.scratch, person.a_mem, message, model)
-  print("message")
-  print(message)
-  print("response")
-  print(response)
+  # print("message")
+  # print(message)
+  # print("response")
+  # print(response)
 
   message = "i said stop talking, end this conversation, bye."
   response = chatting(user.scratch, person.scratch, person.a_mem, message, model)
 
-  print("message")
-  print(message)
-  print("response")
-  print(response)
+  # print("message")
+  # print(message)
+  # print("response")
+  # print(response)
 

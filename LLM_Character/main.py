@@ -1,7 +1,5 @@
 import torch
-import sys
 import time
-sys.path.append('../')
 
 from LLM_Character.llm_api import LLM_API
 from LLM_Character.udp_comms import UdpComms
@@ -12,7 +10,6 @@ from LLM_Character.world.game import ReverieServer
 # TODO: 
 # there must be a way to add location to spatial memory, because now it is hardcoded which is less ideal. 
     
-
 def start_server(sock:UdpComms,
                  server:ReverieServer,
                  dispatcher:MessageProcessor, 
@@ -29,7 +26,6 @@ def start_server(sock:UdpComms,
             continue
         
         dispatcher.dispatch(sock, server, model, value)
-
 
 
 if __name__ == "__main__":

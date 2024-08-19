@@ -1,4 +1,5 @@
 import sys
+from typing import Tuple
 sys.path.append('../../')
 
 from LLM_Character.llm_api import LLM_API
@@ -57,6 +58,11 @@ class Persona:
     reflect(self.scratch, self.a_mem)
 
   def move(self, personas, curr_location, curr_time):
+    # FIXME: add perceiving element. 
+    # by adding perceiving you can add new location to spatial memeory. 
+    # but only by physically going to that location. 
+    # NOTE: also needed for planned conversation between personas.
+
     self.scratch.curr_location = curr_location
 
     new_day = False
@@ -74,12 +80,14 @@ class Persona:
                         user_scratch:UserScratch, 
                         user_mem: AssociativeMemory, 
                         message:str,
-                        model:LLM_API): 
+                        curr_time:str,
+                        model:LLM_API) -> Tuple[str, str, int]: 
+    self.scratch.curr_time = curr_time
     return chatting(user_scratch, 
                     user_mem, 
                     self.scratch, 
                     self.a_mem,
-                    message, 
+                    message,
                     model)
 
 
