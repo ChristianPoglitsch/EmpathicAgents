@@ -12,7 +12,6 @@ class PromptData(BaseModel):
     persona_name:str
     user_name:str
     message: str
-    value: int
 
 class PromptMessage(BaseMessage):
     type: str
@@ -46,7 +45,7 @@ class OneLocationData(BaseModel):
             raise ValueError('sector in current location must contain exactly one arena.')
         return value
 
-class UpdateMessage(BaseMessage):
+class MoveMessage(BaseMessage):
     type: str
     # dict of persona names and their location
     data:  dict[str, OneLocationData]
@@ -55,9 +54,8 @@ class UpdateMessage(BaseMessage):
 # ---------------------------------------------------------------------------
 # class data sent from unity to python endpoint for sending intial setup data.
 class PersonaScratchData(BaseModel):
-    curr_time: str
-    daily_plan_req:str
-    name:str
+    curr_time: Optional[str]
+    name: Optional[str]
     first_name:str
     last_name:str
     age:int
@@ -66,37 +64,6 @@ class PersonaScratchData(BaseModel):
     currently:str
     lifestyle:str
     living_area: OneLocationData
-    # there may be some parameters that could be added. 
-    # ... see json file in generative agent repo
-    recency_w:int
-    relevance_w:int
-    importance_w:int
-    recency_decay:int
-    importance_trigger_max:int
-    importance_trigger_curr:int
-    importance_ele_n:int
-    # there may be some parameters that could be added. 
-    # ... see json file in generative agent repo
-    daily_req:list[str]
-    f_daily_schedule:list[str]
-    f_daily_schedule_hourly_org:list[str]
-    # there may be some parameters that could be added. 
-    # ... see json file in generative agent repo
-
-    act_address: OneLocationData 
-    act_start_time: str 
-    act_duration: str  
-    act_description: str 
-    act_event: Tuple[str, str, str] # not sure 
-    chatting_with: str 
-    chat: list[list[str]] # converted to AI_Messages, or in the same format as AI_messages, nonetheless, it will be converted to some kind of list for serialisabiility.  
-    # maybe make a different class for thsi chat type altogether, based on AI_Messages? idk 
-    chatting_with_buffer: dict
-    chatting_end_time: str 
-
-class UserScratchData(BaseModel):
-    curr_time: str
-    name:str
     
     recency_w:int
     relevance_w:int
@@ -105,69 +72,34 @@ class UserScratchData(BaseModel):
     importance_trigger_max:int
     importance_trigger_curr:int
     importance_ele_n:int
-
-    act_address: OneLocationData 
-    act_start_time: str 
-    act_duration: str  
-    act_description: str 
-    act_event: Tuple[str, str, str] # not sure 
-    chatting_with: str 
-    chat: list[list[str]] # converted to AI_Messages, or in the same format as AI_messages, nonetheless, it will be converted to some kind of list for serialisabiility.  
-    # maybe make a different class for thsi chat type altogether, based on AI_Messages? idk 
-    chatting_with_buffer: dict
-    chatting_end_time: str 
-
-class KwStrengthData(BaseModel):
-    kw_strength_event: dict[str, int]
-    kw_strength_thought: dict[str, int]
-
-class Node(BaseModel):
-    node_id: int
-    node_count: int
-    type_count: int
-    type: str
-    depth: int
-    created: str
-    expiration: Optional[str]
-    subject: str
-    predicate: str
-    object: str
-    description: str
-    embedding_key: str
-    poignancy: int
-    keywords: list[str]
-    filling: list[str]
-
-class AssociativeMemoryData(BaseModel):
-    embeddings: dict[str, list[float]]
-    kw_strenght: KwStrengthData
-    nodes: dict[str, Node]
+    
+class UserScratchData(BaseModel):
+    name:str
 
 class PersonaData(BaseModel):
     scratch_data:PersonaScratchData
     spatial_data:LocationData
-    as_mem_data:AssociativeMemoryData
 
 class UserData(BaseModel):
     scratch_data: UserScratchData
-    as_mem_data:AssociativeMemoryData
 
 class MetaData(BaseModel):
-    fork_sim_code:str
+    fork_sim_code: Optional[str]
     sim_code:str
     curr_time:str
     sec_per_step:int
     persona_names:list[str]
     step:int
 
-class SetupData(BaseModel):
+class UpdateData(BaseModel):
     meta:MetaData
     personas: dict[str, PersonaData]
     users: dict[str, UserData] 
-    # NOTE: this extra field represent the entire possible virtual world (which can be moddeled after real places), it represent
-    # the maze class that is in the original generative agent paper.
-    # is not needed now, untill we decide to include perceiving into the agent.  
-    virtual_world: LocationData
+
+
+class Setupdata(BaseModel):
+    fork_sim_code: Optional[str]
+    sim_code:str
 
 class SetupMessage(BaseMessage):
     type:str
