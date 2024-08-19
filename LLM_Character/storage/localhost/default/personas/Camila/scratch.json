@@ -20,6 +20,8 @@
     "sector" : "Camila's apartment",
     "arena" : "main room"
   },
+  "curr_emotion": "neutral",
+  "curr_trust": {},
   "concept_forget": 100,
   "daily_reflection_time": 180,
   "daily_reflection_size": 5,
