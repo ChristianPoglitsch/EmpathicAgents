@@ -162,9 +162,8 @@ def run_prompt_iterative_chat(uscratch:UserScratch,
    
     output1 = _get_valid_output(model, am, _clean_up_response_1, COUNTER_LIMIT)
 
-    message = output1["utterence"]
-    new_chat = copy.deepcopy(curr_chat) # FIXME; provide a copy method inside the AImessages class. 
-    new_chat.add_message(message, cscratch.name, "user", "MessageAI") 
+    message = output1["utterance"]
+    new_chat = curr_chat + [AIMessage(cscratch.name, message, "user", "MessageAI")] 
     
     prompt_template = BASE_DIR + "/LLM_Character/persona/prompt_modules/templates/is_convo_ending.txt" 
     prompt_input = _create_prompt_input_2(cscratch, new_chat)

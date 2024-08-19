@@ -70,9 +70,9 @@ hobbies with you and you get to know !<INPUT 20>! better.
 
 Format your response in JSON with format 
 {
-"Message" : "<Your message>", 
-"Trust": "<your trust level>", 
-"Emotion": "<your emotion>"
+"utterance" : "<Your message>", 
+"trust": "<your trust level>", 
+"emotion": "<your emotion>"
 } 
 
 No text outside JSON struct allowed. Keep your response short.
