@@ -49,5 +49,5 @@
   "chatting_with": null, 
   "chat": null,
   "chatting_with_buffer": {}, 
-  "chatting_end_time": null
+  "chatting_end_time" : null
 }

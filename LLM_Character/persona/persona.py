@@ -5,7 +5,7 @@ from LLM_Character.persona.memory_structures.spatial_memory import MemoryTree
 from LLM_Character.persona.memory_structures.associative_memory.associative_memory import AssociativeMemory
 from LLM_Character.persona.memory_structures.scratch.persona_scratch import PersonaScratch
 from LLM_Character.persona.memory_structures.scratch.user_scratch import UserScratch 
-from LLM_Character.communication.validation_dataclass import PersonaData
+from LLM_Character.communication.incoming_messages import PersonaData
 
 from LLM_Character.persona.cognitive_modules.plan import plan
 from LLM_Character.persona.cognitive_modules.reflect import reflect
@@ -26,16 +26,16 @@ class Persona:
     scratch_saved = f"{folder_mem_saved}/scratch.json"
     self.scratch = PersonaScratch(name, scratch_saved)
   
-  @staticmethod
-  def save_as(folder_mem_saved:str, data:PersonaData):
-    f_s_mem_saved = f"{folder_mem_saved}/spatial_memory.json"
-    MemoryTree.save_as(f_s_mem_saved, data.spatial_data)
+  # @staticmethod
+  # def save_as(folder_mem_saved:str, data:PersonaData):
+  #   f_s_mem_saved = f"{folder_mem_saved}/spatial_memory.json"
+  #   MemoryTree.save_as(f_s_mem_saved, data.spatial_data)
 
-    f_a_mem_saved = f"{folder_mem_saved}/associative_memory"
-    AssociativeMemory.save_as(f_a_mem_saved, data.as_mem_data) 
+  #   f_a_mem_saved = f"{folder_mem_saved}/associative_memory"
+  #   AssociativeMemory.save_as(f_a_mem_saved, data.as_mem_data) 
 
-    scratch_saved = f"{folder_mem_saved}/scratch.json"
-    PersonaScratch.save_as(scratch_saved, data.scratch_data)
+  #   scratch_saved = f"{folder_mem_saved}/scratch.json"
+  #   PersonaScratch.save_as(scratch_saved, data.scratch_data)
 
 
   def save(self, save_folder): 
@@ -75,13 +75,11 @@ class Persona:
 
   def open_convo_session(self, 
                         user_scratch:UserScratch, 
-                        user_mem: AssociativeMemory, 
                         message:str,
                         curr_time:str,
                         model:LLM_API) -> Tuple[str, str, int]: 
     self.scratch.curr_time = curr_time
     return chatting(user_scratch, 
-                    user_mem, 
                     self.scratch, 
                     self.a_mem,
                     message,

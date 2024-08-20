@@ -5,7 +5,7 @@ import datetime
 from typing import Tuple, Union 
 
 from LLM_Character.messages_dataclass import AIMessages
-from LLM_Character.communication.validation_dataclass import  PersonaScratchData
+from LLM_Character.communication.incoming_messages import  PersonaScratchData
 from LLM_Character.util import check_if_file_exists
 
 # FIXME: curr_location and living_area moeten bepaalde formaten hebben, 
@@ -311,11 +311,7 @@ class PersonaScratch:
     def load(self, f_saved:str):
       if check_if_file_exists(f_saved): 
             scratch_load = json.load(open(f_saved))
-            if scratch_load["curr_time"]: 
-              self.curr_time = datetime.datetime.strptime(scratch_load["curr_time"],
-                                                        "%B %d, %Y, %H:%M:%S")
-            else: 
-              self.curr_time = None
+            self.curr_time = datetime.datetime.strptime(scratch_load["curr_time"], "%B %d, %Y, %H:%M:%S") 
             self.curr_location = scratch_load["curr_location"]
             self.daily_plan_req = scratch_load["daily_plan_req"]
 
@@ -346,12 +342,7 @@ class PersonaScratch:
             self.f_daily_schedule_hourly_org = scratch_load["f_daily_schedule_hourly_org"]
 
             self.act_address = scratch_load["act_address"]
-            if scratch_load["act_start_time"]: 
-              self.act_start_time = datetime.datetime.strptime(
-                                                    scratch_load["act_start_time"],
-                                                    "%B %d, %Y, %H:%M:%S")
-            else: 
-              self.act_start_time = None
+            self.act_start_time = datetime.datetime.strptime(scratch_load["act_start_time"], "%B %d, %Y, %H:%M:%S") if scratch_load["act_start_time"] else None
             self.act_duration = scratch_load["act_duration"]
             self.act_description = scratch_load["act_description"]
             self.act_event = tuple(scratch_load["act_event"])
@@ -359,12 +350,7 @@ class PersonaScratch:
             self.chatting_with = scratch_load["chatting_with"]
             self.chat = scratch_load["chat"]
             self.chatting_with_buffer = scratch_load["chatting_with_buffer"]
-            if scratch_load["chatting_end_time"]: 
-              self.chatting_end_time = datetime.datetime.strptime(
-                                                  scratch_load["chatting_end_time"],
-                                                  "%B %d, %Y, %H:%M:%S")
-            else:
-              self.chatting_end_time = None
+            self.chatting_end_time = datetime.datetime.strptime(scratch_load["chatting_end_time"], "%B %d, %Y, %H:%M:%S") if scratch_load["chatting_end_time"] else None
 
     def save(self, out_json):
       scratch = dict() 
@@ -381,6 +367,8 @@ class PersonaScratch:
       scratch["currently"] = self.currently
       scratch["lifestyle"] = self.lifestyle
       scratch["living_area"] = self.living_area
+      scratch["curr_emotion"] = self.curr_emotion
+      scratch["curr_trust"] = self.curr_trust
 
       scratch["recency_w"] = self.recency_w
       scratch["relevance_w"] = self.relevance_w
@@ -396,8 +384,7 @@ class PersonaScratch:
       scratch["f_daily_schedule_hourly_org"] = self.f_daily_schedule_hourly_org
 
       scratch["act_address"] = self.act_address
-      scratch["act_start_time"] = (self.act_start_time
-                                      .strftime("%B %d, %Y, %H:%M:%S"))
+      scratch["act_start_time"] = self.act_start_time.strftime("%B %d, %Y, %H:%M:%S") if self.act_start_time else None
       scratch["act_duration"] = self.act_duration
       scratch["act_description"] = self.act_description
       scratch["act_event"] = self.act_event
@@ -405,11 +392,7 @@ class PersonaScratch:
       scratch["chatting_with"] = self.chatting_with
       scratch["chat"] = self.chat
       scratch["chatting_with_buffer"] = self.chatting_with_buffer
-      if self.chatting_end_time: 
-        scratch["chatting_end_time"] = (self.chatting_end_time
-                                          .strftime("%B %d, %Y, %H:%M:%S"))
-      else: 
-        scratch["chatting_end_time"] = None
+      scratch["chatting_end_time"] = self.chatting_end_time.strftime("%B %d, %Y, %H:%M:%S") if self.chatting_end_time else None
 
       with open(out_json, "w") as outfile:
         json.dump(scratch, outfile, indent=2) 

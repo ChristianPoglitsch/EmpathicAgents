@@ -123,7 +123,7 @@ if __name__ == "__main__":
   print("starting take off ...")
   
   # person = Persona("Camila", BASE_DIR + "/LLM_Character/storage/initial/personas/Camila")
-  person = Persona("Florian", BASE_DIR + "/LLM_Character/storage/initial/personas/Florian")
+  person = Persona("Florian", BASE_DIR + "/LLM_Character/storage/localhost/default/personas/Florian")
   user = User("Louis")
   
   # modelc = LocalComms()

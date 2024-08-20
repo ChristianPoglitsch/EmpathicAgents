@@ -3,7 +3,6 @@ import datetime
 from typing import Union
 
 from LLM_Character.persona.memory_structures.associative_memory.concept_node import ConceptNode
-from LLM_Character.communication.validation_dataclass import AssociativeMemoryData 
 
 
 class AssociativeMemory: 
@@ -174,48 +173,6 @@ class AssociativeMemory:
     if target_persona_name and target_persona_name.lower() in self.kw_to_chat: 
       return self.kw_to_chat[target_persona_name.lower()][0]
     return None
-
-
-  @staticmethod
-  def save_as(f_saved:str, data:AssociativeMemoryData): 
-    r = dict()
-    for node in data.nodes: 
-      node_id = f"node_{str(node.node_id)}"
-
-      r[node_id] = dict()
-      r[node_id]["node_count"] = node.node_count
-      r[node_id]["type_count"] = node.type_count
-      r[node_id]["type"] = node.type
-      r[node_id]["depth"] = node.depth
-
-      r[node_id]["created"] = node.created.strftime('%Y-%m-%d %H:%M:%S')
-      r[node_id]["expiration"] = None
-      if node.expiration: 
-        r[node_id]["expiration"] = (node.expiration
-                                        .strftime('%Y-%m-%d %H:%M:%S'))
-
-      r[node_id]["subject"] = node.subject
-      r[node_id]["predicate"] = node.predicate
-      r[node_id]["object"] = node.object
-
-      r[node_id]["description"] = node.description
-      r[node_id]["embedding_key"] = node.embedding_key
-      r[node_id]["poignancy"] = node.poignancy
-      r[node_id]["keywords"] = list(node.keywords)
-      r[node_id]["filling"] = node.filling
-
-    with open(f_saved+"/nodes.json", "w") as outfile:
-      json.dump(r, outfile)
-
-    r = dict()
-    r["kw_strength_event"] = data.kw_strenght.kw_strength_event
-    r["kw_strength_thought"] = data.kw_strenght.kw_strength_thought
-    with open(f_saved+"/kw_strength.json", "w") as outfile:
-      json.dump(r, outfile)
-
-    with open(f_saved+"/embeddings.json", "w") as outfile:
-      json.dump(data.embeddings, outfile)
-
 
   def load(self, f_saved:str):
    # TODO check if file exists ...  

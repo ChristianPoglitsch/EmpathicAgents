@@ -1,7 +1,7 @@
 import json
 from typing import Union 
 
-from LLM_Character.communication.validation_dataclass import LocationData, Sector, Arena, GameObject 
+from LLM_Character.communication.incoming_messages import LocationData, Sector, Arena, GameObject 
 from LLM_Character.util import check_if_file_exists
 
 class MemoryTree: 
@@ -10,18 +10,18 @@ class MemoryTree:
         if check_if_file_exists(f_saved): 
             self.tree = json.load(open(f_saved))
 
-    @staticmethod
-    def save_as(f_saved: str, data: LocationData):
-        tree = {}
+    # @staticmethod
+    # def save_as(f_saved: str, data: LocationData):
+    #     tree = {}
 
-        for sector in data.sectors: 
-            sector_tree = _process_sector(sector)
-            tree[sector.sector] = sector_tree
+    #     for sector in data.sectors: 
+    #         sector_tree = _process_sector(sector)
+    #         tree[sector.sector] = sector_tree
 
-        final_tree = {data.world: tree}
+    #     final_tree = {data.world: tree}
 
-        with open(f_saved, "w") as outfile:
-            json.dump(final_tree, outfile) 
+    #     with open(f_saved, "w") as outfile:
+    #         json.dump(final_tree, outfile) 
     
 
     def save(self, out_json):
@@ -60,15 +60,6 @@ class MemoryTree:
           x = ", ".join(list(self.tree[world][sector][arena.lower()]))
         return x
 
-def _process_sector(sector: Sector) -> dict:
-    sector_tree = {}
-    for arena in sector.arenas or []:
-        sector_tree[arena.arena] = _process_arena(arena)
-    return sector_tree
-
-def _process_arena(arena: Arena) -> list[str]:
-    gameobject_list = [obj.gameobject for obj in (arena.gameobjects or [])]
-    return gameobject_list
 
 if __name__ == '__main__':
     f = f"..\..\storage\initial\personas\Isabella\spatial_memory.json"
