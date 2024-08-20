@@ -11,21 +11,9 @@ from LLM_Character.messages_dataclass import AIMessages, AIMessage
 from LLM_Character.llm_comms.llm_abstract import LLMComms
 from LLM_Character.util import API_KEY
 
-
 # tiktoken is a fast BPE tokeniser for use with OpenAI's models.
-
-# TODO:
-# pydantic is a dynamic data validator 
-# type of data to be received or sent to openai endpoint.
-# should also be implemented in udpComms! 
-# i think it is already implemented with json.loads/dumps, 
-# so load and then dump again to validate, or vice versa.
-from pydantic import BaseModel
-
 from openai.types import ChatModel
-from openai.types.chat import ChatCompletion, ChatCompletionMessageParam
 from openai.types import CreateEmbeddingResponse, Embedding
-from openai.types import Model, ModelDeleted
 from openai import OpenAI 
 
 class OpenAIComms(LLMComms):

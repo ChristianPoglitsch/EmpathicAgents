@@ -1,9 +1,4 @@
-﻿""" summary """ 
-import sys
-sys.path.append('../')
-
-from LLM_Character.messages_dataclass import AIMessages, AIMessage
-
+﻿from LLM_Character.messages_dataclass import AIMessages, AIMessage
 from LLM_Character.llm_comms.llm_abstract import LLMComms
 from LLM_Character.llm_comms.llm_local import LocalComms
 from LLM_Character.llm_comms.llm_openai import OpenAIComms
@@ -17,7 +12,6 @@ warnings.filterwarnings('ignore')
 logging.getLogger('transformers').setLevel(logging.ERROR)
 
 # make safe request by making the prompt safe. see gpt_structure. 
-
 #   prompt = 'GPT-3 Prompt:\n"""\n' + prompt + '\n"""\n'
 #   prompt += f"Output the response to the prompt above in json. {special_instruction}\n"
 #   prompt += "Example output json:\n"

@@ -1,9 +1,7 @@
 import json
 from typing import Union 
-import sys
-sys.path.append('../../')
 
-from LLM_Character.world.validation_dataclass import LocationData, Sector, Arena, GameObject 
+from LLM_Character.communication.validation_dataclass import LocationData, Sector, Arena, GameObject 
 from LLM_Character.util import check_if_file_exists
 
 class MemoryTree: 

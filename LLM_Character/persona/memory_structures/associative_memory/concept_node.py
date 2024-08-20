@@ -1,6 +1,3 @@
-import sys
-sys.path.append('../../')
-
 class ConceptNode: 
   def __init__(self,
                node_id, node_count, type_count, node_type, depth,

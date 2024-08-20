@@ -5,7 +5,7 @@ import datetime
 from typing import Tuple, Union 
 
 from LLM_Character.messages_dataclass import AIMessages
-from LLM_Character.world.validation_dataclass import  PersonaScratchData
+from LLM_Character.communication.validation_dataclass import  PersonaScratchData
 from LLM_Character.util import check_if_file_exists
 
 # FIXME: curr_location and living_area moeten bepaalde formaten hebben, 

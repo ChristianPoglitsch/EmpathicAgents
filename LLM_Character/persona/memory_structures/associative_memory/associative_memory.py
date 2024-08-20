@@ -3,7 +3,7 @@ import datetime
 from typing import Union
 
 from LLM_Character.persona.memory_structures.associative_memory.concept_node import ConceptNode
-from LLM_Character.world.validation_dataclass import AssociativeMemoryData 
+from LLM_Character.communication.validation_dataclass import AssociativeMemoryData 
 
 
 class AssociativeMemory: 

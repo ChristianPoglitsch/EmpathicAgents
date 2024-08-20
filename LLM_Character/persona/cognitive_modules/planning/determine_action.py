@@ -1,4 +1,3 @@
-
 from LLM_Character.llm_comms.llm_api import LLM_API 
 from LLM_Character.persona.memory_structures.scratch.persona_scratch import PersonaScratch
 from LLM_Character.persona.memory_structures.spatial_memory import MemoryTree

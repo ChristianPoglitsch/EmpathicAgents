@@ -6,7 +6,7 @@ from LLM_Character.persona.persona import Persona
 from LLM_Character.persona.user import User 
 from LLM_Character.llm_comms.llm_api import LLM_API 
 from LLM_Character.util import copyanything, BASE_DIR
-from LLM_Character.world.validation_dataclass import OneLocationData, SetupData 
+from LLM_Character.communication.validation_dataclass import OneLocationData, SetupData 
 
 FS_STORAGE = BASE_DIR + "/LLM_Character/storage"
 

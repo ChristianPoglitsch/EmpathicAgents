@@ -1,10 +1,5 @@
-import sys
-sys.path.append('../../')
-
 from LLM_Character.persona.memory_structures.scratch.user_scratch import UserScratch 
-from LLM_Character.persona.memory_structures.associative_memory.associative_memory import AssociativeMemory
 from LLM_Character.persona.cognitive_modules.converse import chatting 
-from LLM_Character.persona.cognitive_modules.reflect import reflect 
 
 # User represents the human who plays the game.
 class User: 

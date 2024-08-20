@@ -53,7 +53,7 @@ class MessageProcessor:
             return None
 
 if __name__ == "__main__":
-  from LLM_Character.world.validation_dataclass import PromptMessage, SystemMessage
+  from LLM_Character.communication.validation_dataclass import PromptMessage, SystemMessage
   from LLM_Character.world.dispatchers.prompt_dispatcher import PromptDispatcher
   from LLM_Character.world.dispatchers.setup_dispatcher import SystemDispatcher
 

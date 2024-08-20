@@ -1,8 +1,3 @@
-""" _summary_ """
-
-import sys
-sys.path.append('../')
-
 from LLM_Character.llm_comms.llm_abstract import LLMComms
 from LLM_Character.finetuning.models import load_base_model
 from LLM_Character.messages_dataclass import AIMessages, AIMessage
