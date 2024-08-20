@@ -1,15 +1,14 @@
 import torch
 import time
 
-from LLM_Character.llm_api import LLM_API
-from LLM_Character.udp_comms import UdpComms
-from LLM_Character.messages_dataclass import AIMessages 
-from LLM_Character.world.message_processor import MessageProcessor
+from LLM_Character.llm_comms.llm_api import LLM_API
+from LLM_Character.communication_module.udp_comms import UdpComms
+from LLM_Character.communication_module.message_processor import MessageProcessor
 from LLM_Character.world.game import ReverieServer
 
-# TODO: 
-# there must be a way to add location to spatial memory, because now it is hardcoded which is less ideal. 
-    
+# NOTE: ibrahim: temporary function that will be replaced in the future by the hungarian team ?
+# which will use grpc, for multi client - (multi server?) architecture? 
+# somehow a manager will be needed to link the differnt clients to the right available servers. 
 def start_server(sock:UdpComms,
                  server:ReverieServer,
                  dispatcher:MessageProcessor, 

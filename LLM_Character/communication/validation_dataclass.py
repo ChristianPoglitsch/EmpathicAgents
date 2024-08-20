@@ -96,8 +96,7 @@ class UpdateData(BaseModel):
     personas: dict[str, PersonaData]
     users: dict[str, UserData] 
 
-
-class Setupdata(BaseModel):
+class SetupData(BaseModel):
     fork_sim_code: Optional[str]
     sim_code:str
 

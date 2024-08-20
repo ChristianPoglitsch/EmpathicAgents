@@ -13,7 +13,7 @@ from LLM_Character.persona.cognitive_modules.retrieve import retrieve
 from LLM_Character.persona.memory_structures.associative_memory.associative_memory import AssociativeMemory
 from LLM_Character.persona.memory_structures.scratch.persona_scratch import PersonaScratch
 
-from LLM_Character.llm_api import LLM_API 
+from LLM_Character.llm_comms.llm_api import LLM_API 
 
 # FIXME: where reset scratch_chatting_end_time ? normally in maze or reverie no? 
 

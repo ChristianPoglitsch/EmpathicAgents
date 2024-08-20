@@ -2,7 +2,7 @@
 Plan new steps or quests.
 """
 
-from LLM_Character.llm_api import LLM_API 
+from LLM_Character.llm_comms.llm_api import LLM_API 
 from LLM_Character.persona.memory_structures.spatial_memory import MemoryTree
 from LLM_Character.persona.memory_structures.scratch.persona_scratch import PersonaScratch
 from LLM_Character.persona.memory_structures.associative_memory.associative_memory import AssociativeMemory

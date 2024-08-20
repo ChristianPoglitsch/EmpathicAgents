@@ -5,7 +5,7 @@ The long term planning that spans a day.
 import datetime
 
 from LLM_Character.util import BASE_DIR
-from LLM_Character.llm_api import LLM_API  
+from LLM_Character.llm_comms.llm_api import LLM_API  
 from LLM_Character.messages_dataclass import AIMessages
 from LLM_Character.persona.prompt_modules.prompt import generate_prompt 
 import LLM_Character.persona.memory_structures.scratch.persona_scratch as PersonaScratch

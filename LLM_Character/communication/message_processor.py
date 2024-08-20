@@ -1,18 +1,29 @@
-import sys
 import json 
 from typing import Type, Union
-sys.path.append('../../')
 
-from LLM_Character.world.validation_dataclass import BaseMessage
+from LLM_Character.communication.validation_dataclass import BaseMessage
 from LLM_Character.world.dispatchers.dispatcher import BaseDispatcher
 from LLM_Character.world.dispatchers.prompt_dispatcher import PromptDispatcher
 from LLM_Character.world.dispatchers.setup_dispatcher import SetupDispatcher
 from LLM_Character.world.dispatchers.update_dispatcher import UpdateDispatcher 
-from LLM_Character.world.validation_dataclass import PromptMessage, SystemMessage, UpdateMessage
+from LLM_Character.communication.validation_dataclass import PromptMessage, SystemMessage, UpdateMessage
 from LLM_Character.world.game import ReverieServer
-from LLM_Character.llm_api import LLM_API
-from LLM_Character.udp_comms import UdpComms
+from LLM_Character.llm_comms.llm_api import LLM_API
+from LLM_Character.communication.udp_comms import UdpComms
 
+# ------------------------
+# FIXME: HOE ZORG JE ERVOOR DAT HET STATELESS MAAR DAT JE EERST SETUP MESSAGE UITVOERT EN DAN PAS MOVEMESSAGE OF PROMPTMESSAGE???
+# of 
+# IK DENK DAT IK EEN SERVER MANAGER OF IETS IN DIE SOORT NODIG ZAL HEBBEN. 
+# want stel twee requests binnen met (verschillende of zelfde) sim_code ??? dan hebben we ook een probleem
+# we moeten bijhouden wat er precies mogelijk is en wat niet.
+# en de servermanager, is een dict van connection/socket -> reverieserver ? 
+# ------------------------ 
+
+# NOTE: ibrahim: temporary class which will be replaced by the hungarian team? 
+# after all, they are going to use grpc, and so most of the socket programmming will dissapear
+# no need to make it complicated for now, (assume single client single server), but the server (revererieserver) takes in client-id
+# which makes it possible to run multiple instances for different clients without having a conflict. 
 class MessageProcessor:
     def __init__(self):
         self._dispatch_map: dict[str, BaseDispatcher] = {}
@@ -27,6 +38,7 @@ class MessageProcessor:
         self._dispatch_map[message_type] = dispatcher_class 
     
     def dispatch(self, socket: UdpComms, server:ReverieServer, model: LLM_API, data:BaseMessage):
+      
       self._dispatch_map[data.type].handler(socket, server, model, data)
 
     def validate_data(self, data: str) -> Union[BaseMessage,None]:

@@ -1,7 +1,7 @@
 import datetime
 import math
 
-from LLM_Character.llm_api import LLM_API 
+from LLM_Character.llm_comms.llm_api import LLM_API 
 from LLM_Character.persona.prompt_modules.converse_prompts.decomp_schedule import run_prompt_decomp_schedule
 from LLM_Character.persona.memory_structures.associative_memory.associative_memory import AssociativeMemory
 from LLM_Character.persona.memory_structures.scratch.persona_scratch import PersonaScratch

@@ -4,7 +4,7 @@ return the suitable gameobject where this action can take place.
 """
 import random
 
-from LLM_Character.llm_api import LLM_API 
+from LLM_Character.llm_comms.llm_api import LLM_API 
 from LLM_Character.messages_dataclass import AIMessages
 from LLM_Character.persona.prompt_modules.prompt import generate_prompt
 from LLM_Character.persona.memory_structures.scratch.persona_scratch import PersonaScratch

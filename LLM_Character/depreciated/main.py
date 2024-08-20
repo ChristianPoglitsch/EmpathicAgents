@@ -8,8 +8,8 @@ import time
 from transformers import AutoModel, AutoModelForCausalLM, AutoTokenizer
 from gpt4all import GPT4All
 
-from udp_comms import UdpComms
-from llm_api import LLM_API
+from LLM_Character.communication_module.udp_comms import UdpComms
+from LLM_Character.llm_comms.llm_api import LLM_API
 from speach import speech
 from messages_dataclass import AIMessages, PromptMessage
 from persona.cognitive_modules.summary import summary

@@ -1,5 +1,5 @@
 
-from LLM_Character.llm_api import LLM_API 
+from LLM_Character.llm_comms.llm_api import LLM_API 
 from LLM_Character.persona.memory_structures.scratch.persona_scratch import PersonaScratch
 from LLM_Character.persona.memory_structures.spatial_memory import MemoryTree
 from LLM_Character.persona.prompt_modules.planning_prompts.determine_action.task_decomp import run_prompt_task_decomp

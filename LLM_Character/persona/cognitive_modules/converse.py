@@ -1,5 +1,5 @@
 from typing import Tuple, Union
-from LLM_Character.llm_api import LLM_API 
+from LLM_Character.llm_comms.llm_api import LLM_API 
 from LLM_Character.messages_dataclass import AIMessages
 
 from LLM_Character.persona.memory_structures.associative_memory.associative_memory import AssociativeMemory

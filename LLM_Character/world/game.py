@@ -4,19 +4,11 @@ from typing import Tuple, Union
 
 from LLM_Character.persona.persona import Persona
 from LLM_Character.persona.user import User 
-from LLM_Character.llm_api import LLM_API 
+from LLM_Character.llm_comms.llm_api import LLM_API 
 from LLM_Character.util import copyanything, BASE_DIR
 from LLM_Character.world.validation_dataclass import OneLocationData, SetupData 
 
 FS_STORAGE = BASE_DIR + "/LLM_Character/storage"
-
-# ------------------------
-# FIXME: HOE ZORG JE ERVOOR DAT HET STATELESS MAAR DAT JE EERST SETUP MESSAGE UITVOERT EN DAN PAS MOVEMESSAGE OF PROMPTMESSAGE???
-# IK DENK DAT IK EEN SERVER MANAGER OF IETS IN DIE SOORT NODIG ZAL HEBBEN. 
-# want stel twee requests binnen met (verschillende of zelfde) sim_code ??? dan hebben we ook een probleem
-# we moeten bijhouden wat er precies mogelijk is en wat niet.
-# en de servermanager, is een dict van connection/socket -> reverieserver ? 
-# ------------------------ 
 
 class ReverieServer:
   def __init__(self,
@@ -157,7 +149,7 @@ class ReverieServer:
 
       
 if __name__ == "__main__" :
-  from example_data import example_update_message, example_setup_data
+  from LLM_Character.world.data.example_data import example_update_message, example_setup_data
   r = ReverieServer()
   # FIXME niet content van de vorm van de data, door al die klas declaraties, 
   # kan het niet gedaan worden zonder? 

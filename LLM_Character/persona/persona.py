@@ -1,8 +1,6 @@
-import sys
 from typing import Tuple
-sys.path.append('../../')
 
-from LLM_Character.llm_api import LLM_API
+from LLM_Character.llm_comms.llm_api import LLM_API
 from LLM_Character.persona.memory_structures.scratch import user_scratch
 from LLM_Character.persona.memory_structures.spatial_memory import MemoryTree
 from LLM_Character.persona.memory_structures.associative_memory.associative_memory import AssociativeMemory
