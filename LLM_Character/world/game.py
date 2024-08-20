@@ -21,7 +21,11 @@ FS_STORAGE = BASE_DIR + "/LLM_Character/storage"
   # die verander je door een andere functie weeral toe te voegen 
   # add persona to game 
   # remove persona to game
-  # etc. 
+  # etc.
+  # 
+  # FIXME: also when you add a user to the game, what you are doing is changing the default name "Louis"
+  # to the given name. 
+  # Or in other words, with the start message, not only include simcode, forkcode, clientid but also username.  
 
 
 class ReverieServer:
