@@ -1,6 +1,5 @@
-from pydantic import BaseModel 
-from pydantic import field_validator
-from typing import Tuple, Optional, Any
+from pydantic import BaseModel, field_validator 
+from typing import Any, Dict, List, Optional
 
 class BaseMessage(BaseModel):
     type: str
@@ -50,64 +49,60 @@ class MoveMessage(BaseMessage):
     # dict of persona names and their location
     data:  dict[str, OneLocationData]
 
+# ---------------------------------------------------------------------------
+# class data sent from unity to python endpoint for sending updated data.
+class PersonaScratchData(BaseModel):
+    curr_time: Optional[str] = None
+    name: Optional[str] = None
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    age: Optional[int] = None
+    innate: Optional[str] = None
+    learned: Optional[str] = None
+    currently: Optional[str] = None
+    lifestyle: Optional[str] = None
+    living_area: Optional[OneLocationData] = None
+    
+    recency_w: Optional[int] = None
+    relevance_w: Optional[int] = None
+    importance_w: Optional[int] = None
+    recency_decay: Optional[int] = None
+    importance_trigger_max: Optional[int] = None
+    importance_trigger_curr: Optional[int] = None
+    importance_ele_n: Optional[int] = None
+
+class UserScratchData(BaseModel):
+    name: Optional[str] = None
+
+class PersonaData(BaseModel):
+    scratch_data: Optional[PersonaScratchData] = None
+    spatial_data: Optional[LocationData] = None
+
+class UserData(BaseModel):
+    scratch_data: Optional[UserScratchData] = None
+
+class MetaData(BaseModel):
+    curr_time: Optional[str] = None
+    sec_per_step: Optional[int] = None
+    persona_names: Optional[List[str]] = None
+    step: Optional[int] = None
+
+class UpdateData(BaseModel):
+    meta: Optional[MetaData] = None
+    personas: Optional[Dict[str, PersonaData]] = None
+    users: Optional[Dict[str, UserData]] = None
+
+class UpdateMessage(BaseMessage):
+    type:str
+    data: UpdateData 
 
 # ---------------------------------------------------------------------------
 # class data sent from unity to python endpoint for sending intial setup data.
-class PersonaScratchData(BaseModel):
-    curr_time: Optional[str]
-    name: Optional[str]
-    first_name:str
-    last_name:str
-    age:int
-    innate:str
-    learned:str
-    currently:str
-    lifestyle:str
-    living_area: OneLocationData
-    
-    recency_w:int
-    relevance_w:int
-    importance_w:int
-    recency_decay:int
-    importance_trigger_max:int
-    importance_trigger_curr:int
-    importance_ele_n:int
-    
-class UserScratchData(BaseModel):
-    name:str
-
-class PersonaData(BaseModel):
-    scratch_data:PersonaScratchData
-    spatial_data:LocationData
-
-class UserData(BaseModel):
-    scratch_data: UserScratchData
-
-class MetaData(BaseModel):
-    fork_sim_code: Optional[str]
-    sim_code:str
-    curr_time:str
-    sec_per_step:int
-    persona_names:list[str]
-    step:int
-
-class UpdateData(BaseModel):
-    meta:MetaData
-    personas: dict[str, PersonaData]
-    users: dict[str, UserData] 
-
-class SetupData(BaseModel):
+class StartData(BaseModel):
     fork_sim_code: Optional[str]
     sim_code:str
 
-class SetupMessage(BaseMessage):
+class StartMessage(BaseMessage):
     type:str
-    data: SetupData
-
-
-
-
-
-
-
+    data: StartData
 

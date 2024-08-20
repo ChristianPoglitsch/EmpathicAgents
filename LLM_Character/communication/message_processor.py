@@ -1,12 +1,12 @@
 import json 
 from typing import Type, Union
 
-from LLM_Character.communication.validation_dataclass import BaseMessage
+from LLM_Character.communication.incoming_messages import BaseMessage
 from LLM_Character.world.dispatchers.dispatcher import BaseDispatcher
 from LLM_Character.world.dispatchers.prompt_dispatcher import PromptDispatcher
 from LLM_Character.world.dispatchers.setup_dispatcher import SetupDispatcher
 from LLM_Character.world.dispatchers.update_dispatcher import UpdateDispatcher 
-from LLM_Character.communication.validation_dataclass import PromptMessage, SystemMessage, UpdateMessage
+from LLM_Character.communication.incoming_messages import PromptMessage, SystemMessage, UpdateMessage
 from LLM_Character.world.game import ReverieServer
 from LLM_Character.llm_comms.llm_api import LLM_API
 from LLM_Character.communication.udp_comms import UdpComms
@@ -53,7 +53,7 @@ class MessageProcessor:
             return None
 
 if __name__ == "__main__":
-  from LLM_Character.communication.validation_dataclass import PromptMessage, SystemMessage
+  from LLM_Character.communication.incoming_messages import PromptMessage, SystemMessage
   from LLM_Character.world.dispatchers.prompt_dispatcher import PromptDispatcher
   from LLM_Character.world.dispatchers.setup_dispatcher import SystemDispatcher
 
