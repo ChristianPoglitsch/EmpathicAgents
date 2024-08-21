@@ -89,10 +89,12 @@ def _clean_up_response_1(response:str) -> Union[None, dict[str,str]]:
     cleaned = []
     for _, val in obj.items(): 
       cleaned += [val]
+    
     cleaned_dict["utterance"] = cleaned[0]
-    cleaned_dict["trust"] = cleaned[1]
+    cleaned_dict["trust"] = int(cleaned[1])
     cleaned_dict["emotion"] = cleaned[2]
     return cleaned_dict
+
 
 def _clean_up_response_2(response:str) -> Union[None, dict[str,str]]:
     obj = extract_first_json_dict(response)

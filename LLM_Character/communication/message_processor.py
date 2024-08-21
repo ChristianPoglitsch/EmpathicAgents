@@ -4,21 +4,13 @@ from typing import Type, Union
 from LLM_Character.communication.incoming_messages import BaseMessage
 from LLM_Character.world.dispatchers.dispatcher import BaseDispatcher
 from LLM_Character.world.dispatchers.prompt_dispatcher import PromptDispatcher
-from LLM_Character.world.dispatchers.setup_dispatcher import SetupDispatcher
-from LLM_Character.world.dispatchers.update_dispatcher import UpdateDispatcher 
-from LLM_Character.communication.incoming_messages import PromptMessage, SystemMessage, UpdateMessage
+from LLM_Character.world.dispatchers.start_dispatcher import StartDispatcher 
+from LLM_Character.world.dispatchers.update_dispatcher import UpdateMetaDispatcher, UpdatePersonaDispatcher, UpdateUserDispatcher
+from LLM_Character.world.dispatchers.add_dispatcher import AddPersonaDispatcher 
+from LLM_Character.communication.incoming_messages import PromptMessage, StartMessage, UpdateMetaMessage, UpdatePersonaMessage, UpdateUserMessage, AddPersonaMessage 
 from LLM_Character.world.game import ReverieServer
 from LLM_Character.llm_comms.llm_api import LLM_API
 from LLM_Character.communication.udp_comms import UdpComms
-
-# ------------------------
-# FIXME: HOE ZORG JE ERVOOR DAT HET STATELESS MAAR DAT JE EERST SETUP MESSAGE UITVOERT EN DAN PAS MOVEMESSAGE OF PROMPTMESSAGE???
-# of 
-# IK DENK DAT IK EEN SERVER MANAGER OF IETS IN DIE SOORT NODIG ZAL HEBBEN. 
-# want stel twee requests binnen met (verschillende of zelfde) sim_code ??? dan hebben we ook een probleem
-# we moeten bijhouden wat er precies mogelijk is en wat niet.
-# en de servermanager, is een dict van connection/socket -> reverieserver ? 
-# ------------------------ 
 
 # NOTE: ibrahim: temporary class which will be replaced by the hungarian team? 
 # after all, they are going to use grpc, and so most of the socket programmming will dissapear
@@ -30,32 +22,53 @@ class MessageProcessor:
         self._validator_map: dict[str, Type[BaseMessage]] = {}
 
         self.register('PromptMessage', PromptMessage, PromptDispatcher())
-        self.register('SetupData', SystemMessage, SetupDispatcher())
-        self.register('UpdateData', UpdateMessage, UpdateDispatcher())
+        self.register('StartMessage', StartMessage, StartDispatcher())
+        self.register('UpdateUserMessage', UpdateUserMessage, UpdateUserDispatcher())
+        self.register('UpdateMetaMessage', UpdateMetaMessage, UpdateMetaDispatcher())
+        self.register('UpdatePersonaMessage', UpdatePersonaMessage, UpdatePersonaDispatcher())
+        self.register('AddPersonaMessage', AddPersonaMessage, AddPersonaDispatcher())
 
     def register(self, message_type: str, message_class:Type[BaseMessage], dispatcher_class:BaseDispatcher):
         self._validator_map[message_type] = message_class
         self._dispatch_map[message_type] = dispatcher_class 
     
     def dispatch(self, socket: UdpComms, server:ReverieServer, model: LLM_API, data:BaseMessage):
-      
       self._dispatch_map[data.type].handler(socket, server, model, data)
 
-    def validate_data(self, data: str) -> Union[BaseMessage,None]:
+    def validate_data(self, data: str) -> Union[BaseMessage, None]:
         try:
             loaded_data = json.loads(data)
             data_type = loaded_data.get('type')
+            
+            if not data_type:
+                print("No 'type' field found in the data.")
+                return None
+            
             schema = self._validator_map.get(data_type)
-            if schema:
+            if not schema:
+                print(f"No schema registered for message type: {data_type}")
+                return None
+            
+            try:
                 valid_data = schema(**loaded_data)
                 return valid_data
-        except :
-            return None
+            except TypeError as e:
+                print(f"Validation failed due to a TypeError: {e}")
+            except ValueError as e:
+                print(f"Validation failed due to a ValueError: {e}")
+            except Exception as e:
+                print(f"An unexpected error occurred during validation: {e}")
+
+        except json.JSONDecodeError as e:
+            print(f"Failed to decode JSON: {e}")
+        except Exception as e:
+            print(f"An unexpected error occurred: {e}")
+        return None
 
 if __name__ == "__main__":
   from LLM_Character.communication.incoming_messages import PromptMessage, SystemMessage
   from LLM_Character.world.dispatchers.prompt_dispatcher import PromptDispatcher
-  from LLM_Character.world.dispatchers.setup_dispatcher import SystemDispatcher
+  from LLM_Character.world.dispatchers.start_dispatcher import SystemDispatcher
 
   dispatcher = MessageProcessor()
 
@@ -63,6 +76,6 @@ if __name__ == "__main__":
   value = dispatcher.validate_data(json_string)
   assert value == None
   
-  json_string = '{"type": "PromptMessage", "data": {"persona_name": "Camila", "message": "hoi", "value": 1}}'
+  json_string = '{"type": "PromptMessage", "data": {"persona_name": "Camila", "message": "hoi"}}'
   value = dispatcher.validate_data(json_string)
   assert isinstance(value, PromptMessage), f"it is somethign else {type(value)}"

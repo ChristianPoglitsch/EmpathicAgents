@@ -1,30 +1,33 @@
 import json
+import os
 from typing import Union 
 
-from LLM_Character.communication.incoming_messages import LocationData, Sector, Arena, GameObject 
+from LLM_Character.communication.incoming_messages import LocationData 
 from LLM_Character.util import check_if_file_exists
 
 class MemoryTree: 
-    def __init__(self, f_saved): 
+    def __init__(self): 
         self.tree = {}
-        if check_if_file_exists(f_saved): 
-            self.tree = json.load(open(f_saved))
-
-    # @staticmethod
-    # def save_as(f_saved: str, data: LocationData):
-    #     tree = {}
-
-    #     for sector in data.sectors: 
-    #         sector_tree = _process_sector(sector)
-    #         tree[sector.sector] = sector_tree
-
-    #     final_tree = {data.world: tree}
-
-    #     with open(f_saved, "w") as outfile:
-    #         json.dump(final_tree, outfile) 
     
+    def load_from_file(self, f_saved):
+        if check_if_file_exists(f_saved): 
+            tree = json.load(open(f_saved))
+            self.tree = tree
+    
+    def load_from_data(self, data:LocationData):
+        self.update(data)
+
+    def update(self, data:LocationData):
+        self.tree[data.world] = {}
+        for s in data.sectors:
+            self.tree[data.world][s.sector] = {}
+            for a in s.arenas:
+                self.tree[data.world][s.sector][a.arena] = []
+                for o in a.gameobjects:
+                    self.tree[data.world][s.sector][a.arena] += [o.gameobject]
 
     def save(self, out_json):
+        os.makedirs(os.path.dirname(out_json), exist_ok=True)
         with open(out_json, "w") as outfile:
             json.dump(self.tree, outfile) 
     

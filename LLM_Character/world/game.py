@@ -7,26 +7,9 @@ from LLM_Character.persona.persona import Persona
 from LLM_Character.persona.user import User 
 from LLM_Character.llm_comms.llm_api import LLM_API 
 from LLM_Character.util import copyanything, BASE_DIR
-from LLM_Character.communication.incoming_messages import OneLocationData, UpdateData  
+from LLM_Character.communication.incoming_messages import OneLocationData, MetaData, PersonaData, UserData, AddPersonaData
 
 FS_STORAGE = BASE_DIR + "/LLM_Character/storage"
-
-
-# TODO: 
-  # FIXME: niet 1 update processor
-  # maar meerdere en zeer specifiek. 
-  # dus 1tje om scratch te veranderen van eeen bestaande persona, dus je moet persona naam al doorsturen. 
-  # en 1tje om meta file te veranderen , maar daarvan kun je enkel curr_time veranderne , 
-  # de usernames en personanames MAG JE NIET VERANDEREN !!!!!
-  # die verander je door een andere functie weeral toe te voegen 
-  # add persona to game 
-  # remove persona to game
-  # etc.
-  # 
-  # FIXME: also when you add a user to the game, what you are doing is changing the default name "Louis"
-  # to the given name. 
-  # Or in other words, with the start message, not only include simcode, forkcode, clientid but also username.  
-
 
 class ReverieServer:
   def __init__(self,
@@ -51,7 +34,6 @@ class ReverieServer:
   # =============================================================================
   
   def prompt_processor(self, user_name:str, persona_name:str, message:str, model:LLM_API) -> Tuple[str, str, int]:
-    """ shouldnt be executed if the server is not loaded yet. """
     if self.loaded:
       user = self.users[user_name]
       out = self.personas[persona_name].open_convo_session(user.scratch,
@@ -60,12 +42,14 @@ class ReverieServer:
                                                             model)
       self.curr_time += datetime.timedelta(seconds=self.sec_per_step)
       self.step += 1
-      return out 
+
+      # autosave? 
+      self._save()
+      return out
     return None
 
 
   def move_processor(self, curr_location:dict[str, OneLocationData]):
-    """ shouldnt be executed if the server is not loaded yet. """
     if self.loaded: 
       sim_folder = f"{FS_STORAGE}/{self.sim_code}"
 
@@ -86,25 +70,58 @@ class ReverieServer:
       curr_move_file = f"{sim_folder}/movement/{self.step}.json"
       with open(curr_move_file, "w") as outfile: 
         outfile.write(json.dumps(movements, indent=2))
-
+      
+      # autosave ?
+      self._save()
 
   def start_processor(self):
     self._load()
 
-  # FIXME: niet 1 update processor
-  # maar meerdere en zeer specifiek. 
-  # dus 1tje om scratch te veranderen van eeen bestaande persona, dus je moet persona naam al doorsturen. 
-  # en 1tje om meta file te veranderen , maar daarvan kun je enkel curr_time veranderne , 
-  # de usernames en personanames MAG JE NIET VERANDEREN !!!!!
-  # die verander je door een andere functie weeral toe te voegen 
-  # add persona to game 
-  # remove persona to game
-  # etc. 
-  def update_processor(self, data: UpdateData):
-    """ shouldnt be executed if the server is not loaded yet. """
+
+  def update_meta_processor(self, data: MetaData):
+    if data.curr_time :
+      # FIXME: proper error handling, make sure in the pydantic validation schema 
+      # that data.curr_time conforms to the format "July 25, 2024, 09:15:45"  
+      self.curr_time = datetime.datetime.strptime(data.curr_time, "%B %d, %Y, %H:%M:%S")
+    if data.sec_per_step :
+      self.sec_per_step = data.sec_per_step 
+    
+    # autosave? 
     self._save()
-    self._save_as(data)
-    self._load()
+
+
+  def update_persona_processor(self, data : PersonaData):
+    if data.name in self.personas.keys():
+      persona = self.personas[data.name]
+      persona.update_scratch(data.scratch_data)
+      persona.update_spatial(data.spatial_data)
+    
+    # autosave? 
+    self._save()
+
+
+  def update_user_processor(self, data : UserData):
+    if data.old_name in self.users.keys():
+      user = self.users.pop(data.old_name)
+      # FIXME: not so good, law of demeter....
+      user.scratch.name = data.name
+      self.users[data.name] = user
+    
+    # autosave? 
+    self._save()
+
+  # TODO in every save function, if cannot be opned to write, make new dir and file 
+  def add_persona_processor(self, data: AddPersonaData):
+    if data.name not in self.personas.keys():
+      p = Persona(data.name)
+      p.load_from_data(data.scratch_data, data.spatial_data)
+      # FIXME: not so good, law of demeter....
+      p.scratch.curr_time = self.curr_time
+      self.personas[data.name] = p
+
+      # autosave? 
+      self._save() 
+
 
   # =============================================================================
   # SECTION: Loading and saving logic
@@ -133,7 +150,8 @@ class ReverieServer:
     self.personas:dict[str, Persona] = dict()
     for persona_name in reverie_meta['persona_names']: 
       persona_folder = f"{sim_folder}/personas/{persona_name}"
-      curr_persona = Persona(persona_name, persona_folder)
+      curr_persona = Persona(persona_name)
+      curr_persona.load_from_file(persona_folder)
       self.personas[persona_name] = curr_persona
     
     # NOTE its a single player game, so this can be adjusted to only one field of user, but for generality,
@@ -144,35 +162,6 @@ class ReverieServer:
       self.users[user_name] = curr_user
     
     self.loaded = True
-
-
-  def _save_as(self, data: UpdateData): 
-    sim_folder = f"{FS_STORAGE}/{self.client_id}/{self.sim_code}"
-    if self.loaded and data.meta:
-      reverie_meta_f = f"{sim_folder}/meta.json"
-      
-      with open(reverie_meta_f, "r") as infile:
-        reverie_meta = json.load(infile)    
-      
-      if data.meta.curr_time: 
-        reverie_meta["curr_time"] = data.meta.curr_time
-      if data.meta.sec_per_step:
-        reverie_meta["sec_per_step"] = data.meta.sec_per_step
-      if data.meta.persona_names:
-        reverie_meta["persona_names"] = data.meta.persona_names
-      if data.meta.step :
-        reverie_meta["step"] = data.meta.step
-
-      with open(reverie_meta_f, "w") as outfile: 
-        outfile.write(json.dumps(reverie_meta, indent=2))
-
-      for persona_name in data.meta.persona_names : 
-        save_folder = f"{sim_folder}/personas/{persona_name}/"
-        Persona.save_as(save_folder, data.personas[persona_name])
-      
-      for user_name in data.meta.user_names: 
-        save_folder = f"{sim_folder}/personas/{user_name}/"
-        User.save_as(save_folder, data.users[user_name])
 
 
   def _save(self):
@@ -233,44 +222,4 @@ if __name__ == "__main__" :
   assert a == True 
   assert out1 != None 
   
-  
-  data_dict = {
-    "meta" : None,
-    "personas" : None,
-    "users": None,
-  }
-  update_data_instance = UpdateData(**data_dict)
-  out2  = r.update_processor(update_data_instance)
-
-  data_dict = {
-    "meta": {
-        "curr_time": "2024-08-20T12:00:00Z",
-        "sec_per_step": 30,
-        "persona_names": ["John Doe", "Jane Smith"],
-        "step": 5
-    },
-    "personas": {
-        "john_doe": {
-            "scratch_data": {
-                "curr_time": "2024-08-20T12:00:00Z",
-                "name": "John Doe",
-                "age": 30
-            },
-            "spatial_data": None
-        }
-    },
-    "users": {
-        "jane_smith": {
-            "scratch_data": {
-                "name": "Jane Smith"
-            }
-        }
-    }
-  }
-
-  update_data_instance = UpdateData(**data_dict)
-  out2  = r.update_processor(update_data_instance)
-
-
-  # shutil.rmtree( BASE_DIR + "/LLM_Character/storage/notlocalhost")
-  # del r
+ 

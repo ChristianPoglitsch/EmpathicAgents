@@ -24,3 +24,18 @@ class PromptReponseMessage(BaseMessage):
     type: str
     data: PromptResponseData 
 
+# ---------------------------------------------------------------------------
+
+# get personadata information. 
+
+
+
+
+
+
+
+
+
+
+
+

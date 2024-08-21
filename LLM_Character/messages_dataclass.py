@@ -176,7 +176,7 @@ class AIMessages:
             file_path (str): The path to the file where the messages should be saved.
         """
         with open(file_path, "w") as json_file:
-            json.dump(self.get_messages_formatted(), json_file, indent=4)
+            json.dump(self.get_formatted(), json_file, indent=4)
     
     @staticmethod
     def read_messages_from_json(file_path):
@@ -190,14 +190,17 @@ class AIMessages:
             AIMessages: An AIMessages instance populated with the messages read from the file.
         """
         messages_ai = AIMessages()
-        with open(file_path, "r") as json_file:
-            data = json.load(json_file)
-            for item in data:
-                message_ai = AIMessage(
-                    item["content"], item["role"], class_type=item["class_type"]
-                )
-                messages_ai.add_message(message_ai)
-        return messages_ai
+        try :
+            with open(file_path, "r") as json_file:
+                data = json.load(json_file)
+                for item in data:
+                    content = item.get("content")
+                    role = item.get("role")
+                    sender = item.get("sender")
+                    class_type = item.get("class_type")
+                    messages_ai.add_message(content, sender, role, class_type)
+        finally:
+            return messages_ai
 
     def  __len__(self):
         return  len(self.messages)
@@ -205,6 +208,7 @@ class AIMessages:
 
 if __name__ == "__main__":
 
+    from LLM_Character.communication.incoming_messages import PromptMessage
     pm = PromptMessage(1, "Hallo Wereld")
     print("JSON ", pm.toJSON())
 

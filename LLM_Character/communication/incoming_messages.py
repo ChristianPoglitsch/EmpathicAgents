@@ -35,14 +35,8 @@ class LocationData(BaseModel):
 
 class OneLocationData(BaseModel):
     world: str 
-    sectors: Sector 
-
-    @field_validator('sectors')
-    def check_current_location(cls, value):
-        sector_arenas = value.arenas
-        if sector_arenas is None or len(sector_arenas) != 1:
-            raise ValueError('sector in current location must contain exactly one arena.')
-        return value
+    sector: str
+    arena : Optional[str] = None
 
 class MoveMessage(BaseMessage):
     type: str
@@ -52,8 +46,7 @@ class MoveMessage(BaseMessage):
 # ---------------------------------------------------------------------------
 # class data sent from unity to python endpoint for sending updated data.
 class PersonaScratchData(BaseModel):
-    curr_time: Optional[str] = None
-    name: Optional[str] = None
+    curr_location: Optional[OneLocationData] = None
     first_name: Optional[str] = None
     last_name: Optional[str] = None
     age: Optional[int] = None
@@ -71,30 +64,30 @@ class PersonaScratchData(BaseModel):
     importance_trigger_curr: Optional[int] = None
     importance_ele_n: Optional[int] = None
 
-class UserScratchData(BaseModel):
-    name: Optional[str] = None
-
 class PersonaData(BaseModel):
+    name: str
     scratch_data: Optional[PersonaScratchData] = None
     spatial_data: Optional[LocationData] = None
 
 class UserData(BaseModel):
-    scratch_data: Optional[UserScratchData] = None
+    old_name : str
+    name: str
 
 class MetaData(BaseModel):
     curr_time: Optional[str] = None
     sec_per_step: Optional[int] = None
-    persona_names: Optional[List[str]] = None
-    step: Optional[int] = None
 
-class UpdateData(BaseModel):
-    meta: Optional[MetaData] = None
-    personas: Optional[Dict[str, PersonaData]] = None
-    users: Optional[Dict[str, UserData]] = None
-
-class UpdateMessage(BaseMessage):
+class UpdateMetaMessage(BaseMessage):
     type:str
-    data: UpdateData 
+    data: MetaData 
+
+class UpdatePersonaMessage(BaseMessage):
+    type:str
+    data: PersonaData 
+
+class UpdateUserMessage(BaseMessage):
+    type:str
+    data: UserData 
 
 # ---------------------------------------------------------------------------
 # class data sent from unity to python endpoint for sending intial setup data.
@@ -106,3 +99,31 @@ class StartMessage(BaseMessage):
     type:str
     data: StartData
 
+# https://stackoverflow.com/questions/67699451/make-every-field-as-optional-with-pydantic
+class FullPersonaScratchData(BaseModel):
+    curr_location: OneLocationData 
+    first_name: str 
+    last_name: str 
+    age: int
+    innate: str 
+    learned: str 
+    currently: str 
+    lifestyle: str 
+    living_area: OneLocationData
+    
+    recency_w: int 
+    relevance_w: int 
+    importance_w: int 
+    recency_decay: int 
+    importance_trigger_max: int 
+    importance_trigger_curr: int 
+    importance_ele_n: int 
+
+class AddPersonaData(BaseModel):
+    name:str
+    scratch_data : FullPersonaScratchData
+    spatial_data: LocationData
+
+class AddPersonaMessage(BaseMessage):
+    type: str
+    data: AddPersonaData 

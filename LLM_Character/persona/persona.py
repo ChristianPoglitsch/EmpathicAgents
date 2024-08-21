@@ -1,11 +1,11 @@
-from typing import Tuple
+from typing import Tuple, Union
 
 from LLM_Character.llm_comms.llm_api import LLM_API
 from LLM_Character.persona.memory_structures.spatial_memory import MemoryTree
 from LLM_Character.persona.memory_structures.associative_memory.associative_memory import AssociativeMemory
 from LLM_Character.persona.memory_structures.scratch.persona_scratch import PersonaScratch
 from LLM_Character.persona.memory_structures.scratch.user_scratch import UserScratch 
-from LLM_Character.communication.incoming_messages import PersonaData
+from LLM_Character.communication.incoming_messages import LocationData, FullPersonaScratchData, PersonaScratchData
 
 from LLM_Character.persona.cognitive_modules.plan import plan
 from LLM_Character.persona.cognitive_modules.reflect import reflect
@@ -16,33 +16,30 @@ class Persona:
   a_mem:AssociativeMemory
   scratch:PersonaScratch
   
-  def __init__(self, name, folder_mem_saved:str):
+  def __init__(self, name):
+    self.s_mem = MemoryTree()
+    self.a_mem = AssociativeMemory()
+    self.scratch = PersonaScratch(name)
+
+  def load_from_file(self, folder_mem_saved:str):
     f_s_mem_saved = f"{folder_mem_saved}/spatial_memory.json"
-    self.s_mem = MemoryTree(f_s_mem_saved)
+    self.s_mem.load_from_file(f_s_mem_saved)
 
     f_a_mem_saved = f"{folder_mem_saved}/associative_memory"
-    self.a_mem = AssociativeMemory(f_a_mem_saved)
+    self.a_mem.load_from_file(f_a_mem_saved)
 
     scratch_saved = f"{folder_mem_saved}/scratch.json"
-    self.scratch = PersonaScratch(name, scratch_saved)
-  
-  # @staticmethod
-  # def save_as(folder_mem_saved:str, data:PersonaData):
-  #   f_s_mem_saved = f"{folder_mem_saved}/spatial_memory.json"
-  #   MemoryTree.save_as(f_s_mem_saved, data.spatial_data)
+    self.scratch.load_from_file(scratch_saved)
 
-  #   f_a_mem_saved = f"{folder_mem_saved}/associative_memory"
-  #   AssociativeMemory.save_as(f_a_mem_saved, data.as_mem_data) 
-
-  #   scratch_saved = f"{folder_mem_saved}/scratch.json"
-  #   PersonaScratch.save_as(scratch_saved, data.scratch_data)
-
+  def load_from_data(self, scratch_data:FullPersonaScratchData, spatial_data:LocationData):
+    self.s_mem.load_from_data(spatial_data)
+    self.scratch.load_from_data(scratch_data)
 
   def save(self, save_folder): 
     f_s_mem = f"{save_folder}/spatial_memory.json"
     self.s_mem.save(f_s_mem)
 
-    f_a_mem = f"{save_folder}/associative_memory"
+    f_a_mem = f"{save_folder}/associative_memory/"
     self.a_mem.save(f_a_mem)
 
     f_scratch = f"{save_folder}/scratch.json"
@@ -85,13 +82,10 @@ class Persona:
                     message,
                     model)
 
+  def update_scratch(self, data: Union[PersonaScratchData, None]):
+   if data : 
+    self.scratch.update(data)
 
-
-
-
-
-
-
-
-
-
+  def update_spatial(self, data: Union[LocationData, None]):
+    if data: 
+      self.s_mem.update(data)

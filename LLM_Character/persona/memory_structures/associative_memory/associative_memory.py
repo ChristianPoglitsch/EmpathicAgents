@@ -1,12 +1,13 @@
 import json
 import datetime
+import os
 from typing import Union
 
 from LLM_Character.persona.memory_structures.associative_memory.concept_node import ConceptNode
 
 
 class AssociativeMemory: 
-  def __init__(self, f_saved:str): 
+  def __init__(self): 
     self.id_to_node:dict[str, ConceptNode]= dict()
 
     self.seq_event:list[ConceptNode] = []
@@ -19,11 +20,11 @@ class AssociativeMemory:
 
     self.kw_strength_event:dict[str, int] = dict()
     self.kw_strength_thought:dict[str, int] = dict()
-    
-    self.embeddings:dict[str, list[float]] = json.load(open(f_saved + "/embeddings.json"))
+    self.embeddings:dict[str, list[float]] = dict()
+
+  def load_from_file(self, f_saved:str):
     self.load(f_saved)
 
-  
   def add_thought(self, created, expiration, s, p, o, 
                         description, keywords, poignancy, 
                         embedding_pair, filling):
@@ -219,8 +220,12 @@ class AssociativeMemory:
     if kw_strength_load["kw_strength_thought"]: 
       self.kw_strength_thought = kw_strength_load["kw_strength_thought"]
 
-
+    self.embeddings:dict[str, list[float]] = json.load(open(f_saved + "/embeddings.json"))
+  
+  
   def save(self, out_json): 
+    os.makedirs(os.path.dirname(out_json), exist_ok=True)
+    
     r = dict()
     for count in range(len(self.id_to_node.keys()), 0, -1): 
       node_id = f"node_{str(count)}"
@@ -248,14 +253,14 @@ class AssociativeMemory:
       r[node_id]["keywords"] = list(node.keywords)
       r[node_id]["filling"] = node.filling
 
-    with open(out_json+"/nodes.json", "w") as outfile:
+    with open(out_json+"nodes.json", "w") as outfile:
       json.dump(r, outfile)
 
     r = dict()
     r["kw_strength_event"] = self.kw_strength_event
     r["kw_strength_thought"] = self.kw_strength_thought
-    with open(out_json+"/kw_strength.json", "w") as outfile:
+    with open(out_json+"kw_strength.json", "w") as outfile:
       json.dump(r, outfile)
 
-    with open(out_json+"/embeddings.json", "w") as outfile:
+    with open(out_json+"embeddings.json", "w") as outfile:
       json.dump(self.embeddings, outfile)
