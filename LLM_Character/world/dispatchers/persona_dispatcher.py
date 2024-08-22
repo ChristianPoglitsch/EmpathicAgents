@@ -16,4 +16,3 @@ class AddPersonaDispatcher(BaseDispatcher):
             # FIXME: have proper error messages. 
             socket.SendData("Error: Select a saved game first or start a new game.") 
 
-
