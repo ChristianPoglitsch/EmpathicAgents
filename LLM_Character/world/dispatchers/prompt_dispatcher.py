@@ -16,9 +16,11 @@ class PromptDispatcher(BaseDispatcher) :
     if server and server.is_loaded():
       pd = data.data 
       utt, emotion, trust = server.prompt_processor(pd.user_name,  pd.persona_name, pd.message, model)
+      
       response_data = PromptResponseData(utt=utt, emotion=emotion, trust_level=str(trust))
       response_message = PromptReponseMessage(type="PromptReponseMessage", data=response_data)
       sending_str = response_message.model_dump_json()
+      
       print("Done")
       socket.SendData(sending_str)
     else:
