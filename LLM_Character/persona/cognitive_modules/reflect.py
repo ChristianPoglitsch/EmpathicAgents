@@ -1,5 +1,4 @@
 import datetime
-from typing import Union
 
 from LLM_Character.persona.prompt_modules.converse_prompts.poignancy_chat import run_prompt_poignancy_chat
 from LLM_Character.persona.prompt_modules.reflect_prompts.planning_thought_convo import run_prompt_planning_thought_convo
@@ -9,7 +8,7 @@ from LLM_Character.persona.prompt_modules.reflect_prompts.insight_and_guidance i
 from LLM_Character.persona.prompt_modules.reflect_prompts.memo_convo import run_prompt_memo_convo
 
 from LLM_Character.persona.cognitive_modules.converse import generate_event_poig_score 
-from LLM_Character.persona.cognitive_modules.retrieve import retrieve
+from LLM_Character.persona.cognitive_modules.retrieve import retrieve_focal_points
 from LLM_Character.persona.memory_structures.associative_memory.associative_memory import AssociativeMemory
 from LLM_Character.persona.memory_structures.scratch.persona_scratch import PersonaScratch
 
@@ -77,7 +76,7 @@ def reflection_trigger(scratch:PersonaScratch, a_mem:AssociativeMemory):
 
 def run_reflect(scratch:PersonaScratch, a_mem:AssociativeMemory, model:LLM_API):
   focal_points = generate_focal_points(scratch, a_mem, model, 3)
-  retrieved = retrieve(scratch, a_mem, focal_points, model)
+  retrieved = retrieve_focal_points(scratch, a_mem, focal_points, model)
 
   for _, nodes in retrieved.items(): 
     xx = [i.embedding_key for i in nodes]

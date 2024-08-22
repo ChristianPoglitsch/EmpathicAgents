@@ -18,6 +18,12 @@ def plan(scratch:PersonaScratch, a_mem:AssociativeMemory, s_mem:MemoryTree, new_
   
   return scratch.act_address
 
+
+
+
+
+
+
 if __name__ == "__main__":
   from LLM_Character.persona.persona import Persona
   from LLM_Character.llm_comms.llm_openai import OpenAIComms

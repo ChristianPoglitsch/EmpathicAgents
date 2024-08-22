@@ -26,9 +26,6 @@ def chatting(user_scratch: UserScratch ,
   character_scratch.curr_emotion = emotion
   character_scratch.curr_trust[user_scratch.name] = int(trust)
   
-  # print("iteration")
-  # print(message, "\n" , utt, emotion, trust, end)
-  
   if end:
     _end_conversation(user_scratch, character_scratch, model)   
     p_event = character_scratch.get_curr_event_and_desc()
@@ -37,6 +34,12 @@ def chatting(user_scratch: UserScratch ,
     
     user_scratch.chat = AIMessages()
     user_scratch.start_time_chatting = None
+
+    # reset 
+    character_scratch.chatting_with = None
+    character_scratch.chat = AIMessages() 
+    character_scratch.chatting_with_buffer = None
+    character_scratch.chatting_end_time = None
 
   return utt, emotion, trust
 

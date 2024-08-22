@@ -2,7 +2,7 @@ import datetime
 from typing import Union
 
 from LLM_Character.llm_comms.llm_api import LLM_API 
-from LLM_Character.persona.cognitive_modules.retrieve import retrieve 
+from LLM_Character.persona.cognitive_modules.retrieve import retrieve_focal_points 
 from LLM_Character.persona.prompt_modules.planning_prompts.long_term_planning.wake_up import run_prompt_wake_up 
 from LLM_Character.persona.prompt_modules.planning_prompts.long_term_planning.daily_plan import run_prompt_daily_plan
 from LLM_Character.persona.prompt_modules.planning_prompts.long_term_planning.revise_identity  import run_prompt_revise_identity
@@ -38,7 +38,7 @@ def revise_identity(scratch:PersonaScratch, a_mem:AssociativeMemory, model:LLM_A
   focal_points = [f"{p_name}'s plan for {scratch.get_str_curr_date_str()}.",
                   f"Important recent events for {p_name}'s life."]
 
-  retrieved = retrieve(scratch, a_mem, focal_points, model)
+  retrieved = retrieve_focal_points(scratch, a_mem, focal_points, model)
   _, _, new_currently, new_daily_req = run_prompt_revise_identity(scratch, model, retrieved)
   return new_currently, new_daily_req
 #FIXME: try to make the code more readable instead of adding comments.  

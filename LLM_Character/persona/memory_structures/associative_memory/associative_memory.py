@@ -153,6 +153,17 @@ class AssociativeMemory:
     return ret
   
 
+  def retrieve_relevant_events(self, s_content, p_content, o_content): 
+    contents = [s_content, p_content, o_content]
+
+    ret = []
+    for i in contents: 
+      if i in self.kw_to_event: 
+        ret += self.kw_to_event[i]
+
+    ret = set(ret)
+    return ret    
+
   def get_str_seq_thoughts(self): 
     ret_str = ""
     for count, event in enumerate(self.seq_thought): 

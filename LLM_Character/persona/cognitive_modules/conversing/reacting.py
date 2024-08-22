@@ -7,7 +7,7 @@ from LLM_Character.persona.memory_structures.associative_memory.associative_memo
 from LLM_Character.persona.memory_structures.scratch.persona_scratch import PersonaScratch
 from LLM_Character.persona.memory_structures.scratch.user_scratch import UserScratch 
 
-from LLM_Character.persona.cognitive_modules.retrieve import retrieve 
+from LLM_Character.persona.cognitive_modules.retrieve import retrieve_focal_points 
 from LLM_Character.messages_dataclass import AIMessage, AIMessages
 
 def _generate_response(user_scratch: UserScratch, 
@@ -18,7 +18,7 @@ def _generate_response(user_scratch: UserScratch,
   
   # YOU WANT TO CREATE A MESSAGE DIRECTED TO USER! 
   focal_points = [f"{user_scratch.name}"]
-  retrieved = retrieve(character_scratch, character_mem, focal_points, model, 50)
+  retrieved = retrieve_focal_points(character_scratch, character_mem, focal_points, model, 50)
   relationship = generate_summarize_agent_relationship(user_scratch, character_scratch, model, retrieved)
   
   curr_chat = user_scratch.chat.get_messages()
@@ -36,7 +36,7 @@ def _generate_response(user_scratch: UserScratch,
   
   # NOTE add message as focal point 
   focal_points = [f"{user_scratch.name}", message]
-  retrieved = retrieve(character_scratch, character_mem, focal_points, model, 15)
+  retrieved = retrieve_focal_points(character_scratch, character_mem, focal_points, model, 15)
   utt, emotion, trust, end = generate_one_utterance(user_scratch, 
                                     character_scratch, 
                                     character_mem, 

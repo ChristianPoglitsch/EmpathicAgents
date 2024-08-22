@@ -8,8 +8,11 @@ from LLM_Character.persona.memory_structures.scratch.user_scratch import UserScr
 from LLM_Character.communication.incoming_messages import LocationData, FullPersonaScratchData, PersonaScratchData
 
 from LLM_Character.persona.cognitive_modules.plan import plan
+from LLM_Character.persona.cognitive_modules.interact import interact
 from LLM_Character.persona.cognitive_modules.reflect import reflect
 from LLM_Character.persona.cognitive_modules.converse import chatting 
+
+
 
 class Persona: 
   s_mem:MemoryTree
@@ -45,8 +48,31 @@ class Persona:
     f_scratch = f"{save_folder}/scratch.json"
     self.scratch.save(f_scratch)
 
+  def perceive(self):
+    # # Each game object occupies an event in the tile. We are setting up the 
+    # # default event value here. 
+    # for i in range(self.maze_height):
+    #   for j in range(self.maze_width): 
+    #     if self.tiles[i][j]["game_object"]:
+    #       object_name = ":".join([self.tiles[i][j]["world"], 
+    #                               self.tiles[i][j]["sector"], 
+    #                               self.tiles[i][j]["arena"], 
+    #                               self.tiles[i][j]["game_object"]])
+    #       go_event = (object_name, None, None, None)
+    #       self.tiles[i][j]["events"].add(go_event)
+
+    #  self.maze.add_event_from_tile(persona.scratch
+    #                                .get_curr_event_and_desc(), new_tile)  
+
+    # self.maze.add_event_from_tile(persona.scratch
+    #                        .get_curr_obj_event_and_desc(), new_tile) 
+    return None
+  
+  def interacting(self):
+    interact()
+
   def plan(self, new_day, model):
-    return plan(self.scratch, self.a_mem, new_day, model)
+    return plan(self.scratch, self.a_mem, self.s_mem, new_day, model)
 
   def reflect(self):
     reflect(self.scratch, self.a_mem)
@@ -62,13 +88,17 @@ class Persona:
     new_day = False
     if not self.scratch.curr_time: 
       new_day = "First day"
-    elif (self.scratch.curr_time.strftime('%A %B %d')
-          != curr_time.strftime('%A %B %d')):
+    elif self.scratch.curr_time.strftime('%A %B %d') != curr_time.strftime('%A %B %d'):
       new_day = "New day"
+    
     self.scratch.curr_time = curr_time
 
+    # self.perceive()
+    # self.retrieve_from_context() # or maybe inside perceive function, or whatever 
     self.plan(personas, new_day)
+    # self.interacting()    
     self.reflect()
+    # self.execute() # inside unity.
 
   def open_convo_session(self, 
                         user_scratch:UserScratch, 
