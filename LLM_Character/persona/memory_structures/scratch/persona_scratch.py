@@ -77,7 +77,8 @@ class PersonaScratch:
       self.act_event = action_event
 
       self.chatting_with = chatting_with
-      self.chat = chat 
+      self.chat = chat or AIMessages()
+       
       if chatting_with_buffer: 
         self.chatting_with_buffer.update(chatting_with_buffer)
       self.chatting_end_time = chatting_end_time
@@ -277,7 +278,11 @@ class PersonaScratch:
     def load_from_file(self, f_saved:str):
       if check_if_file_exists(f_saved): 
             scratch_load = json.load(open(f_saved))
-            self.curr_time = datetime.datetime.strptime(scratch_load["curr_time"], "%B %d, %Y, %H:%M:%S") 
+            
+            ct = scratch_load["curr_time"] 
+            if ct: 
+              self.curr_time = datetime.datetime.strptime(ct, "%B %d, %Y, %H:%M:%S")
+
             self.curr_location = scratch_load["curr_location"]
             self.daily_plan_req = scratch_load["daily_plan_req"]
 
@@ -307,17 +312,23 @@ class PersonaScratch:
             self.f_daily_schedule_hourly_org = scratch_load["f_daily_schedule_hourly_org"]
 
             self.act_address = scratch_load["act_address"]
-            self.act_start_time = datetime.datetime.strptime(scratch_load["act_start_time"], "%B %d, %Y, %H:%M:%S") if scratch_load["act_start_time"] else None
+            
+            ast = scratch_load["act_start_time"]
+            self.act_start_time = datetime.datetime.strptime(ast, "%B %d, %Y, %H:%M:%S") if ast else None
+            
             self.act_duration = scratch_load["act_duration"]
             self.act_description = scratch_load["act_description"]
             self.act_event = tuple(scratch_load["act_event"])
 
             self.chatting_with = scratch_load["chatting_with"]
             self.chatting_with_buffer = scratch_load["chatting_with_buffer"]
-            self.chatting_end_time = datetime.datetime.strptime(scratch_load["chatting_end_time"], "%B %d, %Y, %H:%M:%S") if scratch_load["chatting_end_time"] else None
+
+            cet = scratch_load["chatting_end_time"]
+            self.chatting_end_time = datetime.datetime.strptime(cet, "%B %d, %Y, %H:%M:%S") if cet else None
 
             path = os.path.dirname(f_saved)
             self.chat.read_messages_from_json(path + "/messages.json")
+
 
 
     def save(self, out_json):
@@ -365,5 +376,6 @@ class PersonaScratch:
       with open(out_json, "w") as outfile:
         json.dump(scratch, outfile, indent=2)
 
-      path = os.path.dirname(out_json)
-      self.chat.write_messages_to_json(path + "/messages.json")
+      if self.chat:
+        path = os.path.dirname(out_json)
+        self.chat.write_messages_to_json(path + "/messages.json")

@@ -189,6 +189,8 @@ class AssociativeMemory:
   def load(self, f_saved:str):
    # TODO check if file exists ...  
 
+    self.embeddings:dict[str, list[float]] = json.load(open(f_saved + "/embeddings.json"))
+    
     nodes_load = json.load(open(f_saved + "/nodes.json"))
     for count in range(len(nodes_load.keys())): 
       node_id = f"node_{str(count+1)}"
@@ -212,8 +214,7 @@ class AssociativeMemory:
       o = node_details["object"]
 
       description = node_details["description"]
-      embedding_pair = (node_details["embedding_key"], 
-                        self.embeddings[node_details["embedding_key"]])
+      embedding_pair = (node_details["embedding_key"], self.embeddings[node_details["embedding_key"]])
       poignancy =node_details["poignancy"]
       keywords = set(node_details["keywords"])
       filling = node_details["filling"]
@@ -231,8 +232,6 @@ class AssociativeMemory:
     if kw_strength_load["kw_strength_thought"]: 
       self.kw_strength_thought = kw_strength_load["kw_strength_thought"]
 
-    self.embeddings:dict[str, list[float]] = json.load(open(f_saved + "/embeddings.json"))
-  
   
   def save(self, out_json): 
     os.makedirs(os.path.dirname(out_json), exist_ok=True)

@@ -11,6 +11,9 @@ def _determine_action(scratch:PersonaScratch, s_mem:MemoryTree, model:LLM_API):
   curr_index = scratch.get_f_daily_schedule_index()
   curr_index_60 = scratch.get_f_daily_schedule_index(advance=60)
 
+  print(len(scratch.f_daily_schedule))
+  print(curr_index)
+  
   if curr_index == 0:
     act_desp, act_dura = scratch.f_daily_schedule[curr_index]
     if act_dura >= 60: 
@@ -33,23 +36,34 @@ def _determine_action(scratch:PersonaScratch, s_mem:MemoryTree, model:LLM_API):
           scratch.f_daily_schedule[curr_index_60:curr_index_60+1] = (
                               generate_task_decomp(scratch, model, act_desp, act_dura))
 
-  act_desp, act_dura = scratch.f_daily_schedule[curr_index] 
+  # 1440 is 24 * 60 , #minutes in a day. you want your daily schedule to encompass your whole day.  
+  x_emergency = 0
+  for i in scratch.f_daily_schedule: 
+    x_emergency += i[1]
+  scratch.f_daily_schedule += [["sleeping", 1440 - x_emergency]]
+  
+  # print(x_emergency)
+  # if 1440 - x_emergency > 0: 
+  #   print ("x_emergency__AAA", x_emergency)
+
+  act_desp, act_dura = scratch.f_daily_schedule[curr_index]
   act_world = scratch.get_curr_location()["world"]
   act_sector = generate_action_sector(scratch, s_mem, model, act_desp)
-
+  # print(act_sector)
   act_arena = generate_action_arena(scratch, s_mem, model, act_desp, act_world, act_sector)
   act_game_object = generate_action_game_object(scratch, s_mem, model, act_desp, act_world, act_sector, act_arena)
   act_event = generate_action_event_triple(scratch, model, act_desp)
 
   new_address = f"{act_world}:{act_sector}:{act_arena}:{act_game_object}"
+  # FIXME: no chats here, normal?
   scratch.add_new_action(new_address, 
-                                 int(act_dura), 
-                                 act_desp, 
-                                 act_event,
-                                 None, 
-                                 None,
-                                 None, 
-                                 None)
+                          int(act_dura), 
+                          act_desp, 
+                          act_event,
+                          None, 
+                          None,
+                          None, 
+                          None)
 
 def determine_decomp(act_desp, act_dura):
   if "sleep" not in act_desp and "bed" not in act_desp: 

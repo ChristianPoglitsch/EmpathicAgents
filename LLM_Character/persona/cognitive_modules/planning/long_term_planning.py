@@ -15,7 +15,7 @@ def _long_term_planning(scratch:PersonaScratch, a_mem:AssociativeMemory, new_day
   wake_up_hour = generate_wake_up_hour(scratch, model)
   
   if new_day == "First day": 
-    scratch.daily_req = generate_first_daily_plan(scratch, wake_up_hour)
+    scratch.daily_req = generate_first_daily_plan(scratch, wake_up_hour, model)
 
   elif new_day == "New day":
     new_currently, new_daily_req = revise_identity(scratch, a_mem, model)
@@ -25,13 +25,8 @@ def _long_term_planning(scratch:PersonaScratch, a_mem:AssociativeMemory, new_day
   scratch.f_daily_schedule = make_hourly_schedule(scratch, model, wake_up_hour)
   scratch.f_daily_schedule_hourly_org = (scratch.f_daily_schedule[:])
   
-  (created, expiration,
-  s, p, o, 
-  thought, keywords, 
-  thought_poignancy, thought_embedding_pair) = generate_thought_plan(scratch, model)
-  a_mem.add_thought(created, expiration, s, p, o, 
-                            thought, keywords, thought_poignancy, 
-                            thought_embedding_pair, None)
+  c, e, s, p, o, t, k, tp, tep = generate_thought_plan(scratch, model)
+  a_mem.add_thought(c, e, s, p, o, t, k, tp, tep, None)
 
 def revise_identity(scratch:PersonaScratch, a_mem:AssociativeMemory, model:LLM_API): 
   p_name = scratch.name
@@ -41,6 +36,7 @@ def revise_identity(scratch:PersonaScratch, a_mem:AssociativeMemory, model:LLM_A
   retrieved = retrieve_focal_points(scratch, a_mem, focal_points, model)
   _, _, new_currently, new_daily_req = run_prompt_revise_identity(scratch, model, retrieved)
   return new_currently, new_daily_req
+
 #FIXME: try to make the code more readable instead of adding comments.  
 def make_hourly_schedule(scratch:PersonaScratch, model: LLM_API, wake_up_hour): 
   hour_str = ["00:00 AM", "01:00 AM", "02:00 AM", "03:00 AM", "04:00 AM", 
@@ -98,15 +94,14 @@ def generate_thought_plan(scratch:PersonaScratch, model:LLM_API):
 def generate_wake_up_hour(scratch:PersonaScratch, model):
   return int(run_prompt_wake_up(scratch, model)[0])
 
-def generate_first_daily_plan(scratch:PersonaScratch, wake_up_hour): 
-  return run_prompt_daily_plan(scratch, wake_up_hour)[0]
+def generate_first_daily_plan(scratch:PersonaScratch, wake_up_hour:int, model:LLM_API): 
+  return run_prompt_daily_plan(scratch, wake_up_hour, model)[0]
 
 def generate_hourly_schedule(scratch:PersonaScratch, 
                              curr_hour_str:str, 
                              n_activity:list[str], 
                              hour_str:list[str],
                              model:LLM_API):
-  print("new request")
   return run_prompt_hourly_schedule(scratch, curr_hour_str, n_activity, hour_str, model)[0]
 
 if __name__ == "__main__":

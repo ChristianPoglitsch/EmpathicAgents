@@ -2,6 +2,7 @@
 The long term planning that spans a day. 
 """
 
+from LLM_Character.messages_dataclass import AIMessages
 from LLM_Character.util import BASE_DIR
 from LLM_Character.llm_comms.llm_api import LLM_API  
 from LLM_Character.persona.prompt_modules.prompt import generate_prompt 
@@ -53,10 +54,14 @@ def _get_valid_output(model, prompt, counter_limit):
     return _get_fail_safe()
 
 def run_prompt_daily_plan(scratch:PersonaScratch, wake_up_hour:int, model:LLM_API, verbose=False):
-    prompt_template = BASE_DIR + "/LLM_Character/persona/prompt_modules/templates/daily_planning.txt" 
+    prompt_template = BASE_DIR + "/LLM_Character/persona/prompt_modules/templates/daily_plan.txt" 
     prompt_input = _create_prompt_input(scratch, wake_up_hour)
     prompt = generate_prompt(prompt_input, prompt_template)
-    output = _get_valid_output(model, prompt, COUNTER_LIMIT)
+    
+    am = AIMessages()
+    am.add_message(prompt, None, "user", "system") # NOTE: not really user btw
+    
+    output = _get_valid_output(model, am, COUNTER_LIMIT)
     output = ([f"wake up and complete the morning routine at {wake_up_hour}:00 am"] + output)
     return output, [output, prompt, prompt_input]
 

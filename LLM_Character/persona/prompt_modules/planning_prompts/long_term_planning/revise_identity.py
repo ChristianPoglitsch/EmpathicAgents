@@ -19,7 +19,7 @@ def _component_statements(retrieved):
           statements += f"{i.created.strftime('%A %B %d -- %H:%M %p')}: {i.embedding_key}\n"
     return statements
 
-def _create_prompt_input_1(scratch:PersonaScratch, retrieved:int)-> list[str]:
+def _create_prompt_input_1(scratch:PersonaScratch, retrieved)-> list[str]:
     stmts = _component_statements(retrieved)
     p_name = scratch.name 
     time = scratch.curr_time.strftime('%A %B %d') 
@@ -30,7 +30,7 @@ def _create_prompt_input_1(scratch:PersonaScratch, retrieved:int)-> list[str]:
     plan_input+= [time]
     return plan_input
 
-def _create_prompt_input_2(scratch:PersonaScratch, retrieved:int)-> list[str]:
+def _create_prompt_input_2(scratch:PersonaScratch, retrieved)-> list[str]:
     stmts = _component_statements(retrieved)
     p_name = scratch.name 
     
@@ -39,7 +39,7 @@ def _create_prompt_input_2(scratch:PersonaScratch, retrieved:int)-> list[str]:
     thought_prompt += [p_name] 
     return thought_prompt
 
-def _create_prompt_input_3(scratch:PersonaScratch, plan_note:str, thought_note:str) -> list[str]:
+def _create_prompt_input_3(scratch:PersonaScratch, plan_note:str, thought_note:str, retrieved) -> list[str]:
     stmts   = _component_statements(retrieved)
     p_name  = scratch.name 
     time    = scratch.curr_time.strftime('%A %B %d') 
@@ -72,7 +72,7 @@ def _create_prompt_input_4(scratch:PersonaScratch) -> list[str]:
 def _get_valid_output(model, prompt, counter_limit):
     return model.query_text(prompt)
 
-def run_prompt_revise_identity(scratch:PersonaScratch, model:LLM_API, retrieved,verbose=False):
+def run_prompt_revise_identity(scratch:PersonaScratch, model:LLM_API, retrieved, verbose=False):
     prompt_template_1 = BASE_DIR + "/LLM_Character/persona/prompt_modules/templates/revise_identity_1.txt" 
     prompt_input1 = _create_prompt_input_1(scratch, retrieved)
     prompt1 = generate_prompt(prompt_input1, prompt_template_1)
@@ -88,7 +88,7 @@ def run_prompt_revise_identity(scratch:PersonaScratch, model:LLM_API, retrieved,
     thought_note = _get_valid_output(model, am, COUNTER_LIMIT)
     
     prompt_template_3 = BASE_DIR + "/LLM_Character/persona/prompt_modules/templates/revise_identity_3.txt" 
-    prompt_input3 = _create_prompt_input_3(scratch, plan_note, thought_note)
+    prompt_input3 = _create_prompt_input_3(scratch, plan_note, thought_note, retrieved)
     prompt3 = generate_prompt(prompt_input3, prompt_template_3)
     am = AIMessages()
     am.add_message(prompt3, None, "user", "system")

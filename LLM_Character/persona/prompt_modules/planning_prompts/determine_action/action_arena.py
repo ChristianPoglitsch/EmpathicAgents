@@ -64,7 +64,7 @@ def _get_valid_output(model, prompt, counter_limit):
     return _get_fail_safe()
 
 def run_prompt_action_arena(scratch:PersonaScratch, s_mem:MemoryTree, model:LLM_API, action_descrip:str, action_world:str, action_sector:str, verbose=False):
-    prompt_template = BASE_DIR + "/LLM_Character/persona/prompt_modules/templates/action_sector.txt" 
+    prompt_template = BASE_DIR + "/LLM_Character/persona/prompt_modules/templates/action_arena.txt" 
     prompt_input = _create_prompt_input(scratch, s_mem, action_descrip, action_world, action_sector)
     prompt = generate_prompt(prompt_input, prompt_template)
     

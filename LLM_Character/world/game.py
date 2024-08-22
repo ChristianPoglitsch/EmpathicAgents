@@ -7,7 +7,7 @@ from LLM_Character.persona.persona import Persona
 from LLM_Character.persona.user import User 
 from LLM_Character.llm_comms.llm_api import LLM_API 
 from LLM_Character.util import copyanything, BASE_DIR
-from LLM_Character.communication.incoming_messages import OneLocationData, MetaData, PersonaData, UserData, AddPersonaData
+from LLM_Character.communication.incoming_messages import PerceivingData, MetaData, PersonaData, UserData, AddPersonaData
 
 FS_STORAGE = BASE_DIR + "/LLM_Character/storage"
 
@@ -49,25 +49,30 @@ class ReverieServer:
     return None
 
 
-  def move_processor(self, curr_location:dict[str, OneLocationData]):
+  def move_processor(self, perceivements:list[PerceivingData], model:LLM_API):
     if self.loaded: 
-      sim_folder = f"{FS_STORAGE}/{self.sim_code}"
+      sim_folder = f"{FS_STORAGE}/{self.client_id}/{self.sim_code}"
 
       movements = { "persona": dict(), 
                     "meta": dict()}
-      for persona_name, persona in self.personas.items(): 
-        description = persona.move(self.personas, curr_location[persona_name], self.curr_time)  
+      
+      for p in perceivements: 
+        if p.name in self.personas.keys():
+          persona = self.personas[p.name]
+          
+          description = persona.move(self.personas, p.curr_loc, self.curr_time, model)  
 
-        movements["persona"][persona_name] = {}
-        movements["persona"][persona_name]["description"] = description
-        movements["persona"][persona_name]["chat"] = (persona
-                                                .scratch.chat)
-      movements["meta"]["curr_time"] = (self.curr_time 
-                                  .strftime("%B %d, %Y, %H:%M:%S"))
+          movements["persona"][p.name] = {}
+          movements["persona"][p.name]["description"] = description
+          movements["persona"][p.name]["chat"]        = persona.scratch.chat.prints_messages_sender()
+        
+      movements["meta"]["curr_time"] = self.curr_time.strftime("%B %d, %Y, %H:%M:%S")
       
       self.curr_time += datetime.timedelta(seconds=self.sec_per_step)
       self.step += 1
+      
       curr_move_file = f"{sim_folder}/movement/{self.step}.json"
+      os.makedirs(os.path.dirname(curr_move_file), exist_ok=True)
       with open(curr_move_file, "w") as outfile: 
         outfile.write(json.dumps(movements, indent=2))
       
@@ -95,6 +100,11 @@ class ReverieServer:
       persona = self.personas[data.name]
       persona.update_scratch(data.scratch_data)
       persona.update_spatial(data.spatial_data)
+      # could be coded better, dont like this. 
+      if data.scratch_data.living_area:
+        persona.s_mem.update_oloc(data.scratch_data.living_area)
+      if data.scratch_data.curr_location:
+        persona.s_mem.update_oloc(data.scratch_data.curr_location)
     
     # autosave? 
     self._save()

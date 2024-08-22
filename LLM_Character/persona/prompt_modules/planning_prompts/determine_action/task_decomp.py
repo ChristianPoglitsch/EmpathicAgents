@@ -158,7 +158,6 @@ def run_prompt_task_decomp(scratch:PersonaScratch,
     
     output = _get_valid_output(model, am, COUNTER_LIMIT)
 
-    print(output) 
     # FIXME: TRY TO REWRITE THIS JUNK AS WELL. 
     fin_output = []
     time_sum = 0

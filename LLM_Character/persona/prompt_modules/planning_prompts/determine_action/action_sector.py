@@ -20,7 +20,6 @@ def _create_prompt_input(scratch:PersonaScratch, s_mem:MemoryTree, action_descri
     name = scratch.get_str_name()
    
     # NOTE world < sectors < arenas < gameobjects
-    print(act_world, liv_sector)
     possible_arenas1 = s_mem.get_str_accessible_sector_arenas(act_world, liv_sector)
     possible_arenas2 = s_mem.get_str_accessible_sector_arenas(act_world, act_sector)
     possible_sectors = s_mem.get_str_accessible_sectors(act_world)
@@ -82,7 +81,7 @@ def run_prompt_action_sector(scratch:PersonaScratch, s_mem:MemoryTree , model:LL
     prompt_template = BASE_DIR + "/LLM_Character/persona/prompt_modules/templates/action_sector.txt" 
     prompt_input = _create_prompt_input(scratch, s_mem, action_description)
     prompt = generate_prompt(prompt_input, prompt_template)
-    
+
     am = AIMessages()
     am.add_message(prompt, None, "user", "system")
     

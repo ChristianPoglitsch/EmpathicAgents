@@ -9,7 +9,7 @@ class MoveDispatcher(BaseDispatcher):
         client_id = socket.udpIP + str(socket.udpSendPort)
         server = serverM.get_server(client_id)
         if server and server.is_loaded(): 
-            server.move_processor(data.data)
+            server.move_processor(data.data, model)
             print("Done")
             socket.SendData("Done")
         else :

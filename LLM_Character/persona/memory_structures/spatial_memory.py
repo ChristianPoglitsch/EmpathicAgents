@@ -1,30 +1,44 @@
+from collections import defaultdict
 import json
 import os
 from typing import Union 
 
-from LLM_Character.communication.incoming_messages import LocationData 
+from LLM_Character.communication.incoming_messages import LocationData, OneLocationData 
 from LLM_Character.util import check_if_file_exists
 
 class MemoryTree: 
     def __init__(self): 
-        self.tree = {}
-    
+        self.tree = {} 
+        
     def load_from_file(self, f_saved):
         if check_if_file_exists(f_saved): 
             tree = json.load(open(f_saved))
             self.tree = tree
     
     def load_from_data(self, data:LocationData):
-        self.update(data)
+        self.update_loc(data)
 
-    def update(self, data:LocationData):
-        self.tree[data.world] = {}
+    def update_loc(self, data: LocationData):
+        if data.world not in self.tree:
+            self.tree[data.world] = {}
         for s in data.sectors:
-            self.tree[data.world][s.sector] = {}
+            if s.sector not in self.tree[data.world]:
+                self.tree[data.world][s.sector] = {}
             for a in s.arenas:
-                self.tree[data.world][s.sector][a.arena] = []
-                for o in a.gameobjects:
-                    self.tree[data.world][s.sector][a.arena] += [o.gameobject]
+                if a.arena not in self.tree[data.world][s.sector]:
+                    self.tree[data.world][s.sector][a.arena] = []
+                if a.gameobjects:
+                    self.tree[data.world][s.sector][a.arena].extend(
+                        [o.gameobject for o in a.gameobjects]
+                    )
+
+    def update_oloc(self, data: OneLocationData):
+        if data.world not in self.tree:
+            self.tree[data.world] = {}
+        if data.sector not in self.tree[data.world]:
+            self.tree[data.world][data.sector] = {} 
+        if data.arena and (data.arena not in self.tree[data.world][data.sector]):
+            self.tree[data.world][data.sector][data.arena] = [] 
 
     def save(self, out_json):
         os.makedirs(os.path.dirname(out_json), exist_ok=True)
