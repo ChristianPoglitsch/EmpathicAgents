@@ -1,17 +1,18 @@
+import datetime
 from typing import Tuple, Union
 
 from LLM_Character.llm_comms.llm_api import LLM_API
+from LLM_Character.persona.cognitive_modules.perceive import perceive
 from LLM_Character.persona.memory_structures.spatial_memory import MemoryTree
 from LLM_Character.persona.memory_structures.associative_memory.associative_memory import AssociativeMemory
 from LLM_Character.persona.memory_structures.scratch.persona_scratch import PersonaScratch
 from LLM_Character.persona.memory_structures.scratch.user_scratch import UserScratch 
-from LLM_Character.communication.incoming_messages import LocationData, FullPersonaScratchData, PersonaScratchData
+from LLM_Character.communication.incoming_messages import LocationData, FullPersonaScratchData, OneLocationData, PersonaScratchData
 
 from LLM_Character.persona.cognitive_modules.plan import plan
 from LLM_Character.persona.cognitive_modules.interact import interact
 from LLM_Character.persona.cognitive_modules.reflect import reflect
 from LLM_Character.persona.cognitive_modules.converse import chatting 
-
 
 
 class Persona: 
@@ -48,42 +49,20 @@ class Persona:
     f_scratch = f"{save_folder}/scratch.json"
     self.scratch.save(f_scratch)
 
-  def perceive(self):
-    # # Each game object occupies an event in the tile. We are setting up the 
-    # # default event value here. 
-    # for i in range(self.maze_height):
-    #   for j in range(self.maze_width): 
-    #     if self.tiles[i][j]["game_object"]:
-    #       object_name = ":".join([self.tiles[i][j]["world"], 
-    #                               self.tiles[i][j]["sector"], 
-    #                               self.tiles[i][j]["arena"], 
-    #                               self.tiles[i][j]["game_object"]])
-    #       go_event = (object_name, None, None, None)
-    #       self.tiles[i][j]["events"].add(go_event)
-
-    #  self.maze.add_event_from_tile(persona.scratch
-    #                                .get_curr_event_and_desc(), new_tile)  
-
-    # self.maze.add_event_from_tile(persona.scratch
-    #                        .get_curr_obj_event_and_desc(), new_tile) 
-    return None
+  def perceive(self, loc_data:OneLocationData, model:LLM_API):
+    perceive(self.scratch, self.a_mem, self.s_mem, loc_data, model)
   
   def interacting(self):
     interact()
 
-  def plan(self, new_day, model):
+  def plan(self, new_day, model:LLM_API):
     return plan(self.scratch, self.a_mem, self.s_mem, new_day, model)
 
-  def reflect(self):
-    reflect(self.scratch, self.a_mem)
+  def reflect(self, model:LLM_API):
+    reflect(self.scratch, self.a_mem, model)
 
-  def move(self, personas, curr_location, curr_time):
-    # FIXME: add perceiving element. 
-    # by adding perceiving you can add new location to spatial memeory. 
-    # but only by physically going to that location. 
-    # NOTE: also needed for planned conversation between personas.
-
-    self.scratch.curr_location = curr_location
+  def move(self, personas, curr_location:OneLocationData, curr_time:datetime.datetime, model:LLM_API):
+    self.scratch.curr_location = curr_location.model_dump()
 
     new_day = False
     if not self.scratch.curr_time: 
@@ -93,11 +72,11 @@ class Persona:
     
     self.scratch.curr_time = curr_time
 
-    # self.perceive()
-    # self.retrieve_from_context() # or maybe inside perceive function, or whatever 
-    self.plan(personas, new_day)
+    self.perceive(curr_location, model)
+    # self.retrieve_from_context() # or maybe inside perceive function
+    self.plan(new_day, model)
     # self.interacting()    
-    self.reflect()
+    self.reflect(model)
     # self.execute() # inside unity.
 
   def open_convo_session(self, 
@@ -118,4 +97,4 @@ class Persona:
 
   def update_spatial(self, data: Union[LocationData, None]):
     if data: 
-      self.s_mem.update(data)
+      self.s_mem.update_loc(data)

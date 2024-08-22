@@ -47,18 +47,18 @@ def retrieve_focal_points(scratch: PersonaScratch,
     return retrieved
 
 
-# def retrieve_contextual_events(a_mem:AssociativeMemory, perceived):
-#   retrieved = dict()
-#   for event in perceived: 
-#     retrieved[event.description] = dict()
-#     retrieved[event.description]["curr_event"] = event
+def retrieve_contextual_events(a_mem:AssociativeMemory, perceived):
+  retrieved = dict()
+  for event in perceived: 
+    retrieved[event.description] = dict()
+    retrieved[event.description]["curr_event"] = event
     
-#     relevant_events = a_mem.retrieve_relevant_events(event.subject, event.predicate, event.object)
-#     retrieved[event.description]["events"] = list(relevant_events)
+    relevant_events = a_mem.retrieve_relevant_events(event.subject, event.predicate, event.object)
+    retrieved[event.description]["events"] = list(relevant_events)
 
-#     relevant_thoughts = a_mem.retrieve_relevant_thoughts(event.subject, event.predicate, event.object)
-#     retrieved[event.description]["thoughts"] = list(relevant_thoughts)
-#   return retrieved
+    relevant_thoughts = a_mem.retrieve_relevant_thoughts(event.subject, event.predicate, event.object)
+    retrieved[event.description]["thoughts"] = list(relevant_thoughts)
+  return retrieved
 
 
 

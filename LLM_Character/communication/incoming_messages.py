@@ -37,11 +37,22 @@ class OneLocationData(BaseModel):
     world: str 
     sector: str
     arena : Optional[str] = None
+    obj : Optional[str] = None
 
+class EventData(BaseModel):
+    action_event_subject : Optional[str]= None
+    action_event_predicate : Optional[str]= None
+    action_event_object : Optional[str]= None
+    action_event_description : Optional[str]= None
+
+class PerceivingData(BaseModel):
+    name : str
+    curr_loc : OneLocationData
+    events: list[EventData]
+    
 class MoveMessage(BaseMessage):
     type: str
-    # dict of persona names and their location
-    data:  dict[str, OneLocationData]
+    data:  list[PerceivingData]
 
 # ---------------------------------------------------------------------------
 # class data sent from unity to python endpoint for sending updated data.
