@@ -3,11 +3,14 @@ from typing import Type, Union
 
 from LLM_Character.communication.incoming_messages import BaseMessage
 from LLM_Character.world.dispatchers.dispatcher import BaseDispatcher
+
 from LLM_Character.world.dispatchers.prompt_dispatcher import PromptDispatcher
+from LLM_Character.world.dispatchers.move_dispatcher import MoveDispatcher 
 from LLM_Character.world.dispatchers.start_dispatcher import StartDispatcher 
 from LLM_Character.world.dispatchers.update_dispatcher import UpdateMetaDispatcher, UpdatePersonaDispatcher, UpdateUserDispatcher
 from LLM_Character.world.dispatchers.add_dispatcher import AddPersonaDispatcher 
-from LLM_Character.communication.incoming_messages import PromptMessage, StartMessage, UpdateMetaMessage, UpdatePersonaMessage, UpdateUserMessage, AddPersonaMessage 
+
+from LLM_Character.communication.incoming_messages import PromptMessage, StartMessage, UpdateMetaMessage, UpdatePersonaMessage, UpdateUserMessage, AddPersonaMessage, MoveMessage 
 from LLM_Character.world.game import ReverieServer
 from LLM_Character.llm_comms.llm_api import LLM_API
 from LLM_Character.communication.udp_comms import UdpComms
@@ -27,6 +30,7 @@ class MessageProcessor:
         self.register('UpdateMetaMessage', UpdateMetaMessage, UpdateMetaDispatcher())
         self.register('UpdatePersonaMessage', UpdatePersonaMessage, UpdatePersonaDispatcher())
         self.register('AddPersonaMessage', AddPersonaMessage, AddPersonaDispatcher())
+        self.register('MoveMessage', MoveMessage, MoveDispatcher())
 
     def register(self, message_type: str, message_class:Type[BaseMessage], dispatcher_class:BaseDispatcher):
         self._validator_map[message_type] = message_class

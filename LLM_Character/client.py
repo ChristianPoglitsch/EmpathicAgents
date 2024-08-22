@@ -187,6 +187,33 @@ print(nice)
 # print(nice) 
 
 
+MoveJson = {
+    "world": "Graz",
+    "sector": "JakominiPlatz",
+    "arena" : "Bäckerei Sorger",
+}
+
+json7 = {
+    "type" : "MoveMessage",
+    "data" : {
+        "Camila": MoveJson
+    } 
+}
+
+
+s.SendData(json.dumps(json7))
+
+time.sleep(20)
+nice = s.ReadReceivedData()
+print("Received7:")
+print(nice) 
+
+
+
+
+
+
+
 
 
 
