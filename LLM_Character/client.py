@@ -64,23 +64,15 @@ updatePersonaJson  = {
             "importance_ele_n": 3
         },
         "spatial_data": {
-            "world": "FantasyLand",
-            "sectors": [{
-                "sector": "Northern Realm",
-                "arenas": [
-                {
-                    "arena": "Dragon's Lair",
-                    "gameobjects": [
-                    {"gameobject": "Dragon"},
-                    {"gameobject": "Treasure Chest"}]
-                }, 
-                {
-                    "arena": "Ice Cavern",
-                    "gameobjects": [
-                    {"gameobject": "Ice Golem"},
-                    {"gameobject": "Frozen Statue"}]
-                }]
-            }]
+            "FantasyLand" : {           
+                "Northern Realm" : {
+                    "Dragon's Lair" : ["Dragon", "Treasure Chest"],
+                    "Ice Cavern" : ["Ice Golem" ,"Frozen Statue"]
+                },
+                "Southern Realm" :  {
+
+                }
+            }
         }
     }
 
@@ -154,23 +146,14 @@ AddPersonaJson  = {
             "importance_ele_n": 3
         },
         "spatial_data": {
-            "world": "FantasyLand",
-            "sectors": [{
-                "sector": "Northern Realm",
-                "arenas": [
+            "FantasyLand": 
+            {
+                "Northern Realm" : 
                 {
-                    "arena": "Dragon's Lair",
-                    "gameobjects": [
-                    {"gameobject": "Dragon"},
-                    {"gameobject": "Treasure Chest"}]
-                }, 
-                {
-                    "arena": "Ice Cavern",
-                    "gameobjects": [
-                    {"gameobject": "Ice Golem"},
-                    {"gameobject": "Frozen Statue"}]
-                }]
-            }]
+                    "Dragon's Lair" : ["Dragon", "Treasure Chest"],
+                    "Ice Cavern" : ["Ice Golem", "Frozen Statue"]
+                }
+            }
         }
     }
 
@@ -218,7 +201,7 @@ json7 = {
     
 s.SendData(json.dumps(json7))
 
-time.sleep(40)
+time.sleep(60)
 nice = s.ReadReceivedData()
 print("Received7:")
 print(nice) 
@@ -234,7 +217,7 @@ json8 = {
 }
 s.SendData(json.dumps(json8))
 
-time.sleep(20)
+time.sleep(60)
 nice = s.ReadReceivedData()
 print("Received8:")
 print(nice) 

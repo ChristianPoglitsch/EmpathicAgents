@@ -50,6 +50,11 @@ class MessageProcessor:
         self._dispatch_map[message_type] = dispatcher_class 
     
     def dispatch(self, socket: UdpComms, server:ReverieServer, model: LLM_API, data:BaseMessage):
+      # FIXME: call handler in seperate process. 
+      # threads arent usefull due to GIL 
+      # use a wroker - master architecture ...
+      # maybe use indirect communication, like pub sub or 
+      # for example, RabbitMQ can be used with pub sub.
       self._dispatch_map[data.type].handler(socket, server, model, data)
 
     def validate_data(self, data: str) -> Union[BaseMessage, None]:

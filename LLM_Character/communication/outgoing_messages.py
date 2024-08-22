@@ -12,7 +12,7 @@ class PromptResponseData(BaseModel):
     emotion : str
     trust_level : str 
 
-class PromptReponseResponse(BaseMessage):
+class PromptReponse(BaseMessage):
     type: str
     data: PromptResponseData 
 

@@ -11,9 +11,6 @@ def _determine_action(scratch:PersonaScratch, s_mem:MemoryTree, model:LLM_API):
   curr_index = scratch.get_f_daily_schedule_index()
   curr_index_60 = scratch.get_f_daily_schedule_index(advance=60)
 
-  print(len(scratch.f_daily_schedule))
-  print(curr_index)
-  
   if curr_index == 0:
     act_desp, act_dura = scratch.f_daily_schedule[curr_index]
     if act_dura >= 60: 

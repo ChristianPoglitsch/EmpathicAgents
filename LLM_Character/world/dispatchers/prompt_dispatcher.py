@@ -1,7 +1,7 @@
 import json
 
 from LLM_Character.communication.incoming_messages import PromptMessage
-from LLM_Character.communication.outgoing_messages import PromptReponseMessage, PromptResponseData
+from LLM_Character.communication.outgoing_messages import PromptReponse, PromptResponseData
 from LLM_Character.communication.reverieserver_manager import ReverieServerManager
 from LLM_Character.world.dispatchers.dispatcher import BaseDispatcher
 from LLM_Character.world.game import ReverieServer
@@ -18,7 +18,7 @@ class PromptDispatcher(BaseDispatcher) :
       utt, emotion, trust = server.prompt_processor(pd.user_name,  pd.persona_name, pd.message, model)
       
       response_data = PromptResponseData(utt=utt, emotion=emotion, trust_level=str(trust))
-      response_message = PromptReponseMessage(type="PromptReponseMessage", data=response_data)
+      response_message = PromptReponse(type="PromptReponse", data=response_data)
       sending_str = response_message.model_dump_json()
       
       print("Done")

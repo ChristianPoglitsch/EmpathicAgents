@@ -9,6 +9,9 @@ from LLM_Character.communication.reverieserver_manager import ReverieServerManag
 # NOTE: ibrahim: temporary function that will be replaced in the future by the hungarian team ?
 # which will use grpc, for multi client - (multi server?) architecture? 
 # somehow a manager will be needed to link the differnt clients to the right available servers. 
+
+# NOTE or in the time being, if problems occur when trying on different PC's isntead of localhost,
+# try REQ-REPLY with ZeroMQ
 def start_server(sock:UdpComms,
                  serverM:ReverieServerManager,
                  dispatcher:MessageProcessor, 
@@ -25,6 +28,7 @@ def start_server(sock:UdpComms,
         value = dispatcher.validate_data(str(byte_data))
         if value is None:
             continue
+        
         dispatcher.dispatch(sock, serverM, model, value)
 
 if __name__ == "__main__":

@@ -25,18 +25,6 @@ class PromptMessage(BaseMessage):
 
 # ---------------------------------------------------------------------------
 # class data sent from unity to python endpoint for sending update data.
-class LocationDetails(BaseModel):
-    details: List[str]
-
-class Location(BaseModel):
-    location: Dict[str, LocationDetails]
-
-class City(BaseModel):
-    city: Dict[str, Location]
-
-class LocationData(BaseModel):
-    cities: Dict[str, City]
-
 class OneLocationData(BaseModel):
     world: str 
     sector: str
@@ -82,7 +70,7 @@ class PersonaScratchData(BaseModel):
 class PersonaData(BaseModel):
     name: str
     scratch_data: Optional[PersonaScratchData] = None
-    spatial_data: Optional[LocationData] = None
+    spatial_data: Dict[str, Dict[str, Dict[str, List[str]]]]
 
 class UserData(BaseModel):
     old_name : str
@@ -138,7 +126,7 @@ class FullPersonaScratchData(BaseModel):
 class FullPersonaData(BaseModel):
     name:str
     scratch_data : FullPersonaScratchData
-    spatial_data: LocationData
+    spatial_data:  Dict[str, Dict[str, Dict[str, List[str]]]]
 
 class AddPersonaMessage(BaseMessage):
     type: str

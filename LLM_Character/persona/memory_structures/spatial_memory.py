@@ -1,9 +1,8 @@
-from collections import defaultdict
 import json
 import os
 from typing import Union 
 
-from LLM_Character.communication.incoming_messages import Arena, City, GameObject, Location, LocationData, LocationDetails, OneLocationData, Sector 
+from LLM_Character.communication.incoming_messages import OneLocationData
 from LLM_Character.util import check_if_file_exists
 
 class MemoryTree: 
@@ -15,24 +14,25 @@ class MemoryTree:
             tree = json.load(open(f_saved))
             self.tree = tree
     
-    def load_from_data(self, data:LocationData):
+    def load_from_data(self, data):
         self.update_loc(data)
 
-    def update_loc(self, data: LocationData):
-        for world_name, city in data.cities.items():
+    def update_loc(self, data):
+        for world_name, city in data.items():
             if world_name not in self.tree:
                 self.tree[world_name] = {}
             
-            for city_name, location in city.city.items():
+            for city_name, location in city.items():
                 if city_name not in self.tree[world_name]:
                     self.tree[world_name][city_name] = {}
                 
-                for location_name, details in location.location.items():
+                for location_name, details in location.items():
                     if location_name not in self.tree[world_name][city_name]:
                         self.tree[world_name][city_name][location_name] = []
 
-                    self.tree[world_name][city_name][location_name].extend(details.details)
-
+                    self.tree[world_name][city_name][location_name].extend(details)
+        
+        # self.print_tree()
 
     def update_oloc(self, data: OneLocationData):
         if data.world not in self.tree:
@@ -42,7 +42,7 @@ class MemoryTree:
         if data.arena and (data.arena not in self.tree[data.world][data.sector]):
             self.tree[data.world][data.sector][data.arena] = [] 
 
-    def get_info(self) -> LocationData:
+    def get_info(self):
        return self.tree.copy() 
 
     def save(self, out_json):
