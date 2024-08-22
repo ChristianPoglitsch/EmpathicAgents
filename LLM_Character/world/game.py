@@ -7,7 +7,7 @@ from LLM_Character.persona.persona import Persona
 from LLM_Character.persona.user import User 
 from LLM_Character.llm_comms.llm_api import LLM_API 
 from LLM_Character.util import copyanything, BASE_DIR
-from LLM_Character.communication.incoming_messages import PerceivingData, MetaData, PersonaData, UserData, AddPersonaData
+from LLM_Character.communication.incoming_messages import FullPersonaData, PerceivingData, MetaData, PersonID, PersonaData, UserData
 
 FS_STORAGE = BASE_DIR + "/LLM_Character/storage"
 
@@ -121,7 +121,7 @@ class ReverieServer:
     self._save()
 
   # TODO in every save function, if cannot be opned to write, make new dir and file 
-  def add_persona_processor(self, data: AddPersonaData):
+  def add_persona_processor(self, data: FullPersonaData):
     if data.name not in self.personas.keys():
       p = Persona(data.name)
       p.load_from_data(data.scratch_data, data.spatial_data)
@@ -132,8 +132,27 @@ class ReverieServer:
       # autosave? 
       self._save() 
 
-
   # =============================================================================
+  # SECTION: Getters 
+  # =============================================================================
+  def get_personas(self) -> list[str]:
+    return self.personas.keys()
+
+  def get_users(self) -> list[str]:
+    return self.users.keys()
+  
+  def get_persona_info(self, data:PersonID) -> FullPersonaData:
+    if data.name in self.personas.keys():
+      return self.personas[data.name].get_info()
+    return None
+
+  def get_meta_data(self) -> MetaData:
+    return  MetaData(curr_time=self.curr_time, sec_per_step=self.sec_per_step)
+  
+  def get_saved_games(self) -> list[str]:
+    return os.listdir(f"{FS_STORAGE}/{self.client_id}/")   
+  
+  #  =============================================================================
   # SECTION: Loading and saving logic
   # =============================================================================
 

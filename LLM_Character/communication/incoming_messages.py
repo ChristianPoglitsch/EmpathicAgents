@@ -5,6 +5,13 @@ class BaseMessage(BaseModel):
     type: str
     data: Any
 
+
+
+# ---------------------------------------------------------------------------
+# PUTTERS/ POSTERS 
+# ---------------------------------------------------------------------------
+
+
 # ---------------------------------------------------------------------------
 # class data sent from unity to python endpoint for sending chat messages. 
 class PromptData(BaseModel):
@@ -18,20 +25,17 @@ class PromptMessage(BaseMessage):
 
 # ---------------------------------------------------------------------------
 # class data sent from unity to python endpoint for sending update data.
-class GameObject(BaseModel):
-    gameobject: str
+class LocationDetails(BaseModel):
+    details: List[str]
 
-class Arena(BaseModel):
-    arena: str
-    gameobjects: Optional[list[GameObject]] = None 
+class Location(BaseModel):
+    location: Dict[str, LocationDetails]
 
-class Sector(BaseModel):
-    sector: str
-    arenas: Optional[list[Arena]] = None
+class City(BaseModel):
+    city: Dict[str, Location]
 
 class LocationData(BaseModel):
-    world: str 
-    sectors: list[Sector] 
+    cities: Dict[str, City]
 
 class OneLocationData(BaseModel):
     world: str 
@@ -110,6 +114,7 @@ class StartMessage(BaseMessage):
     type:str
     data: StartData
 
+# ---------------------------------------------------------------------------
 # https://stackoverflow.com/questions/67699451/make-every-field-as-optional-with-pydantic
 class FullPersonaScratchData(BaseModel):
     curr_location: OneLocationData 
@@ -130,11 +135,41 @@ class FullPersonaScratchData(BaseModel):
     importance_trigger_curr: int 
     importance_ele_n: int 
 
-class AddPersonaData(BaseModel):
+class FullPersonaData(BaseModel):
     name:str
     scratch_data : FullPersonaScratchData
     spatial_data: LocationData
 
 class AddPersonaMessage(BaseMessage):
     type: str
-    data: AddPersonaData 
+    data: FullPersonaData
+
+
+# ---------------------------------------------------------------------------
+# GETTERS
+# ---------------------------------------------------------------------------
+
+
+class GetPersonasMessage(BaseMessage):
+    type : str
+    data : None
+
+class GetUsersMessage(BaseMessage):
+    type : str
+    data : None
+
+class PersonID(BaseModel):
+    name : str
+
+class GetPersonaDetailsMessage(BaseMessage):
+    type : str
+    data : PersonID 
+
+class GetSavedGamesMessage(BaseMessage):
+    type : str
+    data : None
+
+class GetMetaDataMessage(BaseMessage):
+    type : str
+    data : None
+                    

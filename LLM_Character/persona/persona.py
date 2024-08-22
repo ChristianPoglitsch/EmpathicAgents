@@ -7,7 +7,7 @@ from LLM_Character.persona.memory_structures.spatial_memory import MemoryTree
 from LLM_Character.persona.memory_structures.associative_memory.associative_memory import AssociativeMemory
 from LLM_Character.persona.memory_structures.scratch.persona_scratch import PersonaScratch
 from LLM_Character.persona.memory_structures.scratch.user_scratch import UserScratch 
-from LLM_Character.communication.incoming_messages import LocationData, FullPersonaScratchData, OneLocationData, PersonaScratchData
+from LLM_Character.communication.incoming_messages import AddPersonaData, FullPersonaData, LocationData, FullPersonaScratchData, OneLocationData, PersonaData, PersonaScratchData
 
 from LLM_Character.persona.cognitive_modules.plan import plan
 from LLM_Character.persona.cognitive_modules.interact import interact
@@ -98,3 +98,10 @@ class Persona:
   def update_spatial(self, data: Union[LocationData, None]):
     if data: 
       self.s_mem.update_loc(data)
+
+
+  def get_info(self) -> FullPersonaData:
+    scratch_data = self.scratch.get_info()
+    spatial_data = self.s_mem.get_info()
+    data = AddPersonaData(name=self.scratch.name, scratch_data=scratch_data, spatial_data=spatial_data)
+    return data 

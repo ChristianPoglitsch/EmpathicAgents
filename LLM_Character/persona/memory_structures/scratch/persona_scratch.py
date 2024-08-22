@@ -253,6 +253,27 @@ class PersonaScratch:
         ret += f"{hour:02}:{minute:02} || {row[0]}\n"
       return ret
 
+    def get_info(self) -> FullPersonaScratchData:
+        return FullPersonaScratchData(
+            curr_location=self.curr_location,
+            first_name=self.first_name,
+            last_name=self.last_name,
+            age=self.age,
+            innate=self.innate,
+            learned=self.learned,
+            currently=self.currently,
+            lifestyle=self.lifestyle,
+            living_area=self.living_area,
+            
+            recency_w=self.recency_w,
+            relevance_w=self.relevance_w,
+            importance_w=self.importance_w,
+            recency_decay=self.recency_decay,
+            importance_trigger_max=self.importance_trigger_max,
+            importance_trigger_curr=self.importance_trigger_curr,
+            importance_ele_n=self.importance_ele_n
+        )
+
     # LOADING AND SAVING 
     def update(self, data:PersonaScratchData):
       self.curr_location = data.curr_location.model_dump() if data.curr_location else self.curr_location
@@ -328,7 +349,6 @@ class PersonaScratch:
 
             path = os.path.dirname(f_saved)
             self.chat.read_messages_from_json(path + "/messages.json")
-
 
 
     def save(self, out_json):
