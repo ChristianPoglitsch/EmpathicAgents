@@ -59,16 +59,16 @@ class ReverieServer:
       for p in perceivements: 
         if p.name in self.personas.keys():
           persona = self.personas[p.name]
-
           personas_data = {name: (p.scratch, p.a_mem) for name, p in self.personas.items()}
-          description = persona.move(p.curr_loc, p.events, personas_data, self.curr_time, model)  
-
-          movements["persona"][p.name] = {}
-          movements["persona"][p.name]["description"] = description
-          movements["persona"][p.name]["chat"]        = persona.scratch.chat.prints_messages_sender()
-        
+          
+          plan = persona.move(p.curr_loc, p.events, personas_data, self.curr_time, model)  
+          
+          movements["persona"][p.name] = {
+            "plan" : plan,
+            "chat" : persona.scratch.chat.prints_messages_sender()
+          }
       movements["meta"]["curr_time"] = self.curr_time.strftime("%B %d, %Y, %H:%M:%S")
-      
+
       self.curr_time += datetime.timedelta(seconds=self.sec_per_step)
       self.step += 1
       
@@ -79,6 +79,8 @@ class ReverieServer:
       
       # autosave ?
       self._save()
+
+      return movements
 
   def start_processor(self):
     self._load()

@@ -51,8 +51,8 @@ class Persona:
     f_scratch = f"{save_folder}/scratch.json"
     self.scratch.save(f_scratch)
 
-  def perceive(self, loc_data:OneLocationData, model:LLM_API):
-    return perceive(self.scratch, self.a_mem, self.s_mem, loc_data, model)
+  def perceive(self, loc_data:OneLocationData, events:list[EventData], model:LLM_API):
+    return perceive(self.scratch, self.a_mem, self.s_mem, loc_data, events, model)
 
   def retrieve(self, perceived:list[ConceptNode]) -> dict[str, EventContext]:
     return retrieve_contextual_events(self.a_mem, perceived) 
@@ -79,7 +79,7 @@ class Persona:
            model:LLM_API):
     self.scratch.curr_location = curr_location.model_dump()
     
-    new_day = None 
+    new_day = None
     if not self.scratch.curr_time: 
       new_day = "First day"
     elif self.scratch.curr_time.strftime('%A %B %d') != curr_time.strftime('%A %B %d'):
@@ -100,7 +100,8 @@ class Persona:
                         message:str,
                         curr_time:str,
                         model:LLM_API) -> Tuple[str, str, int]: 
-    self.scratch.curr_time = curr_time
+    # FIXME:
+    # self.scratch.curr_time = curr_time
     return chatting(user_scratch, 
                     self.scratch, 
                     self.a_mem,

@@ -47,7 +47,7 @@ def _generate_response(user_scratch: UserScratch,
   return utt, emotion, trust, end
 
 
-def generate_summarize_agent_relationship(iscratch: Union[UserScratch | PersonaScratch], 
+def generate_summarize_agent_relationship(iscratch: Union[UserScratch, PersonaScratch], 
                                           tscratch:PersonaScratch,
                                           model: LLM_API, 
                                           retrieved:dict[str, list[ConceptNode]]):

@@ -22,11 +22,12 @@ def should_react(persona_scratch:PersonaScratch,
 
   curr_event = focused_event.curr_event
   # this is a persona event if 
-  if ":" not in curr_event.subject: 
-    if lets_talk(persona_scratch, persona_amem, personas[curr_event.subject], focused_event, model):
+  if ":" not in curr_event.subject:
+    tscratch, _ = personas[curr_event.subject]
+    if lets_talk(persona_scratch, persona_amem, tscratch, focused_event, model):
       return f"chat with {curr_event.subject}"
     
-    react_mode = lets_react(persona_scratch, personas[curr_event.subject], focused_event, model)
+    react_mode = lets_react(persona_scratch, tscratch, focused_event, model)
     return react_mode
   
   return False

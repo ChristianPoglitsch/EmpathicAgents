@@ -8,7 +8,7 @@ from LLM_Character.persona.memory_structures.scratch.user_scratch import UserScr
 
 COUNTER_LIMIT = 5
 
-def _create_prompt_input(iscratch:Union[UserScratch|PersonaScratch], tscratch:PersonaScratch, statements:str):
+def _create_prompt_input(iscratch:Union[UserScratch, PersonaScratch], tscratch:PersonaScratch, statements:str):
     prompt_input = [statements, iscratch.name, tscratch.name]
     return prompt_input
 

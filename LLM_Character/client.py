@@ -178,18 +178,18 @@ print(nice)
 # print(nice) 
 
 
-# MoveJson = {
-#     "world": "Graz",
-#     "sector": "JakominiPlatz",
-#     "arena" : "Bäckerei Sorger",
-# }
+MoveJson = {
+    "world": "Graz",
+    "sector": "JakominiPlatz",
+    "arena" : "Bäckerei Sorger",
+}
 
-# EventData1 = {
-#     "action_event_subject" : "Florian",
-#     "action_event_predicate" : None,
-#     "action_event_object" : None,
-#     "action_event_description" : None
-# }
+EventData1 = {
+    "action_event_subject" : "Florian",
+    "action_event_predicate" : None,
+    "action_event_object" : None,
+    "action_event_description" : None
+}
 
 # EventData2 = {
 #     "action_event_obj_subject" : "Hammer",
@@ -198,22 +198,19 @@ print(nice)
 #     "action_event_obj_sdescription" : None
 # }
 
-# json7 = {
-#     "type" : "MoveMessage",
-#     "data" : [{
-#         "name" : "Camila",
-#         "curr_loc" : MoveJson,
-#         "events" : [EventData1]
-#     }] 
-# }
-    
-# s.SendData(json.dumps(json7))
+json7 = {
+    "type" : "MoveMessage",
+    "data" : [{
+        "name" : "Camila",
+        "curr_loc" : MoveJson,
+        "events" : [EventData1]
+    }] 
+}
 
-# time.sleep(60)
-# nice = s.ReadReceivedData()
-# print("Received7:")
-# print(nice) 
-
+s.SendData(json.dumps(json7))
+nice = temp(s)
+print("Received7:")
+print(nice)
 
 # json8 = {
 #     "type" : "PromptMessage",

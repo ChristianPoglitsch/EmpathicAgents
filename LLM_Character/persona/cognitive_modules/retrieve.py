@@ -16,14 +16,16 @@ class EventContext :
 def retrieve_contextual_events(a_mem:AssociativeMemory, perceived:list[ConceptNode]) ->  Dict[str, EventContext]:
   retrieved = dict()
   for event in perceived: 
-    retrieved[event.description] = dict()
-    retrieved[event.description]["curr_event"] = event # event is of type ConceptNode
-    
     relevant_events = a_mem.retrieve_relevant_events(event.subject, event.predicate, event.object) # return set of ConceptNode
-    retrieved[event.description]["events"] = list(relevant_events)
-
     relevant_thoughts = a_mem.retrieve_relevant_thoughts(event.subject, event.predicate, event.object) # return set of ConceptNode
-    retrieved[event.description]["thoughts"] = list(relevant_thoughts) 
+
+    context = EventContext(
+        curr_event=event,
+        events=list(relevant_events),
+        thoughts=list(relevant_thoughts)
+    )        
+    retrieved[event.description] = context
+
   return retrieved
 
 def retrieve_focal_points(scratch: PersonaScratch,

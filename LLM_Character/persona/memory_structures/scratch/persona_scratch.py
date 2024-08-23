@@ -171,7 +171,7 @@ class PersonaScratch:
       commonset += f"Currently: {self.currently}\n"
       commonset += f"Lifestyle: {self.lifestyle}\n"
       commonset += f"Daily plan requirement: {self.daily_plan_req}\n"
-      commonset += f"Current Date: {self.curr_time.strftime('%A %B %d')}\n"
+      commonset += f"Current Date: {self.curr_time.strftime('%A %B %d') if self.curr_time else None}\n"
       return commonset
 
     def get_str_name(self): 
@@ -358,7 +358,7 @@ class PersonaScratch:
       os.makedirs(os.path.dirname(out_json), exist_ok=True)
       
       scratch = dict() 
-      scratch["curr_time"] = self.curr_time.strftime("%B %d, %Y, %H:%M:%S")
+      scratch["curr_time"] = self.curr_time.strftime("%B %d, %Y, %H:%M:%S") if self.curr_time else None
       scratch["curr_location"] = self.curr_location
       scratch["daily_plan_req"] = self.daily_plan_req
 

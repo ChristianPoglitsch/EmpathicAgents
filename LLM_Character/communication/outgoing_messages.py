@@ -1,6 +1,6 @@
-from LLM_Character.communication.incoming_messages import MetaData, FullPersonaData, OneLocationData
+from LLM_Character.communication.incoming_messages import MetaData, FullPersonaData
 from pydantic import BaseModel 
-from typing import Any
+from typing import Any, Dict
 
 class BaseMessage(BaseModel):
     type: str
@@ -11,11 +11,20 @@ class PromptResponseData(BaseModel):
     utt: str
     emotion : str
     trust_level : str
-    act_location: OneLocationData 
 
 class PromptReponse(BaseMessage):
     type: str
     data: PromptResponseData 
+
+# ---------------------------------------------------------------------------
+class MoveResponseData(BaseModel):
+    persona: Dict[str, Dict[str, Any]]
+    meta: Dict[str, Any]
+
+class MoveResponse(BaseMessage):
+    type: str
+    data: MoveResponseData
+
 
 # ---------------------------------------------------------------------------
 

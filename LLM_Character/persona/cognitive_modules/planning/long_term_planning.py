@@ -25,6 +25,8 @@ def _long_term_planning(scratch:PersonaScratch, a_mem:AssociativeMemory, new_day
   scratch.f_daily_schedule = make_hourly_schedule(scratch, model, wake_up_hour)
   scratch.f_daily_schedule_hourly_org = (scratch.f_daily_schedule[:])
   
+  # FIXME: dictionary instead of tuple. 
+  # dont want add_thought inside generate_thought_plan for readability.  
   c, e, s, p, o, t, k, tp, tep = generate_thought_plan(scratch, model)
   a_mem.add_thought(c, e, s, p, o, t, k, tp, tep, None)
 

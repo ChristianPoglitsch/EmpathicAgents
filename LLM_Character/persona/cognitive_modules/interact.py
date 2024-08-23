@@ -17,7 +17,7 @@ def interact(scratch:PersonaScratch,
              mem:AssociativeMemory, 
              personas:dict[str, Tuple[PersonaScratch, AssociativeMemory]], 
              retrieved: dict[str, EventContext], 
-             model:LLM_API):
+             model:LLM_API) -> str:
   focused_event = False
   if retrieved.keys(): 
     focused_event = choose_retrieved(scratch, retrieved)
