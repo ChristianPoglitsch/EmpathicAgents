@@ -1,3 +1,4 @@
+from __future__ import annotations # for type hints of Persona in move method
 import datetime
 from typing import Tuple, Union
 
@@ -7,13 +8,13 @@ from LLM_Character.persona.memory_structures.spatial_memory import MemoryTree
 from LLM_Character.persona.memory_structures.associative_memory.associative_memory import AssociativeMemory
 from LLM_Character.persona.memory_structures.scratch.persona_scratch import PersonaScratch
 from LLM_Character.persona.memory_structures.scratch.user_scratch import UserScratch 
-from LLM_Character.communication.incoming_messages import FullPersonaData, FullPersonaScratchData, OneLocationData, PersonaScratchData
+from LLM_Character.communication.incoming_messages import EventData, FullPersonaData, FullPersonaScratchData, OneLocationData, PersonaData, PersonaScratchData
 
 from LLM_Character.persona.cognitive_modules.plan import plan
 from LLM_Character.persona.cognitive_modules.interact import interact
 from LLM_Character.persona.cognitive_modules.reflect import reflect
 from LLM_Character.persona.cognitive_modules.converse import chatting 
-
+from LLM_Character.persona.cognitive_modules.retrieve import EventContext, retrieve_contextual_events
 
 class Persona: 
   s_mem:MemoryTree
@@ -50,10 +51,13 @@ class Persona:
     self.scratch.save(f_scratch)
 
   def perceive(self, loc_data:OneLocationData, model:LLM_API):
-    perceive(self.scratch, self.a_mem, self.s_mem, loc_data, model)
-  
-  def interacting(self):
-    interact()
+    return perceive(self.scratch, self.a_mem, self.s_mem, loc_data, model)
+
+  def retrieve(self, perceived):
+    return retrieve_contextual_events(self.a_mem, perceived) 
+
+  def interact(self, persona:Persona, personas : list[Persona], retrieved: dict[str, EventContext], model:LLM_API):
+    return interact(self, persona, personas, retrieved, model)
 
   def plan(self, new_day, model:LLM_API):
     return plan(self.scratch, self.a_mem, self.s_mem, new_day, model)
@@ -61,7 +65,7 @@ class Persona:
   def reflect(self, model:LLM_API):
     reflect(self.scratch, self.a_mem, model)
 
-  def move(self, personas, curr_location:OneLocationData, curr_time:datetime.datetime, model:LLM_API):
+  def move(self, curr_location:OneLocationData, perceived_events:list[EventData], personas:list[Persona], curr_time:datetime.datetime, model:LLM_API):
     self.scratch.curr_location = curr_location.model_dump()
     
     new_day = False
@@ -72,12 +76,13 @@ class Persona:
     
     self.scratch.curr_time = curr_time
     
-    self.perceive(curr_location, model)
-    # self.retrieve_from_context() # or maybe inside perceive function
+    perceived = self.perceive(curr_location, perceived_events, model)
+    retrieved = self.retrieve(perceived) 
     self.plan(new_day, model)
-    # self.interacting()    
+    act = self.interact(personas, retrieved, model)    
     self.reflect(model)
     # self.execute() # inside unity.
+    return act
 
   def open_convo_session(self, 
                         user_scratch:UserScratch, 
@@ -94,6 +99,10 @@ class Persona:
   def update_scratch(self, data: Union[PersonaScratchData, None]):
    if data : 
     self.scratch.update(data)
+    if data.living_area:
+      self.s_mem.update_oloc(data.living_area)
+    if data.curr_location:
+      self.s_mem.update_oloc(data.curr_location)
 
   def update_spatial(self, data) :
     if data: 
@@ -104,4 +113,23 @@ class Persona:
     scratch_data = self.scratch.get_info()
     spatial_data = self.s_mem.get_info()
     data = FullPersonaData(name=self.scratch.name, scratch_data=scratch_data, spatial_data=spatial_data)
-    return data 
+    return data
+
+
+if __name__ == "__main__":
+  # from LLM_Character.persona.persona import Persona
+  # from LLM_Character.persona.user import User 
+  # from LLM_Character.llm_comms.llm_openai import OpenAIComms
+  # from LLM_Character.llm_comms.llm_local import LocalComms
+  # from LLM_Character.util import BASE_DIR
+  # print("starting take off ...")
+  
+  # # person = Persona("Camila", BASE_DIR + "/LLM_Character/storage/initial/personas/Camila")
+  # person = Persona("Florian", BASE_DIR + "/LLM_Character/storage/localhost/default/personas/Florian")
+  # user = User("Louis")
+  
+  
+  # modelc = OpenAIComms()
+  # model_id = "gpt-4"
+  # modelc.init(model_id)
+  pass 

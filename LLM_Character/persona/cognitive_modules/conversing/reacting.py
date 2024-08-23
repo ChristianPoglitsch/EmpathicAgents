@@ -37,7 +37,7 @@ def _generate_response(user_scratch: UserScratch,
   # NOTE add message as focal point 
   focal_points = [f"{user_scratch.name}", message]
   retrieved = retrieve_focal_points(character_scratch, character_mem, focal_points, model, 15)
-  utt, emotion, trust, end = generate_one_utterance(user_scratch, 
+  utt, emotion, trust, end = generate_one_utterance_user(user_scratch, 
                                     character_scratch, 
                                     character_mem, 
                                     model, 
@@ -68,7 +68,7 @@ def generate_summarize_agent_relationship(user_scratch: UserScratch ,
                               all_embedding_key_str)[0]
   return summarized_relationship
 
-def generate_one_utterance(uscratch: UserScratch,
+def generate_one_utterance_user(uscratch: UserScratch,
                            cscratch:PersonaScratch,
                            camem: AssociativeMemory,
                            model: LLM_API, 

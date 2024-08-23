@@ -141,7 +141,7 @@ class AssociativeMemory:
     return node
     
 
-  def retrieve_relevant_thoughts(self, s_content, p_content, o_content): 
+  def retrieve_relevant_thoughts(self, s_content, p_content, o_content)-> set[ConceptNode]: 
     contents = [s_content, p_content, o_content]
 
     ret = []
@@ -153,7 +153,7 @@ class AssociativeMemory:
     return ret
   
 
-  def retrieve_relevant_events(self, s_content, p_content, o_content): 
+  def retrieve_relevant_events(self, s_content, p_content, o_content) -> set[ConceptNode]: 
     contents = [s_content, p_content, o_content]
 
     ret = []
@@ -185,6 +185,12 @@ class AssociativeMemory:
     if target_persona_name and target_persona_name.lower() in self.kw_to_chat: 
       return self.kw_to_chat[target_persona_name.lower()][0]
     return None
+
+  def get_summarized_latest_events(self, retention): 
+    ret_set = set()
+    for e_node in self.seq_event[:retention]: 
+      ret_set.add(e_node.spo_summary())
+    return ret_set
 
   def load(self, f_saved:str):
    # TODO check if file exists ...  

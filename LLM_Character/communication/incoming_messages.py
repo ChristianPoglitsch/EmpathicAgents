@@ -32,7 +32,8 @@ class OneLocationData(BaseModel):
     obj : Optional[str] = None
 
 class EventData(BaseModel):
-    action_event_subject : Optional[str]= None
+    # subject should be of format "{world}:{sector}:{arena}:{obj}"  
+    action_event_subject : Optional[str]= None 
     action_event_predicate : Optional[str]= None
     action_event_object : Optional[str]= None
     action_event_description : Optional[str]= None

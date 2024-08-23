@@ -60,7 +60,7 @@ class ReverieServer:
         if p.name in self.personas.keys():
           persona = self.personas[p.name]
           
-          description = persona.move(self.personas, p.curr_loc, self.curr_time, model)  
+          description = persona.move(p.curr_loc, p.events,self.personas, self.curr_time, model)  
 
           movements["persona"][p.name] = {}
           movements["persona"][p.name]["description"] = description
@@ -101,10 +101,10 @@ class ReverieServer:
       persona.update_scratch(data.scratch_data)
       persona.update_spatial(data.spatial_data)
       # could be coded better, dont like this. 
-      if data.scratch_data.living_area:
-        persona.s_mem.update_oloc(data.scratch_data.living_area)
-      if data.scratch_data.curr_location:
-        persona.s_mem.update_oloc(data.scratch_data.curr_location)
+      # if data.scratch_data.living_area:
+      #   persona.s_mem.update_oloc(data.scratch_data.living_area)
+      # if data.scratch_data.curr_location:
+      #   persona.s_mem.update_oloc(data.scratch_data.curr_location)
     
     # autosave? 
     self._save()

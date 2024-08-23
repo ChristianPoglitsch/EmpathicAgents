@@ -78,6 +78,8 @@ def _remember_chat(cscratch: PersonaScratch, ca_mem:AssociativeMemory, p_event, 
                     chat_poignancy, 
                     chat_embedding_pair, 
                     cscratch.chat)
+    
+    # FIXME: add this to a_mem with add_event.
     return node.node_id, keywords
 
 

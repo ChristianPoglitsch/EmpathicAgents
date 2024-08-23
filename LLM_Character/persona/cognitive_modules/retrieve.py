@@ -1,15 +1,29 @@
+from dataclasses import dataclass
+from typing import Dict
+from LLM_Character.communication.incoming_messages import EventData
 from LLM_Character.llm_comms.llm_api import LLM_API
 from LLM_Character.persona.memory_structures.associative_memory.associative_memory import AssociativeMemory, ConceptNode
 from LLM_Character.persona.memory_structures.scratch.persona_scratch import PersonaScratch
 from LLM_Character.persona.cognitive_modules.retrieving.util import *
 
+@dataclass
+class EventContext :
+  curr_event : ConceptNode
+  events : list[ConceptNode] 
+  thoughts : list[ConceptNode]
 
-# FIXME:
-# PROBLEMS OBSERVED IN THIS CODE AND THAT ARE ALSO PRESENT IN THE ORIGINAL REPOSITORY:
-# if the dictionary is empty, normalize_dict_floats fails. 
-# is now temporarlily fixed by adding `if dict` in the function. 
-# a unit test is needed, or importing a function from stdlib could also help. 
+def retrieve_contextual_events(a_mem:AssociativeMemory, perceived:list[ConceptNode]) ->  Dict[str, EventContext]:
+  retrieved = dict()
+  for event in perceived: 
+    retrieved[event.description] = dict()
+    retrieved[event.description]["curr_event"] = event # event is of type ConceptNode
+    
+    relevant_events = a_mem.retrieve_relevant_events(event.subject, event.predicate, event.object) # return set of ConceptNode
+    retrieved[event.description]["events"] = list(relevant_events)
 
+    relevant_thoughts = a_mem.retrieve_relevant_thoughts(event.subject, event.predicate, event.object) # return set of ConceptNode
+    retrieved[event.description]["thoughts"] = list(relevant_thoughts)
+  return retrieved
 
 def retrieve_focal_points(scratch: PersonaScratch,
              a_mem: AssociativeMemory, 
@@ -45,32 +59,7 @@ def retrieve_focal_points(scratch: PersonaScratch,
             n.last_accessed = scratch.curr_time
         retrieved[focal_pt] = master_nodes
     return retrieved
-
-
-def retrieve_contextual_events(a_mem:AssociativeMemory, perceived):
-  retrieved = dict()
-  for event in perceived: 
-    retrieved[event.description] = dict()
-    retrieved[event.description]["curr_event"] = event
-    
-    relevant_events = a_mem.retrieve_relevant_events(event.subject, event.predicate, event.object)
-    retrieved[event.description]["events"] = list(relevant_events)
-
-    relevant_thoughts = a_mem.retrieve_relevant_thoughts(event.subject, event.predicate, event.object)
-    retrieved[event.description]["thoughts"] = list(relevant_thoughts)
-  return retrieved
-
-
-
-
-
-
-
-
-
-
-
-
+   
 
 
 if __name__ == "__main__":
@@ -91,7 +80,8 @@ if __name__ == "__main__":
     
     model = LLM_API(modelc)
 
-    person = Persona("Camila", BASE_DIR + "/LLM_Character/storage/initial/personas/Camila")
+    person = Persona("Camila")
+    person.load_from_file(BASE_DIR + "/LLM_Character/storage/localhost/default/personas/Camila")
     text = "Frederiek went to the shop"  
     created = datetime.datetime(21,3,4)
     expiration= None
@@ -105,11 +95,18 @@ if __name__ == "__main__":
     filling = None 
 
     # person.a_mem.add_chat(created, expiration, s, p, o, description, keywords, poignancy, embedding_pair, filling)
-    person.a_mem.add_thought(created, expiration, s, p, o, description, keywords, poignancy, embedding_pair, filling)
-    person.a_mem.add_event(created, expiration, s, p, o, description, keywords, poignancy, embedding_pair, filling)
+    node1 = person.a_mem.add_thought(created, expiration, s, p, o, description, keywords, poignancy, embedding_pair, filling)
+    node2 = person.a_mem.add_event(created, expiration, s, p, o, description, keywords, poignancy, embedding_pair, filling)
     
-    retrieved = retrieve_focal_points(person.scratch, person.a_mem, ["who is me?"], model)
+    retrieved1 = retrieve_focal_points(person.scratch, person.a_mem, ["who is me?"], model)
+    print(len(retrieved1["who is me?"]))
+    print(retrieved1["who is me?"][0].description)
+    print(retrieved1["who is me?"][1].description)
     
-    print(len(retrieved["who is me?"]))
-    print(retrieved["who is me?"][0].description)
-    print(retrieved["who is me?"][1].description)
+    
+    retrieved2 = retrieve_contextual_events(person.a_mem, [node1, node2])
+    print(retrieved2)
+
+
+
+    

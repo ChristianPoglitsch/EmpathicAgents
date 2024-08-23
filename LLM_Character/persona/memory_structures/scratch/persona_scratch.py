@@ -31,6 +31,9 @@ class PersonaScratch:
       self.curr_emotion:str = None 
       self.curr_trust:dict[str, int] = dict() 
 
+      # PERCEIVE VARIABLES
+      self.retention = 5
+
       # RETRIEVE VARIABLES
       self.recency_w = 1
       self.relevance_w = 1
