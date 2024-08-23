@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+import random
 from typing import Dict
 from LLM_Character.communication.incoming_messages import EventData
 from LLM_Character.llm_comms.llm_api import LLM_API
@@ -22,7 +23,7 @@ def retrieve_contextual_events(a_mem:AssociativeMemory, perceived:list[ConceptNo
     retrieved[event.description]["events"] = list(relevant_events)
 
     relevant_thoughts = a_mem.retrieve_relevant_thoughts(event.subject, event.predicate, event.object) # return set of ConceptNode
-    retrieved[event.description]["thoughts"] = list(relevant_thoughts)
+    retrieved[event.description]["thoughts"] = list(relevant_thoughts) 
   return retrieved
 
 def retrieve_focal_points(scratch: PersonaScratch,

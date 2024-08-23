@@ -1,3 +1,4 @@
+from typing import Union
 from LLM_Character.llm_comms.llm_api import LLM_API 
 
 from LLM_Character.persona.prompt_modules.converse_prompts.summarize_relationship import run_prompt_summarize_relationship 
@@ -46,8 +47,8 @@ def _generate_response(user_scratch: UserScratch,
   return utt, emotion, trust, end
 
 
-def generate_summarize_agent_relationship(user_scratch: UserScratch , 
-                                          character_scratch:PersonaScratch,
+def generate_summarize_agent_relationship(iscratch: Union[UserScratch | PersonaScratch], 
+                                          tscratch:PersonaScratch,
                                           model: LLM_API, 
                                           retrieved:dict[str, list[ConceptNode]]):
   all_embedding_keys = list()
@@ -62,8 +63,8 @@ def generate_summarize_agent_relationship(user_scratch: UserScratch ,
     all_embedding_key_str = "There is no statements to share." 
   
   summarized_relationship = run_prompt_summarize_relationship(
-                              user_scratch,
-                              character_scratch,
+                              iscratch,
+                              tscratch,
                               model,
                               all_embedding_key_str)[0]
   return summarized_relationship

@@ -59,8 +59,9 @@ class ReverieServer:
       for p in perceivements: 
         if p.name in self.personas.keys():
           persona = self.personas[p.name]
-          
-          description = persona.move(p.curr_loc, p.events,self.personas, self.curr_time, model)  
+
+          personas_data = {name: (p.scratch, p.a_mem) for name, p in self.personas.items()}
+          description = persona.move(p.curr_loc, p.events, personas_data, self.curr_time, model)  
 
           movements["persona"][p.name] = {}
           movements["persona"][p.name]["description"] = description

@@ -4,6 +4,7 @@ from typing import Tuple, Union
 
 from LLM_Character.llm_comms.llm_api import LLM_API
 from LLM_Character.persona.cognitive_modules.perceive import perceive
+from LLM_Character.persona.memory_structures.associative_memory.concept_node import ConceptNode
 from LLM_Character.persona.memory_structures.spatial_memory import MemoryTree
 from LLM_Character.persona.memory_structures.associative_memory.associative_memory import AssociativeMemory
 from LLM_Character.persona.memory_structures.scratch.persona_scratch import PersonaScratch
@@ -53,22 +54,32 @@ class Persona:
   def perceive(self, loc_data:OneLocationData, model:LLM_API):
     return perceive(self.scratch, self.a_mem, self.s_mem, loc_data, model)
 
-  def retrieve(self, perceived):
+  def retrieve(self, perceived:list[ConceptNode]) -> dict[str, EventContext]:
     return retrieve_contextual_events(self.a_mem, perceived) 
 
-  def interact(self, persona:Persona, personas : list[Persona], retrieved: dict[str, EventContext], model:LLM_API):
-    return interact(self, persona, personas, retrieved, model)
+  def interact(self, 
+               personas: dict[str, Tuple[PersonaScratch, AssociativeMemory]], 
+               retrieved: dict[str, EventContext], 
+               model:LLM_API):
+    return interact(self.scratch, self.a_mem,  personas, retrieved, model)
 
-  def plan(self, new_day, model:LLM_API):
+  def plan(self, 
+           new_day:Union[str,None], 
+           model:LLM_API):
     return plan(self.scratch, self.a_mem, self.s_mem, new_day, model)
 
   def reflect(self, model:LLM_API):
     reflect(self.scratch, self.a_mem, model)
 
-  def move(self, curr_location:OneLocationData, perceived_events:list[EventData], personas:list[Persona], curr_time:datetime.datetime, model:LLM_API):
+  def move(self, 
+           curr_location:OneLocationData, 
+           perceived_events:list[EventData], 
+           personas:dict[str, Tuple[PersonaScratch, AssociativeMemory]], 
+           curr_time:datetime.datetime, 
+           model:LLM_API):
     self.scratch.curr_location = curr_location.model_dump()
     
-    new_day = False
+    new_day = None 
     if not self.scratch.curr_time: 
       new_day = "First day"
     elif self.scratch.curr_time.strftime('%A %B %d') != curr_time.strftime('%A %B %d'):
