@@ -14,7 +14,6 @@ class GetMetaDataDispatcher(BaseDispatcher):
         server = serverM.get_server(client_id)
         if server and server.is_loaded(): 
             info = server.get_meta_data()
-            
             response_message = GetMetaDataResponse(type="GetMetaDataResponse", data=info)
             sending_str = response_message.model_dump_json()
             
@@ -29,13 +28,15 @@ class GetPersonaDetailsDispatcher(BaseDispatcher):
         client_id = socket.udpIP + str(socket.udpSendPort)
         server = serverM.get_server(client_id)
         if server and server.is_loaded(): 
-            info = server.get_persona_info(data.data.name)
-
-            response_message = GetPersonaDetailsResponse(type="GetPersonaDetailsResponse", data=info)
-            sending_str = response_message.model_dump_json()
+            info = server.get_persona_info(data.data)
+            if info : 
+                response_message = GetPersonaDetailsResponse(type="GetPersonaDetailsResponse", data=info)
+                sending_str = response_message.model_dump_json()
             
-            print("Done")
-            socket.SendData(sending_str)
+                print("Done")
+                socket.SendData(sending_str)
+            else : 
+                socket.SendData("Error: Persona name doesn't exist.") 
         else :
             # FIXME: have proper error messages. 
             socket.SendData("Error: Select a saved game first or start a new game.") 
@@ -46,7 +47,6 @@ class GetPersonasDispatcher(BaseDispatcher):
         server = serverM.get_server(client_id)
         if server and server.is_loaded(): 
             info = server.get_personas()
-            
             response_message = GetPersonasResponse(type="GetPersonasResponse", data=info)
             sending_str = response_message.model_dump_json()
             
@@ -62,7 +62,6 @@ class GetUsersDispatcher(BaseDispatcher):
         server = serverM.get_server(client_id)
         if server and server.is_loaded(): 
             info = server.get_saved_games()
-            
             response_message = GetSavedGamesResponse(type="GetSavedGamesResponse", data=info)
             sending_str = response_message.model_dump_json()
             
@@ -77,8 +76,7 @@ class GetSavedGamesDispatcher(BaseDispatcher):
         client_id = socket.udpIP + str(socket.udpSendPort)
         server = serverM.get_server(client_id)
         if server and server.is_loaded(): 
-            info = server.get_users(data.data)
-            
+            info = server.get_users()
             response_message = GetUsersResponse(type="GetUsersResponse", data=info)
             sending_str = response_message.model_dump_json()
             

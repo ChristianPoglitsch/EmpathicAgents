@@ -141,13 +141,13 @@ class ReverieServer:
   def get_users(self) -> list[str]:
     return self.users.keys()
   
-  def get_persona_info(self, data:PersonID) -> FullPersonaData:
+  def get_persona_info(self, data:PersonID) -> Union[FullPersonaData, None]:
     if data.name in self.personas.keys():
       return self.personas[data.name].get_info()
     return None
-
+  
   def get_meta_data(self) -> MetaData:
-    return  MetaData(curr_time=self.curr_time, sec_per_step=self.sec_per_step)
+    return  MetaData(curr_time=self.curr_time.strftime("%B %d, %Y, %H:%M:%S"), sec_per_step=self.sec_per_step)
   
   def get_saved_games(self) -> list[str]:
     return os.listdir(f"{FS_STORAGE}/{self.client_id}/")   

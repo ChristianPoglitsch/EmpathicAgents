@@ -1,4 +1,4 @@
-from LLM_Character.communication.incoming_messages import MetaData, PersonaData
+from LLM_Character.communication.incoming_messages import MetaData, FullPersonaData
 from pydantic import BaseModel 
 from typing import Any
 
@@ -28,7 +28,7 @@ class GetUsersResponse(BaseMessage):
 
 class GetPersonaDetailsResponse(BaseMessage):
     type : str
-    data : PersonaData
+    data : FullPersonaData
 
 class GetSavedGamesResponse(BaseMessage):
     type : str

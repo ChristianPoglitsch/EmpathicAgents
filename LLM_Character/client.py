@@ -2,6 +2,16 @@ import json
 import time
 from LLM_Character.communication.udp_comms import UdpComms
 
+def temp(s) -> str:
+    byte_data = None
+    while True:
+        time.sleep(1)
+        byte_data = s.ReadReceivedData()
+        if not byte_data:
+            continue 
+        break
+    return byte_data
+ 
 
 print("starting off ...")
 udpIP="127.0.0.1"
@@ -21,10 +31,9 @@ json1 = {
             "sim_code": "SIM456"
         }
     }
-s.SendData(json.dumps(json1))
 
-time.sleep(5)
-nice = s.ReadReceivedData()
+s.SendData(json.dumps(json1))
+nice = temp(s)
 print("Received1:")
 print(nice)
 
@@ -36,201 +45,245 @@ json2 = {
         "message" : "Hi"
     }
 }
-s.SendData(json.dumps(json2))
 
-time.sleep(20)
-nice = s.ReadReceivedData()
+s.SendData(json.dumps(json2))
+nice = temp(s)
 print("Received2:")
 print(nice) 
 
-updateMetaJson = {
-    "curr_time": "July 25, 2024, 09:15:45",
-    "sec_per_step": 30
-    }
+# updateMetaJson = {
+#     "curr_time": "July 25, 2024, 09:15:45",
+#     "sec_per_step": 30
+#     }
 
-updatePersonaJson  = {
-    "name" : "Camila", # old name
-    "scratch_data": {
-            "first_name": "Alice",
-            "last_name": "Smith",
-            "age": 30,
-            "living_area": {
-                    "world" : "Graz",
-                    "sector" : "DownTown",
-                    "arena" : "Someone's Appartement",
-            },
-            "recency_w": 5,
-            "relevance_w": 7,
-            "importance_ele_n": 3
-        },
-        "spatial_data": {
-            "FantasyLand" : {           
-                "Northern Realm" : {
-                    "Dragon's Lair" : ["Dragon", "Treasure Chest"],
-                    "Ice Cavern" : ["Ice Golem" ,"Frozen Statue"]
-                },
-                "Southern Realm" :  {
+# updatePersonaJson  = {
+#     "name" : "Camila", # old name
+#     "scratch_data": {
+#             "first_name": "Alice",
+#             "last_name": "Smith",
+#             "age": 30,
+#             "living_area": {
+#                     "world" : "Graz",
+#                     "sector" : "DownTown",
+#                     "arena" : "Someone's Appartement",
+#             },
+#             "recency_w": 5,
+#             "relevance_w": 7,
+#             "importance_ele_n": 3
+#         },
+#         "spatial_data": {
+#             "FantasyLand" : {           
+#                 "Northern Realm" : {
+#                     "Dragon's Lair" : ["Dragon", "Treasure Chest"],
+#                     "Ice Cavern" : ["Ice Golem" ,"Frozen Statue"]
+#                 },
+#                 "Southern Realm" :  {
 
-                }
-            }
-        }
-    }
+#                 }
+#             }
+#         }
+#     }
 
-updateUserJson = {
-    "old_name" : "Louis",
-    "name" : "Joe Smith",
-}
+# updateUserJson = {
+#     "old_name" : "Louis",
+#     "name" : "Joe Smith",
+# }
 
-json3 = {
-    "type" : "UpdateMetaMessage",
-    "data" : updateMetaJson 
-}
+# json3 = {
+#     "type" : "UpdateMetaMessage",
+#     "data" : updateMetaJson 
+# }
 
-json4 = {
-    "type" : "UpdatePersonaMessage",
-    "data" : updatePersonaJson
-}
+# json4 = {
+#     "type" : "UpdatePersonaMessage",
+#     "data" : updatePersonaJson
+# }
 
-json5 = {
-    "type" : "UpdateUserMessage",
-    "data" : updateUserJson
-}
+# json5 = {
+#     "type" : "UpdateUserMessage",
+#     "data" : updateUserJson
+# }
 
-s.SendData(json.dumps(json3))
+# s.SendData(json.dumps(json3))
 
-time.sleep(20)
-nice = s.ReadReceivedData()
-print("Received3:")
-print(nice) 
+# time.sleep(20)
+# nice = s.ReadReceivedData()
+# print("Received3:")
+# print(nice) 
 
-s.SendData(json.dumps(json4))
+# s.SendData(json.dumps(json4))
 
-time.sleep(20)
-nice = s.ReadReceivedData()
-print("Received4:")
-print(nice) 
+# time.sleep(20)
+# nice = s.ReadReceivedData()
+# print("Received4:")
+# print(nice) 
 
-s.SendData(json.dumps(json5))
+# s.SendData(json.dumps(json5))
 
-time.sleep(20)
-nice = s.ReadReceivedData()
-print("Received5:")
-print(nice) 
+# time.sleep(20)
+# nice = s.ReadReceivedData()
+# print("Received5:")
+# print(nice) 
 
-AddPersonaJson  = {
-    "name" : "Alice Smith", # new name 
-    "scratch_data": {
-            "curr_location" : {
-                "world" : "Graz",
-                "sector" : "JakominiPlatz",
-                "arena" : "Home"
-            },
-            "first_name": "Alice",
-            "last_name": "Smith",
-            "age": 30,
-            "innate": "Curious",
-            "learned": "Programming",
-            "currently": "Researcher",
-            "lifestyle": "Urban",
-            "living_area": {
-                    "world" : "Graz",
-                    "sector" : "DownTown",
-                    "arena" : "Someone's Appartement",
-            },
-            "recency_w": 5,
-            "relevance_w": 7,
-            "importance_w": 9,
-            "recency_decay": 2,
-            "importance_trigger_max": 10,
-            "importance_trigger_curr": 6,
-            "importance_ele_n": 3
-        },
-        "spatial_data": {
-            "FantasyLand": 
-            {
-                "Northern Realm" : 
-                {
-                    "Dragon's Lair" : ["Dragon", "Treasure Chest"],
-                    "Ice Cavern" : ["Ice Golem", "Frozen Statue"]
-                }
-            }
-        }
-    }
+# AddPersonaJson  = {
+#     "name" : "Alice Smith", # new name 
+#     "scratch_data": {
+#             "curr_location" : {
+#                 "world" : "Graz",
+#                 "sector" : "JakominiPlatz",
+#                 "arena" : "Home"
+#             },
+#             "first_name": "Alice",
+#             "last_name": "Smith",
+#             "age": 30,
+#             "innate": "Curious",
+#             "learned": "Programming",
+#             "currently": "Researcher",
+#             "lifestyle": "Urban",
+#             "living_area": {
+#                     "world" : "Graz",
+#                     "sector" : "DownTown",
+#                     "arena" : "Someone's Appartement",
+#             },
+#             "recency_w": 5,
+#             "relevance_w": 7,
+#             "importance_w": 9,
+#             "recency_decay": 2,
+#             "importance_trigger_max": 10,
+#             "importance_trigger_curr": 6,
+#             "importance_ele_n": 3
+#         },
+#         "spatial_data": {
+#             "FantasyLand": 
+#             {
+#                 "Northern Realm" : 
+#                 {
+#                     "Dragon's Lair" : ["Dragon", "Treasure Chest"],
+#                     "Ice Cavern" : ["Ice Golem", "Frozen Statue"]
+#                 }
+#             }
+#         }
+#     }
 
-json6 = {
-    "type" : "AddPersonaMessage",
-    "data" : AddPersonaJson 
-}
+# json6 = {
+#     "type" : "AddPersonaMessage",
+#     "data" : AddPersonaJson 
+# }
 
-s.SendData(json.dumps(json6))
+# s.SendData(json.dumps(json6))
 
-time.sleep(20)
-nice = s.ReadReceivedData()
-print("Received6:")
-print(nice) 
+# time.sleep(20)
+# nice = s.ReadReceivedData()
+# print("Received6:")
+# print(nice) 
 
 
-MoveJson = {
-    "world": "Graz",
-    "sector": "JakominiPlatz",
-    "arena" : "Bäckerei Sorger",
-}
+# MoveJson = {
+#     "world": "Graz",
+#     "sector": "JakominiPlatz",
+#     "arena" : "Bäckerei Sorger",
+# }
 
-EventData1 = {
-    "action_event_subject" : "Florian",
-    "action_event_predicate" : None,
-    "action_event_object" : None,
-    "action_event_description" : None
-}
+# EventData1 = {
+#     "action_event_subject" : "Florian",
+#     "action_event_predicate" : None,
+#     "action_event_object" : None,
+#     "action_event_description" : None
+# }
 
-EventData2 = {
-    "action_event_obj_subject" : "Hammer",
-    "action_event_obj_spredicate" : None,
-    "action_event_obj_sobject" : None,
-    "action_event_obj_sdescription" : None
-}
+# EventData2 = {
+#     "action_event_obj_subject" : "Hammer",
+#     "action_event_obj_spredicate" : None,
+#     "action_event_obj_sobject" : None,
+#     "action_event_obj_sdescription" : None
+# }
 
-json7 = {
-    "type" : "MoveMessage",
-    "data" : [{
-        "name" : "Camila",
-        "curr_loc" : MoveJson,
-        "events" : [EventData1]
-    }] 
-}
+# json7 = {
+#     "type" : "MoveMessage",
+#     "data" : [{
+#         "name" : "Camila",
+#         "curr_loc" : MoveJson,
+#         "events" : [EventData1]
+#     }] 
+# }
     
-s.SendData(json.dumps(json7))
+# s.SendData(json.dumps(json7))
 
-time.sleep(60)
-nice = s.ReadReceivedData()
-print("Received7:")
-print(nice) 
-
-
-json8 = {
-    "type" : "PromptMessage",
-    "data" : {
-        "persona_name" : "Alice Smith",
-        "user_name" : "Joe Smith",
-        "message" : "Hi"
-    }
-}
-s.SendData(json.dumps(json8))
-
-time.sleep(60)
-nice = s.ReadReceivedData()
-print("Received8:")
-print(nice) 
+# time.sleep(60)
+# nice = s.ReadReceivedData()
+# print("Received7:")
+# print(nice) 
 
 
-# FIXME: hier zat ik : + nog unity endpoint developpen, maar dat zal wss voor weekend zijn?  
+# json8 = {
+#     "type" : "PromptMessage",
+#     "data" : {
+#         "persona_name" : "Alice Smith",
+#         "user_name" : "Joe Smith",
+#         "message" : "Hi"
+#     }
+# }
+# s.SendData(json.dumps(json8))
+
+# time.sleep(60)
+# nice = s.ReadReceivedData()
+# print("Received8:")
+# print(nice) 
+
 
 # =============================================================================
 # REQUESTING INFORMATION from unity endpoint to python endpoint  
 # =============================================================================
 
-# request all possible perspona's 
+json9 ={
+    "type": "GetPersonasMessage",
+    "data": None
+}
 
-# request 
+s.SendData(json.dumps(json9))
+nice = temp(s)
+print("Received9:")
+print(nice) 
 
-# request 
+json10 = {
+    "type": "GetUsersMessage",
+    "data": None
+}
+
+s.SendData(json.dumps(json10))
+nice = temp(s)
+print("Received10:")
+print(nice) 
+
+json11 = {
+    "type": "GetPersonaDetailsMessage",
+    "data": {
+        "name": "example_name"
+    }
+}
+
+s.SendData(json.dumps(json11))
+nice = temp(s)
+print("Received11:")
+print(nice) 
+
+json12 = {
+    "type": "GetSavedGamesMessage",
+    "data": None
+}
+
+s.SendData(json.dumps(json12))
+nice = temp(s)
+print("Received12:")
+print(nice) 
+
+
+json13 = {
+    "type": "GetMetaDataMessage",
+    "data": None
+}
+
+s.SendData(json.dumps(json13))
+nice = temp(s)
+print("Received13:")
+print(nice) 
