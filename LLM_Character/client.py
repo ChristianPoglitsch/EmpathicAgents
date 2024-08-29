@@ -189,14 +189,11 @@ EventData1 = {
     "action_event_predicate" : None,
     "action_event_object" : None,
     "action_event_description" : None
-}
-
-# EventData2 = {
 #     "action_event_obj_subject" : "Hammer",
 #     "action_event_obj_spredicate" : None,
 #     "action_event_obj_sobject" : None,
 #     "action_event_obj_sdescription" : None
-# }
+}
 
 json7 = {
     "type" : "MoveMessage",
@@ -212,20 +209,20 @@ nice = temp(s)
 print("Received7:")
 print(nice)
 
-# json8 = {
-#     "type" : "PromptMessage",
-#     "data" : {
-#         "persona_name" : "Alice Smith",
-#         "user_name" : "Joe Smith",
-#         "message" : "Hi"
-#     }
-# }
-# s.SendData(json.dumps(json8))
+json8 = {
+    "type" : "PromptMessage",
+    "data" : {
+        "persona_name" : "Camila",
+        "user_name" : "Louis",
+        "message" : "Hi"
+    }
+}
+s.SendData(json.dumps(json8))
 
-# time.sleep(60)
-# nice = s.ReadReceivedData()
-# print("Received8:")
-# print(nice) 
+time.sleep(60)
+nice = s.ReadReceivedData()
+print("Received8:")
+print(nice) 
 
 
 # =============================================================================

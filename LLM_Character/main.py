@@ -24,7 +24,7 @@ def start_server(sock:UdpComms,
             continue  
         
         print(f"Received some juicy data : {byte_data}")
-
+        # TODO: MOVE validate_data inside dispatch method. 
         value = dispatcher.validate_data(str(byte_data))
         if value is None:
             continue
@@ -49,7 +49,7 @@ if __name__ == "__main__":
     modelc.init(model_id)
     model = LLM_API(modelc)
 
-    sock = UdpComms(udpIP="127.0.0.1", portTX=8000, portRX=8001, enableRX=True, suppressWarnings=True)
+    sock = UdpComms(udpIP="127.0.0.1", portTX=9090, portRX=9091, enableRX=True, suppressWarnings=True)
     dispatcher = MessageProcessor()
 
     #NOTE: for example, for each new incoming socket, new process that executes start_server, with shared resource server_manager, messageprocessor;  

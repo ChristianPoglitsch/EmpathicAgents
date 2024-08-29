@@ -5,6 +5,10 @@ from typing import Any, Dict
 class BaseMessage(BaseModel):
     type: str
     data: Any
+# ---------------------------------------------------------------------------
+class ErrorResponse(BaseMessage):
+    type: str # type of error for example, PromptResponseError etc. 
+    data: str # description of the error. 
 
 # ---------------------------------------------------------------------------
 class PromptResponseData(BaseModel):

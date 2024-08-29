@@ -1,3 +1,10 @@
+""" 
+ibrahim: temporary class which will be replaced by the hungarian team? 
+# after all, they are going to use grpc, and so most of the socket programmming will dissapear
+# no need to make it complicated for now, (assume single client single server), but the server (revererieserver) takes in client-id
+# which makes it possible to run multiple instances for different clients without having a conflict. 
+"""
+
 import json 
 from typing import Type, Union
 
@@ -19,10 +26,6 @@ from LLM_Character.communication.udp_comms import UdpComms
 
 
 
-# NOTE: ibrahim: temporary class which will be replaced by the hungarian team? 
-# after all, they are going to use grpc, and so most of the socket programmming will dissapear
-# no need to make it complicated for now, (assume single client single server), but the server (revererieserver) takes in client-id
-# which makes it possible to run multiple instances for different clients without having a conflict. 
 class MessageProcessor:
     def __init__(self):
         self._dispatch_map: dict[str, BaseDispatcher] = {}
