@@ -58,7 +58,7 @@ Trust increases if !<INPUT 6>! share your interests and hobbies with you and you
 If we do not share interest your trust will be reduced.
 
 Estimate your emotional state with one of the emotions: 
-happy, angry, disgust, fear, surprise, sad or neutral. 
+happy, angry, disgust, fear, surprised sad or neutral. 
 There are no other emotions possible.
 The emotional state changes if !<INPUT 6>! shares your interests and 
 hobbies with you and you get to know !<INPUT 6>! better.

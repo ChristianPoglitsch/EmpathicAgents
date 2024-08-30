@@ -41,7 +41,7 @@ def chatting(user_scratch: UserScratch ,
     character_scratch.chatting_with_buffer = None
     character_scratch.chatting_end_time = None
 
-  return utt, emotion, trust
+  return utt, emotion, trust, end
 
 
 def _remember_chat(cscratch: PersonaScratch, ca_mem:AssociativeMemory, p_event, model:LLM_API):

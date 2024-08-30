@@ -2,53 +2,63 @@ from LLM_Character.communication.incoming_messages import MetaData, FullPersonaD
 from pydantic import BaseModel 
 from typing import Any, Dict
 
-class BaseMessage(BaseModel):
+class BaseResponse(BaseModel):
     type: str
+    status : str
     data: Any
 # ---------------------------------------------------------------------------
-class ErrorResponse(BaseMessage):
-    type: str # type of error for example, PromptResponseError etc. 
+class ErrorResponse(BaseResponse):
+    type: str # type of error for example, PromptResponseError etc.
+    status:str 
     data: str # description of the error. 
 
 # ---------------------------------------------------------------------------
 class PromptResponseData(BaseModel):
     utt: str
     emotion : str
-    trust_level : str
+    trust_level : int 
+    end: bool
 
-class PromptReponse(BaseMessage):
+class PromptReponse(BaseResponse):
     type: str
+    status: str
     data: PromptResponseData 
+
+# ---------------------------------------------------------------------------
+class StartResponse(BaseResponse):
+    type:str
+    status:str
+    data:str
 
 # ---------------------------------------------------------------------------
 class MoveResponseData(BaseModel):
     persona: Dict[str, Dict[str, Any]]
     meta: Dict[str, Any]
 
-class MoveResponse(BaseMessage):
+class MoveResponse(BaseResponse):
     type: str
     data: MoveResponseData
 
 
 # ---------------------------------------------------------------------------
 
-class GetPersonasResponse(BaseMessage):
+class GetPersonasResponse(BaseResponse):
     type : str
     data : list[str] 
 
-class GetUsersResponse(BaseMessage):
+class GetUsersResponse(BaseResponse):
     type : str
     data : list[str]
 
-class GetPersonaDetailsResponse(BaseMessage):
+class GetPersonaDetailsResponse(BaseResponse):
     type : str
     data : FullPersonaData
 
-class GetSavedGamesResponse(BaseMessage):
+class GetSavedGamesResponse(BaseResponse):
     type : str
     data : list[str]
 
-class GetMetaDataResponse(BaseMessage):
+class GetMetaDataResponse(BaseResponse):
     type : str
     data : MetaData 
 
