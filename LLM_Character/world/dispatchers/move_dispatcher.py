@@ -1,7 +1,7 @@
-from LLM_Character.communication.outgoing_messages import MoveResponse, MoveResponseData
+from LLM_Character.communication.outgoing_messages import MoveResponse, MoveResponseData, ResponseType, StartResponse, StatusType
 from LLM_Character.communication.reverieserver_manager import ReverieServerManager
 from LLM_Character.world.dispatchers.dispatcher import BaseDispatcher
-from LLM_Character.communication.incoming_messages import MetaData, MoveMessage  
+from LLM_Character.communication.incoming_messages import MoveMessage  
 from LLM_Character.llm_comms.llm_api import LLM_API
 from LLM_Character.communication.udp_comms import UdpComms
 
@@ -13,12 +13,12 @@ class MoveDispatcher(BaseDispatcher):
             movements = server.move_processor(data.data, model)
             
             move_response_data = MoveResponseData(**movements)
-            move_response = MoveResponse(type="movement", data=move_response_data)
+            move_response = MoveResponse(type=ResponseType.MOVERESPONSE, status=StatusType.SUCCESS, data=move_response_data)
             move_str = move_response.model_dump_json() 
             print("Done") 
             socket.SendData(move_str)
         else :
-            # FIXME: have proper error messages. 
-            socket.SendData("Error: Select a saved game first or start a new game.") 
-
-
+            print("Error: Select a saved game first or start a new game.")
+            response_message = StartResponse(type=ResponseType.STARTRESPONSE, status=StatusType.FAIL, data="Select a saved game first or start a new game.")
+            sending_str = response_message.model_dump_json() 
+            socket.SendData(sending_str) 

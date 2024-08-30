@@ -58,7 +58,7 @@ class MessageProcessor:
       # use a wroker - master architecture ...
       # maybe use indirect communication, like pub sub or 
       # for example, RabbitMQ can be used with pub sub.
-      self._dispatch_map[data.type].handler(socket, server, model, data)
+      self._dispatch_map[data.type.value].handler(socket, server, model, data)
 
     def validate_data(self, data: str) -> Union[BaseMessage, None]:
         try:

@@ -1,7 +1,7 @@
 import json
 
 from LLM_Character.communication.incoming_messages import PromptMessage
-from LLM_Character.communication.outgoing_messages import PromptReponse, PromptResponseData
+from LLM_Character.communication.outgoing_messages import PromptReponse, PromptResponseData, ResponseType, StartResponse, StatusType
 from LLM_Character.communication.reverieserver_manager import ReverieServerManager
 from LLM_Character.world.dispatchers.dispatcher import BaseDispatcher
 from LLM_Character.llm_comms.llm_api import LLM_API
@@ -16,14 +16,14 @@ class PromptDispatcher(BaseDispatcher) :
       pd = data.data 
       utt, emotion, trust, end = server.prompt_processor(pd.user_name,  pd.persona_name, pd.message, model)
 
-      print(type(utt), type(emotion), type(trust), type(end)) 
       response_data = PromptResponseData(utt=utt, emotion=emotion, trust_level=str(trust), end=end)
-      response_message = PromptReponse(type="PromptReponse", status="Success", data=response_data)
+      response_message = PromptReponse(type=ResponseType.PROMPTRESPONSE, status=StatusType.SUCCESS, data=response_data)
       sending_str = response_message.model_dump_json()
       
       print("Done")
       socket.SendData(sending_str)
     else:
       print("Error: Select a saved game first or start a new game.")
-      # FIXME: have proper error messages. 
-      socket.SendData("Error: Select a saved game first or start a new game.") 
+      response_message = StartResponse(type=ResponseType.STARTRESPONSE, status=StatusType.FAIL, data="Select a saved game first or start a new game.")
+      sending_str = response_message.model_dump_json() 
+      socket.SendData(sending_str) 

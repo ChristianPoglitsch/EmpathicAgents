@@ -1,15 +1,23 @@
+from enum import Enum
 from LLM_Character.communication.incoming_messages import MetaData, FullPersonaData
 from pydantic import BaseModel 
 from typing import Any, Dict
 
+class ResponseType(Enum):
+    STARTRESPONSE    = "StartResponse"
+    PROMPTRESPONSE   = "PromptResponse"
+    MOVERESPONSE     = "MoveResponse"
+
+class StatusType(Enum):
+    SUCCESS = "Success"
+    FAIL = "Failed"
+
 class BaseResponse(BaseModel):
-    type: str
-    status : str
+    type: ResponseType 
+    status : StatusType 
     data: Any
 # ---------------------------------------------------------------------------
 class ErrorResponse(BaseResponse):
-    type: str # type of error for example, PromptResponseError etc.
-    status:str 
     data: str # description of the error. 
 
 # ---------------------------------------------------------------------------
@@ -20,14 +28,10 @@ class PromptResponseData(BaseModel):
     end: bool
 
 class PromptReponse(BaseResponse):
-    type: str
-    status: str
     data: PromptResponseData 
 
 # ---------------------------------------------------------------------------
 class StartResponse(BaseResponse):
-    type:str
-    status:str
     data:str
 
 # ---------------------------------------------------------------------------
@@ -36,30 +40,24 @@ class MoveResponseData(BaseModel):
     meta: Dict[str, Any]
 
 class MoveResponse(BaseResponse):
-    type: str
     data: MoveResponseData
 
 
 # ---------------------------------------------------------------------------
 
 class GetPersonasResponse(BaseResponse):
-    type : str
     data : list[str] 
 
 class GetUsersResponse(BaseResponse):
-    type : str
     data : list[str]
 
 class GetPersonaDetailsResponse(BaseResponse):
-    type : str
     data : FullPersonaData
 
 class GetSavedGamesResponse(BaseResponse):
-    type : str
     data : list[str]
 
 class GetMetaDataResponse(BaseResponse):
-    type : str
     data : MetaData 
 
 

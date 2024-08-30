@@ -1,11 +1,15 @@
 from pydantic import BaseModel, field_validator 
 from typing import Any, Dict, List, Optional
+from enum import Enum
+
+class MessageTypes(Enum):
+    STARTMESSAGE    = "StartMessage"
+    PROMPTMESSAGE   = "PromptMessage"
+    MOVEMESSAGE     = "MoveMessage"
 
 class BaseMessage(BaseModel):
-    type: str
+    type: MessageTypes 
     data: Any
-
-
 
 # ---------------------------------------------------------------------------
 # PUTTERS/ POSTERS 
@@ -20,7 +24,6 @@ class PromptData(BaseModel):
     message: str
 
 class PromptMessage(BaseMessage):
-    type: str
     data: PromptData
 
 # ---------------------------------------------------------------------------
@@ -44,7 +47,6 @@ class PerceivingData(BaseModel):
     events: list[EventData]
     
 class MoveMessage(BaseMessage):
-    type: str
     data:  list[PerceivingData]
 
 # ---------------------------------------------------------------------------
@@ -82,15 +84,12 @@ class MetaData(BaseModel):
     sec_per_step: Optional[int] = None
 
 class UpdateMetaMessage(BaseMessage):
-    type:str
     data: MetaData 
 
 class UpdatePersonaMessage(BaseMessage):
-    type:str
     data: PersonaData 
 
 class UpdateUserMessage(BaseMessage):
-    type:str
     data: UserData 
 
 # ---------------------------------------------------------------------------
@@ -100,7 +99,6 @@ class StartData(BaseModel):
     sim_code:str
 
 class StartMessage(BaseMessage):
-    type:str
     data: StartData
 
 # ---------------------------------------------------------------------------
@@ -130,7 +128,6 @@ class FullPersonaData(BaseModel):
     spatial_data:  Dict[str, Dict[str, Dict[str, List[str]]]]
 
 class AddPersonaMessage(BaseMessage):
-    type: str
     data: FullPersonaData
 
 
@@ -140,25 +137,20 @@ class AddPersonaMessage(BaseMessage):
 
 
 class GetPersonasMessage(BaseMessage):
-    type : str
     data : None
 
 class GetUsersMessage(BaseMessage):
-    type : str
     data : None
 
 class PersonID(BaseModel):
     name : str
 
 class GetPersonaDetailsMessage(BaseMessage):
-    type : str
     data : PersonID 
 
 class GetSavedGamesMessage(BaseMessage):
-    type : str
     data : None
 
 class GetMetaDataMessage(BaseMessage):
-    type : str
     data : None
                     
