@@ -39,8 +39,7 @@ class GetMetaDataDispatcher(BaseDispatcher):
             socket.SendData(sending_str)
         else:
             # FIXME: have proper error messages.
-            socket.SendData(
-                "Error: Select a saved game first or start a new game.")
+            socket.SendData("Error: Select a saved game first or start a new game.")
 
 
 class GetPersonaDetailsDispatcher(BaseDispatcher):
@@ -67,8 +66,7 @@ class GetPersonaDetailsDispatcher(BaseDispatcher):
                 socket.SendData("Error: Persona name doesn't exist.")
         else:
             # FIXME: have proper error messages.
-            socket.SendData(
-                "Error: Select a saved game first or start a new game.")
+            socket.SendData("Error: Select a saved game first or start a new game.")
 
 
 class GetPersonasDispatcher(BaseDispatcher):
@@ -92,8 +90,7 @@ class GetPersonasDispatcher(BaseDispatcher):
             socket.SendData(sending_str)
         else:
             # FIXME: have proper error messages.
-            socket.SendData(
-                "Error: Select a saved game first or start a new game.")
+            socket.SendData("Error: Select a saved game first or start a new game.")
 
 
 class GetUsersDispatcher(BaseDispatcher):
@@ -117,8 +114,7 @@ class GetUsersDispatcher(BaseDispatcher):
             socket.SendData(sending_str)
         else:
             # FIXME: have proper error messages.
-            socket.SendData(
-                "Error: Select a saved game first or start a new game.")
+            socket.SendData("Error: Select a saved game first or start a new game.")
 
 
 class GetSavedGamesDispatcher(BaseDispatcher):
@@ -133,13 +129,11 @@ class GetSavedGamesDispatcher(BaseDispatcher):
         server = serverM.get_server(client_id)
         if server and server.is_loaded():
             info = server.get_users()
-            response_message = GetUsersResponse(
-                type="GetUsersResponse", data=info)
+            response_message = GetUsersResponse(type="GetUsersResponse", data=info)
             sending_str = response_message.model_dump_json()
 
             print("Done")
             socket.SendData(sending_str)
         else:
             # FIXME: have proper error messages.
-            socket.SendData(
-                "Error: Select a saved game first or start a new game.")
+            socket.SendData("Error: Select a saved game first or start a new game.")

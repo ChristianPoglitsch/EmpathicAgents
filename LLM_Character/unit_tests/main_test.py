@@ -63,8 +63,7 @@ def running_examples(client_sock: UdpComms, sim):
 
     prompt_mess = PromptMessage(
         type=MessageTypes.PROMPTMESSAGE,
-        data=PromptData(persona_name="Camila",
-                        user_name="Louis", message="hi"),
+        data=PromptData(persona_name="Camila", user_name="Louis", message="hi"),
     )
     json2 = prompt_mess.model_dump_json()
     client_sock.SendData(json2)
@@ -242,8 +241,7 @@ def running_examples(client_sock: UdpComms, sim):
 
     # ------------------------------------------
 
-    get_users_mess = GetUsersMessage(
-        type=MessageTypes.GET_USERS_MESSAGE, data=None)
+    get_users_mess = GetUsersMessage(type=MessageTypes.GET_USERS_MESSAGE, data=None)
     json9 = get_users_mess.model_dump_json()
     client_sock.SendData(json9)
     response = receive(client_sock)
@@ -272,8 +270,7 @@ def running_examples(client_sock: UdpComms, sim):
 
     # ------------------------------------------
 
-    get_meta_message = GetMetaMessage(
-        type=MessageTypes.GET_META_MESSAGE, data=None)
+    get_meta_message = GetMetaMessage(type=MessageTypes.GET_META_MESSAGE, data=None)
     json12 = get_meta_message.model_dump_json()
     client_sock.SendData(json12)
     response = receive(client_sock)

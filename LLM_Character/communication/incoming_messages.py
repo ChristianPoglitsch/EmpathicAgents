@@ -25,6 +25,7 @@ class BaseMessage(BaseModel):
     type: MessageTypes
     data: Any
 
+
 # ---------------------------------------------------------------------------
 # PUTTERS/ POSTERS
 # ---------------------------------------------------------------------------
@@ -39,6 +40,7 @@ class PromptData(BaseModel):
 
 class PromptMessage(BaseMessage):
     data: PromptData
+
 
 # ---------------------------------------------------------------------------
 # class data sent from unity to python endpoint for sending update data.
@@ -67,6 +69,7 @@ class PerceivingData(BaseModel):
 
 class MoveMessage(BaseMessage):
     data: list[PerceivingData]
+
 
 # ---------------------------------------------------------------------------
 # class data sent from unity to python endpoint for sending updated data.
