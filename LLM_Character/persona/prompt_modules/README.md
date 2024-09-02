@@ -1,3 +1,10 @@
+# TODO
+
+ibrahim : add explanation
+
+also add example of how to run the file with example (unit test)
+
+
 # prompt templates
 
 all the prompt templates necessary in order to query LLM's for the cognitive modules.  

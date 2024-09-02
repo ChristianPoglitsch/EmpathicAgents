@@ -1,3 +1,8 @@
+# TODO 
+
+ibrahim add explanation
+
+
 # cognitive abilities. 
 
 
