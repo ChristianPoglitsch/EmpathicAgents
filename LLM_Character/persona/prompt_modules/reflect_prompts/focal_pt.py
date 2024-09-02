@@ -1,9 +1,7 @@
-
-from LLM_Character.util import BASE_DIR
 from LLM_Character.llm_comms.llm_api import LLM_API
 from LLM_Character.messages_dataclass import AIMessages
 from LLM_Character.persona.prompt_modules.prompt import generate_prompt
-from LLM_Character.persona.memory_structures.scratch.persona_scratch import PersonaScratch
+from LLM_Character.util import BASE_DIR
 
 COUNTER_LIMIT = 5
 
@@ -31,6 +29,7 @@ def _validate_response(response: str):
 def _get_fail_safe(n):
     return ["Who am I"] * n
 
+
 # FIXME change in each for loop the paramters of the model for example, like in the other repo.
 # if needed
 
@@ -43,18 +42,15 @@ def _get_valid_output(model, prompt, n, counter_limit):
     return _get_fail_safe(n)
 
 
-def run_prompt_generate_focal_pt(
-        model: LLM_API,
-        n: int,
-        all_utt: str,
-        verbose=False):
-
-    prompt_template = BASE_DIR + \
-        "/LLM_Character/persona/prompt_modules/templates/generate_focal_pt.txt"
+def run_prompt_generate_focal_pt(model: LLM_API, n: int, all_utt: str, verbose=False):
+    prompt_template = (
+        BASE_DIR
+        + "/LLM_Character/persona/prompt_modules/templates/generate_focal_pt.txt"
+    )
     prompt_input = _create_prompt_input(n, all_utt)
     prompt = generate_prompt(prompt_input, prompt_template)
-  # example_output = '["What should Jane do for lunch", "Does Jane like stra
-  # special_instruction = "Output must be a list of str." ########
+    # example_output = '["What should Jane do for lunch", "Does Jane like stra
+    # special_instruction = "Output must be a list of str." ########
     am = AIMessages()
     am.add_message(prompt, None, "user", "system")  # NOTE: not really user btw
     output = _get_valid_output(model, am, n, COUNTER_LIMIT)
@@ -74,6 +70,5 @@ if __name__ == "__main__":
 
     model = LLM_API(modelc)
     run_prompt_generate_focal_pt(
-        person.scratch,
-        model,
-        "i will drive to the broeltorens.")
+        person.scratch, model, "i will drive to the broeltorens."
+    )

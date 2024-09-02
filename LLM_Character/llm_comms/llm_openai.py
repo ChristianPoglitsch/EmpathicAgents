@@ -1,24 +1,25 @@
-""" inspired by
+"""inspired by
 
 https://github.com/adimis-ai/Large-Language-Model-LLM-Wrapper-from-Scratch-using-Openai-models/blob/main/Large_Language_Model_(LLM)_Wrapper_from_Scratch_using_Openai_models.ipynb
 https://github.com/openai/openai-python
 https://github.com/joonspk-research/generative_agents
 
 """
+
 from typing import List, Optional
 
-from LLM_Character.messages_dataclass import AIMessages, AIMessage
-from LLM_Character.llm_comms.llm_abstract import LLMComms
-from LLM_Character.util import API_KEY
+from openai import OpenAI
 
 # tiktoken is a fast BPE tokeniser for use with OpenAI's models.
-from openai.types import ChatModel
-from openai.types import CreateEmbeddingResponse, Embedding
-from openai import OpenAI
+from openai.types import ChatModel, CreateEmbeddingResponse, Embedding
+
+from LLM_Character.llm_comms.llm_abstract import LLMComms
+from LLM_Character.messages_dataclass import AIMessage, AIMessages
+from LLM_Character.util import API_KEY
 
 
 class OpenAIComms(LLMComms):
-    """class responsible for sending messages to openAI API """
+    """class responsible for sending messages to openAI API"""
 
     def __init__(self):
         self.client = None
@@ -39,7 +40,8 @@ class OpenAIComms(LLMComms):
         """
         if not self._check_valid_model_chat(model):
             raise ValueError(
-                "The model type does not exist or is not camptabible for chat completion.")
+                "The model type does not exist or is not camptabible for chat completion."
+            )
 
         self.model_name = model
         self.client = OpenAI(api_key=API_KEY)
@@ -78,23 +80,24 @@ class OpenAIComms(LLMComms):
         return self._requese_emb(keywords)
 
     def set_params(
-            self,
-            max_tokens: int,
-            temperature: int,
-            top_p: int,
-            amount_responses: int,
-            max_retry_attemps: int,
-            presence_penalty=None,
-            frequency_penalty=None):
-
+        self,
+        max_tokens: int,
+        temperature: int,
+        top_p: int,
+        amount_responses: int,
+        max_retry_attemps: int,
+        presence_penalty=None,
+        frequency_penalty=None,
+    ):
         if not self._validate_inputs(
-                max_tokens,
-                temperature,
-                top_p,
-                amount_responses,
-                max_retry_attemps,
-                presence_penalty,
-                frequency_penalty):
+            max_tokens,
+            temperature,
+            top_p,
+            amount_responses,
+            max_retry_attemps,
+            presence_penalty,
+            frequency_penalty,
+        ):
             return None
 
         self.max_tokens = max_tokens
@@ -110,25 +113,22 @@ class OpenAIComms(LLMComms):
     # ---------
 
     def _validate_inputs(
-            self,
-            max_tokens,
-            temperature,
-            top_p,
-            n,
-            max_retry_attemps,
-            presence_penalty,
-            frequency_penalty):
+        self,
+        max_tokens,
+        temperature,
+        top_p,
+        n,
+        max_retry_attemps,
+        presence_penalty,
+        frequency_penalty,
+    ):
         b1 = max_tokens > 0
         b2 = temperature >= 0 and temperature <= 2
         b3 = top_p >= 0 and top_p <= 1
         b4 = n >= 1 and n <= 128
         b5 = max_retry_attemps >= 0
-        b6 = presence_penalty or (
-            presence_penalty >= -
-            2 and presence_penalty <= 2)
-        b7 = frequency_penalty or (
-            frequency_penalty >= -
-            2 and frequency_penalty <= 2)
+        b6 = presence_penalty or (presence_penalty >= -2 and presence_penalty <= 2)
+        b7 = frequency_penalty or (frequency_penalty >= -2 and frequency_penalty <= 2)
 
         if all[b1, b2, b3, b4, b5, b6, b7]:
             return True
@@ -145,23 +145,21 @@ class OpenAIComms(LLMComms):
             Optional[str]: the completion of the provided chat.
         """
         try:
-            response = self.client\
-                .with_options(max_retries=self.max_retry_attempts)\
-                .chat.completions.create(
-                    messages=messages,
-                    model=self.model_name,
-                    max_tokens=self.max_tokens,
-                    n=self.n,
-                    # FIXME: this could be very usefull for us, since we do use json object in which we want the reponse to be in, and the trust level, etc...
-                    # response_format= ? "Must be one of `text` or `json_object`." bv. response_format={"type": "json_object"}
-
-                    # temperature: float | NotGiven | None = NOT_GIVEN,
-                    # top_p: float | NotGiven | None = NOT_GIVEN,
-
-                    # frequency_penalty
-                    # presence_penalty
-                    # stop
-                )
+            response = self.client.with_options(
+                max_retries=self.max_retry_attempts
+            ).chat.completions.create(
+                messages=messages,
+                model=self.model_name,
+                max_tokens=self.max_tokens,
+                n=self.n,
+                # FIXME: this could be very usefull for us, since we do use json object in which we want the reponse to be in, and the trust level, etc...
+                # response_format= ? "Must be one of `text` or `json_object`." bv. response_format={"type": "json_object"}
+                # temperature: float | NotGiven | None = NOT_GIVEN,
+                # top_p: float | NotGiven | None = NOT_GIVEN,
+                # frequency_penalty
+                # presence_penalty
+                # stop
+            )
         except Exception as e:
             print("openAI request failed")
             print(e)
@@ -176,12 +174,12 @@ class OpenAIComms(LLMComms):
         # parameter
         return response.choices[0].message.content
 
-    def _requese_emb(self, keywords: str,
-                     model_name="text-embedding-3-small") -> Optional[List[Embedding]]:
+    def _requese_emb(
+        self, keywords: str, model_name="text-embedding-3-small"
+    ) -> Optional[List[Embedding]]:
         try:
             response: CreateEmbeddingResponse = self.client.embeddings.create(
-                model=model_name,
-                input=keywords
+                model=model_name, input=keywords
             )
 
         except Exception as e:
@@ -213,7 +211,8 @@ class OpenAIComms(LLMComms):
         return model in [
             "text-embedding-ada-002",
             "text-embedding-3-small",
-            "text-embedding-3-large"]
+            "text-embedding-3-large",
+        ]
 
 
 if __name__ == "__main__":

@@ -1,17 +1,18 @@
-from LLM_Character.communication.reverieserver_manager import ReverieServerManager
-from LLM_Character.world.dispatchers.dispatcher import BaseDispatcher
 from LLM_Character.communication.incoming_messages import AddPersonaMessage
-from LLM_Character.llm_comms.llm_api import LLM_API
+from LLM_Character.communication.reverieserver_manager import ReverieServerManager
 from LLM_Character.communication.udp_comms import UdpComms
+from LLM_Character.llm_comms.llm_api import LLM_API
+from LLM_Character.world.dispatchers.dispatcher import BaseDispatcher
 
 
 class AddPersonaDispatcher(BaseDispatcher):
     def handler(
-            self,
-            socket: UdpComms,
-            serverM: ReverieServerManager,
-            model: LLM_API,
-            data: AddPersonaMessage):
+        self,
+        socket: UdpComms,
+        serverM: ReverieServerManager,
+        model: LLM_API,
+        data: AddPersonaMessage,
+    ):
         client_id = socket.udpIP + str(socket.udpSendPort)
         server = serverM.get_server(client_id)
         if server and server.is_loaded():
@@ -20,5 +21,4 @@ class AddPersonaDispatcher(BaseDispatcher):
             socket.SendData("Done")
         else:
             # FIXME: have proper error messages.
-            socket.SendData(
-                "Error: Select a saved game first or start a new game.")
+            socket.SendData("Error: Select a saved game first or start a new game.")

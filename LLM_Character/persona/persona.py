@@ -1,21 +1,36 @@
 from __future__ import annotations  # for type hints of Persona in move method
+
 import datetime
 from typing import Tuple, Union
 
+from LLM_Character.communication.incoming_messages import (
+    EventData,
+    FullPersonaData,
+    FullPersonaScratchData,
+    OneLocationData,
+    PersonaScratchData,
+)
 from LLM_Character.llm_comms.llm_api import LLM_API
-from LLM_Character.persona.cognitive_modules.perceive import perceive
-from LLM_Character.persona.memory_structures.associative_memory.concept_node import ConceptNode
-from LLM_Character.persona.memory_structures.spatial_memory import MemoryTree
-from LLM_Character.persona.memory_structures.associative_memory.associative_memory import AssociativeMemory
-from LLM_Character.persona.memory_structures.scratch.persona_scratch import PersonaScratch
-from LLM_Character.persona.memory_structures.scratch.user_scratch import UserScratch
-from LLM_Character.communication.incoming_messages import EventData, FullPersonaData, FullPersonaScratchData, OneLocationData, PersonaData, PersonaScratchData
-
-from LLM_Character.persona.cognitive_modules.plan import plan
-from LLM_Character.persona.cognitive_modules.interact import interact
-from LLM_Character.persona.cognitive_modules.reflect import reflect
 from LLM_Character.persona.cognitive_modules.converse import chatting
-from LLM_Character.persona.cognitive_modules.retrieve import EventContext, retrieve_contextual_events
+from LLM_Character.persona.cognitive_modules.interact import interact
+from LLM_Character.persona.cognitive_modules.perceive import perceive
+from LLM_Character.persona.cognitive_modules.plan import plan
+from LLM_Character.persona.cognitive_modules.reflect import reflect
+from LLM_Character.persona.cognitive_modules.retrieve import (
+    EventContext,
+    retrieve_contextual_events,
+)
+from LLM_Character.persona.memory_structures.associative_memory.associative_memory import (
+    AssociativeMemory,
+)
+from LLM_Character.persona.memory_structures.associative_memory.concept_node import (
+    ConceptNode,
+)
+from LLM_Character.persona.memory_structures.scratch.persona_scratch import (
+    PersonaScratch,
+)
+from LLM_Character.persona.memory_structures.scratch.user_scratch import UserScratch
+from LLM_Character.persona.memory_structures.spatial_memory import MemoryTree
 
 
 class Persona:
@@ -38,10 +53,7 @@ class Persona:
         scratch_saved = f"{folder_mem_saved}/scratch.json"
         self.scratch.load_from_file(scratch_saved)
 
-    def load_from_data(
-            self,
-            scratch_data: FullPersonaScratchData,
-            spatial_data):
+    def load_from_data(self, scratch_data: FullPersonaScratchData, spatial_data):
         self.s_mem.load_from_data(spatial_data)
         self.scratch.load_from_data(scratch_data)
 
@@ -56,48 +68,43 @@ class Persona:
         self.scratch.save(f_scratch)
 
     def perceive(
-            self,
-            loc_data: OneLocationData,
-            events: list[EventData],
-            model: LLM_API):
-        return perceive(
-            self.scratch,
-            self.a_mem,
-            self.s_mem,
-            loc_data,
-            events,
-            model)
+        self, loc_data: OneLocationData, events: list[EventData], model: LLM_API
+    ):
+        return perceive(self.scratch, self.a_mem, self.s_mem, loc_data, events, model)
 
-    def retrieve(self, perceived: list[ConceptNode]
-                 ) -> dict[str, EventContext]:
+    def retrieve(self, perceived: list[ConceptNode]) -> dict[str, EventContext]:
         return retrieve_contextual_events(self.a_mem, perceived)
 
-    def interact(self,
-                 personas: dict[str, Tuple[PersonaScratch, AssociativeMemory]],
-                 retrieved: dict[str, EventContext],
-                 model: LLM_API):
+    def interact(
+        self,
+        personas: dict[str, Tuple[PersonaScratch, AssociativeMemory]],
+        retrieved: dict[str, EventContext],
+        model: LLM_API,
+    ):
         return interact(self.scratch, self.a_mem, personas, retrieved, model)
 
-    def plan(self,
-             new_day: Union[str, None],
-             model: LLM_API):
+    def plan(self, new_day: Union[str, None], model: LLM_API):
         return plan(self.scratch, self.a_mem, self.s_mem, new_day, model)
 
     def reflect(self, model: LLM_API):
         reflect(self.scratch, self.a_mem, model)
 
-    def move(self,
-             curr_location: OneLocationData,
-             perceived_events: list[EventData],
-             personas: dict[str, Tuple[PersonaScratch, AssociativeMemory]],
-             curr_time: datetime.datetime,
-             model: LLM_API):
+    def move(
+        self,
+        curr_location: OneLocationData,
+        perceived_events: list[EventData],
+        personas: dict[str, Tuple[PersonaScratch, AssociativeMemory]],
+        curr_time: datetime.datetime,
+        model: LLM_API,
+    ):
         self.scratch.curr_location = curr_location.model_dump()
 
         new_day = None
         if not self.scratch.curr_time:
             new_day = "First day"
-        elif self.scratch.curr_time.strftime('%A %B %d') != curr_time.strftime('%A %B %d'):
+        elif self.scratch.curr_time.strftime("%A %B %d") != curr_time.strftime(
+            "%A %B %d"
+        ):
             new_day = "New day"
 
         self.scratch.curr_time = curr_time
@@ -110,17 +117,11 @@ class Persona:
         # self.execute() # inside unity.
         return act
 
-    def open_convo_session(self,
-                           user_scratch: UserScratch,
-                           message: str,
-                           curr_time: str,
-                           model: LLM_API) -> Tuple[str, str, int]:
+    def open_convo_session(
+        self, user_scratch: UserScratch, message: str, curr_time: str, model: LLM_API
+    ) -> Tuple[str, str, int]:
         self.scratch.curr_time = curr_time
-        return chatting(user_scratch,
-                        self.scratch,
-                        self.a_mem,
-                        message,
-                        model)
+        return chatting(user_scratch, self.scratch, self.a_mem, message, model)
 
     def update_scratch(self, data: Union[PersonaScratchData, None]):
         if data:
@@ -138,9 +139,8 @@ class Persona:
         scratch_data = self.scratch.get_info()
         spatial_data = self.s_mem.get_info()
         data = FullPersonaData(
-            name=self.scratch.name,
-            scratch_data=scratch_data,
-            spatial_data=spatial_data)
+            name=self.scratch.name, scratch_data=scratch_data, spatial_data=spatial_data
+        )
         return data
 
 

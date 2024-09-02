@@ -1,27 +1,38 @@
-
-from LLM_Character.llm_comms.llm_api import LLM_API
-from LLM_Character.communication.udp_comms import UdpComms
-from LLM_Character.world.dispatchers.dispatcher import BaseDispatcher
+from LLM_Character.communication.incoming_messages import (
+    GetMetaDataMessage,
+    GetPersonaDetailsMessage,
+    GetPersonasMessage,
+    GetSavedGamesMessage,
+    GetUsersMessage,
+)
+from LLM_Character.communication.outgoing_messages import (
+    GetMetaDataResponse,
+    GetPersonaDetailsResponse,
+    GetPersonasResponse,
+    GetSavedGamesResponse,
+    GetUsersResponse,
+)
 from LLM_Character.communication.reverieserver_manager import ReverieServerManager
-from LLM_Character.communication.incoming_messages import GetMetaDataMessage, GetPersonaDetailsMessage, GetPersonasMessage
-from LLM_Character.communication.incoming_messages import GetSavedGamesMessage, GetUsersMessage
-from LLM_Character.communication.outgoing_messages import GetMetaDataResponse, GetPersonaDetailsResponse, GetPersonasResponse
-from LLM_Character.communication.outgoing_messages import GetSavedGamesResponse, GetUsersResponse
+from LLM_Character.communication.udp_comms import UdpComms
+from LLM_Character.llm_comms.llm_api import LLM_API
+from LLM_Character.world.dispatchers.dispatcher import BaseDispatcher
 
 
 class GetMetaDataDispatcher(BaseDispatcher):
     def handler(
-            self,
-            socket: UdpComms,
-            serverM: ReverieServerManager,
-            model: LLM_API,
-            data: GetMetaDataMessage):
+        self,
+        socket: UdpComms,
+        serverM: ReverieServerManager,
+        model: LLM_API,
+        data: GetMetaDataMessage,
+    ):
         client_id = socket.udpIP + str(socket.udpSendPort)
         server = serverM.get_server(client_id)
         if server and server.is_loaded():
             info = server.get_meta_data()
             response_message = GetMetaDataResponse(
-                type="GetMetaDataResponse", data=info)
+                type="GetMetaDataResponse", data=info
+            )
             sending_str = response_message.model_dump_json()
 
             print("Done")
@@ -34,18 +45,20 @@ class GetMetaDataDispatcher(BaseDispatcher):
 
 class GetPersonaDetailsDispatcher(BaseDispatcher):
     def handler(
-            self,
-            socket: UdpComms,
-            serverM: ReverieServerManager,
-            model: LLM_API,
-            data: GetPersonaDetailsMessage):
+        self,
+        socket: UdpComms,
+        serverM: ReverieServerManager,
+        model: LLM_API,
+        data: GetPersonaDetailsMessage,
+    ):
         client_id = socket.udpIP + str(socket.udpSendPort)
         server = serverM.get_server(client_id)
         if server and server.is_loaded():
             info = server.get_persona_info(data.data)
             if info:
                 response_message = GetPersonaDetailsResponse(
-                    type="GetPersonaDetailsResponse", data=info)
+                    type="GetPersonaDetailsResponse", data=info
+                )
                 sending_str = response_message.model_dump_json()
 
                 print("Done")
@@ -60,17 +73,19 @@ class GetPersonaDetailsDispatcher(BaseDispatcher):
 
 class GetPersonasDispatcher(BaseDispatcher):
     def handler(
-            self,
-            socket: UdpComms,
-            serverM: ReverieServerManager,
-            model: LLM_API,
-            data: GetPersonasMessage):
+        self,
+        socket: UdpComms,
+        serverM: ReverieServerManager,
+        model: LLM_API,
+        data: GetPersonasMessage,
+    ):
         client_id = socket.udpIP + str(socket.udpSendPort)
         server = serverM.get_server(client_id)
         if server and server.is_loaded():
             info = server.get_personas()
             response_message = GetPersonasResponse(
-                type="GetPersonasResponse", data=info)
+                type="GetPersonasResponse", data=info
+            )
             sending_str = response_message.model_dump_json()
 
             print("Done")
@@ -83,17 +98,19 @@ class GetPersonasDispatcher(BaseDispatcher):
 
 class GetUsersDispatcher(BaseDispatcher):
     def handler(
-            self,
-            socket: UdpComms,
-            serverM: ReverieServerManager,
-            model: LLM_API,
-            data: GetSavedGamesMessage):
+        self,
+        socket: UdpComms,
+        serverM: ReverieServerManager,
+        model: LLM_API,
+        data: GetSavedGamesMessage,
+    ):
         client_id = socket.udpIP + str(socket.udpSendPort)
         server = serverM.get_server(client_id)
         if server and server.is_loaded():
             info = server.get_saved_games()
             response_message = GetSavedGamesResponse(
-                type="GetSavedGamesResponse", data=info)
+                type="GetSavedGamesResponse", data=info
+            )
             sending_str = response_message.model_dump_json()
 
             print("Done")
@@ -106,11 +123,12 @@ class GetUsersDispatcher(BaseDispatcher):
 
 class GetSavedGamesDispatcher(BaseDispatcher):
     def handler(
-            self,
-            socket: UdpComms,
-            serverM: ReverieServerManager,
-            model: LLM_API,
-            data: GetUsersMessage):
+        self,
+        socket: UdpComms,
+        serverM: ReverieServerManager,
+        model: LLM_API,
+        data: GetUsersMessage,
+    ):
         client_id = socket.udpIP + str(socket.udpSendPort)
         server = serverM.get_server(client_id)
         if server and server.is_loaded():

@@ -1,9 +1,22 @@
 class ConceptNode:
-    def __init__(self,
-                 node_id, node_count, type_count, node_type, depth,
-                 created, expiration,
-                 s, p, o,
-                 description, embedding_key, poignancy, keywords, filling):
+    def __init__(
+        self,
+        node_id,
+        node_count,
+        type_count,
+        node_type,
+        depth,
+        created,
+        expiration,
+        s,
+        p,
+        o,
+        description,
+        embedding_key,
+        poignancy,
+        keywords,
+        filling,
+    ):
         self.node_id = node_id
         self.node_count = node_count
         self.type_count = type_count

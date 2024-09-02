@@ -1,6 +1,7 @@
-from abc import ABC, abstractmethod
 import sys
-sys.path.append('../../')
+from abc import ABC, abstractmethod
+
+sys.path.append("../../")
 
 
 class BaseDispatcher(ABC):

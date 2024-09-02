@@ -1,11 +1,15 @@
 from dataclasses import dataclass
-import random
 from typing import Dict
-from LLM_Character.communication.incoming_messages import EventData
+
 from LLM_Character.llm_comms.llm_api import LLM_API
-from LLM_Character.persona.memory_structures.associative_memory.associative_memory import AssociativeMemory, ConceptNode
-from LLM_Character.persona.memory_structures.scratch.persona_scratch import PersonaScratch
 from LLM_Character.persona.cognitive_modules.retrieving.util import *
+from LLM_Character.persona.memory_structures.associative_memory.associative_memory import (
+    AssociativeMemory,
+    ConceptNode,
+)
+from LLM_Character.persona.memory_structures.scratch.persona_scratch import (
+    PersonaScratch,
+)
 
 
 @dataclass
@@ -16,29 +20,34 @@ class EventContext:
 
 
 def retrieve_contextual_events(
-        a_mem: AssociativeMemory, perceived: list[ConceptNode]) -> Dict[str, EventContext]:
+    a_mem: AssociativeMemory, perceived: list[ConceptNode]
+) -> Dict[str, EventContext]:
     retrieved = dict()
     for event in perceived:
         relevant_events = a_mem.retrieve_relevant_events(
-            event.subject, event.predicate, event.object)  # return set of ConceptNode
+            event.subject, event.predicate, event.object
+        )  # return set of ConceptNode
         relevant_thoughts = a_mem.retrieve_relevant_thoughts(
-            event.subject, event.predicate, event.object)  # return set of ConceptNode
+            event.subject, event.predicate, event.object
+        )  # return set of ConceptNode
 
         context = EventContext(
             curr_event=event,
             events=list(relevant_events),
-            thoughts=list(relevant_thoughts)
+            thoughts=list(relevant_thoughts),
         )
         retrieved[event.description] = context
 
     return retrieved
 
 
-def retrieve_focal_points(scratch: PersonaScratch,
-                          a_mem: AssociativeMemory,
-                          focal_points: list[str],
-                          model: LLM_API,
-                          n_count=30) -> dict[str, list[ConceptNode]]:
+def retrieve_focal_points(
+    scratch: PersonaScratch,
+    a_mem: AssociativeMemory,
+    focal_points: list[str],
+    model: LLM_API,
+    n_count=30,
+) -> dict[str, list[ConceptNode]]:
     retrieved = dict()
     for focal_pt in focal_points:
         nodes = retrieve_recent_sorted_nodes(a_mem)
@@ -56,19 +65,13 @@ def retrieve_focal_points(scratch: PersonaScratch,
         master_out = dict()
         for key in recency_out.keys():
             master_out[key] = (
-                scratch.recency_w *
-                recency_out[key] *
-                gw[0] +
-                scratch.relevance_w *
-                relevance_out[key] *
-                gw[1] +
-                scratch.importance_w *
-                importance_out[key] *
-                gw[2])
+                scratch.recency_w * recency_out[key] * gw[0]
+                + scratch.relevance_w * relevance_out[key] * gw[1]
+                + scratch.importance_w * importance_out[key] * gw[2]
+            )
 
         master_out = top_highest_x_values(master_out, n_count)
-        master_nodes = [a_mem.id_to_node[key]
-                        for key in list(master_out.keys())]
+        master_nodes = [a_mem.id_to_node[key] for key in list(master_out.keys())]
 
         for n in master_nodes:
             n.last_accessed = scratch.curr_time
@@ -77,12 +80,11 @@ def retrieve_focal_points(scratch: PersonaScratch,
 
 
 if __name__ == "__main__":
-    from LLM_Character.persona.persona import Persona
-    from LLM_Character.llm_comms.llm_openai import OpenAIComms
-    from LLM_Character.llm_comms.llm_local import LocalComms
-    from LLM_Character.util import BASE_DIR
-
     import datetime
+
+    from LLM_Character.llm_comms.llm_openai import OpenAIComms
+    from LLM_Character.persona.persona import Persona
+    from LLM_Character.util import BASE_DIR
 
     # modelc = LocalComms()
     # model_id = "mistralai/Mistral-7B-Instruct-v0.2"
@@ -96,8 +98,8 @@ if __name__ == "__main__":
 
     person = Persona("Camila")
     person.load_from_file(
-        BASE_DIR +
-        "/LLM_Character/storage/localhost/default/personas/Camila")
+        BASE_DIR + "/LLM_Character/storage/localhost/default/personas/Camila"
+    )
     text = "Frederiek went to the shop"
     created = datetime.datetime(21, 3, 4)
     expiration = None
@@ -121,7 +123,8 @@ if __name__ == "__main__":
         keywords,
         poignancy,
         embedding_pair,
-        filling)
+        filling,
+    )
     node2 = person.a_mem.add_event(
         created,
         expiration,
@@ -132,10 +135,12 @@ if __name__ == "__main__":
         keywords,
         poignancy,
         embedding_pair,
-        filling)
+        filling,
+    )
 
     retrieved1 = retrieve_focal_points(
-        person.scratch, person.a_mem, ["who is me?"], model)
+        person.scratch, person.a_mem, ["who is me?"], model
+    )
     print(len(retrieved1["who is me?"]))
     print(retrieved1["who is me?"][0].description)
     print(retrieved1["who is me?"][1].description)

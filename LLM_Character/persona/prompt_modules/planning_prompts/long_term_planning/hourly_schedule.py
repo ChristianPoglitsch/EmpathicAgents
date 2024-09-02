@@ -1,25 +1,28 @@
-
-from LLM_Character.messages_dataclass import AIMessages
-from LLM_Character.util import BASE_DIR, get_random_alphanumeric
 from LLM_Character.llm_comms.llm_api import LLM_API
+from LLM_Character.messages_dataclass import AIMessages
+from LLM_Character.persona.memory_structures.scratch.persona_scratch import (
+    PersonaScratch,
+)
 from LLM_Character.persona.prompt_modules.prompt import generate_prompt
-from LLM_Character.persona.memory_structures.scratch.persona_scratch import PersonaScratch
+from LLM_Character.util import BASE_DIR, get_random_alphanumeric
 
 COUNTER_LIMIT = 5
 
 
-def _create_prompt_input(scratch: PersonaScratch,
-                         curr_hour_str: str,
-                         p_f_ds_hourly_org: list[str],
-                         hour_str: list[str],
-                         intermission2=None) -> list[str]:
+def _create_prompt_input(
+    scratch: PersonaScratch,
+    curr_hour_str: str,
+    p_f_ds_hourly_org: list[str],
+    hour_str: list[str],
+    intermission2=None,
+) -> list[str]:
     schedule_format = ""
     for i in hour_str:
         schedule_format += f"[{scratch.get_str_curr_date_str()} -- {i}]"
-        schedule_format += f" Activity: [Fill in]\n"
+        schedule_format += " Activity: [Fill in]\n"
     schedule_format = schedule_format[:-1]
 
-    intermission_str = f"Here the originally intended hourly breakdown of"
+    intermission_str = "Here the originally intended hourly breakdown of"
     intermission_str += f" {scratch.get_str_firstname()}'s schedule today: "
     for count, i in enumerate(scratch.daily_req):
         intermission_str += f"{str(count+1)}) {i}, "
@@ -84,21 +87,22 @@ def _get_valid_output(model, prompt, counter_limit):
     return _get_fail_safe()
 
 
-def run_prompt_hourly_schedule(scratch: PersonaScratch,
-                               curr_hour_str: str,
-                               p_f_ds_hourly_org: list[str],
-                               hour_str: list[str],
-                               model: LLM_API,
-                               intermission2=None,
-                               verbose=False):
-    prompt_template = BASE_DIR + \
-        "/LLM_Character/persona/prompt_modules/templates/generate_hourly_schedule.txt"
+def run_prompt_hourly_schedule(
+    scratch: PersonaScratch,
+    curr_hour_str: str,
+    p_f_ds_hourly_org: list[str],
+    hour_str: list[str],
+    model: LLM_API,
+    intermission2=None,
+    verbose=False,
+):
+    prompt_template = (
+        BASE_DIR
+        + "/LLM_Character/persona/prompt_modules/templates/generate_hourly_schedule.txt"
+    )
     prompt_input = _create_prompt_input(
-        scratch,
-        curr_hour_str,
-        p_f_ds_hourly_org,
-        hour_str,
-        intermission2)
+        scratch, curr_hour_str, p_f_ds_hourly_org, hour_str, intermission2
+    )
     prompt = generate_prompt(prompt_input, prompt_template)
     am = AIMessages()
     am.add_message(prompt, None, "user", "system")

@@ -3,19 +3,28 @@ Plan new steps or quests.
 """
 
 from LLM_Character.llm_comms.llm_api import LLM_API
+from LLM_Character.persona.cognitive_modules.planning.determine_action import (
+    _determine_action,
+)
+from LLM_Character.persona.cognitive_modules.planning.long_term_planning import (
+    _long_term_planning,
+)
+from LLM_Character.persona.memory_structures.associative_memory.associative_memory import (
+    AssociativeMemory,
+)
+from LLM_Character.persona.memory_structures.scratch.persona_scratch import (
+    PersonaScratch,
+)
 from LLM_Character.persona.memory_structures.spatial_memory import MemoryTree
-from LLM_Character.persona.memory_structures.scratch.persona_scratch import PersonaScratch
-from LLM_Character.persona.memory_structures.associative_memory.associative_memory import AssociativeMemory
-from LLM_Character.persona.cognitive_modules.planning.long_term_planning import _long_term_planning
-from LLM_Character.persona.cognitive_modules.planning.determine_action import _determine_action
 
 
 def plan(
-        scratch: PersonaScratch,
-        a_mem: AssociativeMemory,
-        s_mem: MemoryTree,
-        new_day: str,
-        model: LLM_API):
+    scratch: PersonaScratch,
+    a_mem: AssociativeMemory,
+    s_mem: MemoryTree,
+    new_day: str,
+    model: LLM_API,
+):
     if new_day:
         _long_term_planning(scratch, a_mem, new_day, model)
 
@@ -26,9 +35,8 @@ def plan(
 
 
 if __name__ == "__main__":
-    from LLM_Character.persona.persona import Persona
     from LLM_Character.llm_comms.llm_openai import OpenAIComms
-    from LLM_Character.llm_comms.llm_local import LocalComms
+    from LLM_Character.persona.persona import Persona
     from LLM_Character.util import BASE_DIR
 
     print("starting take off ...")
@@ -64,9 +72,11 @@ if __name__ == "__main__":
         print(x10)
         print(x11)
         print(x12)
+
     # -----------
-    person = Persona("Camila", BASE_DIR +
-                     "/LLM_Character/storage/initial/personas/Camila")
+    person = Persona(
+        "Camila", BASE_DIR + "/LLM_Character/storage/initial/personas/Camila"
+    )
     plan(person.scratch, person.a_mem, person.s_mem, "First Day", model)
     print(print_plan(person))
     # -----------

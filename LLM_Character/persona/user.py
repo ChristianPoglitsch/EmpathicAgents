@@ -1,6 +1,5 @@
-import datetime
-from LLM_Character.persona.memory_structures.scratch.user_scratch import UserScratch
 from LLM_Character.persona.cognitive_modules.converse import chatting
+from LLM_Character.persona.memory_structures.scratch.user_scratch import UserScratch
 
 # User represents the human who plays the game.
 

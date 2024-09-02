@@ -1,19 +1,26 @@
-from LLM_Character.llm_comms.llm_api import LLM_API
-
-from LLM_Character.persona.cognitive_modules.reflect import generate_poig_score
-from LLM_Character.persona.memory_structures.associative_memory.associative_memory import AssociativeMemory
-from LLM_Character.persona.memory_structures.associative_memory.concept_node import ConceptNode
-from LLM_Character.persona.memory_structures.scratch.persona_scratch import PersonaScratch
-from LLM_Character.persona.memory_structures.spatial_memory import MemoryTree
 from LLM_Character.communication.incoming_messages import EventData, OneLocationData
+from LLM_Character.llm_comms.llm_api import LLM_API
+from LLM_Character.persona.cognitive_modules.reflect import generate_poig_score
+from LLM_Character.persona.memory_structures.associative_memory.associative_memory import (
+    AssociativeMemory,
+)
+from LLM_Character.persona.memory_structures.associative_memory.concept_node import (
+    ConceptNode,
+)
+from LLM_Character.persona.memory_structures.scratch.persona_scratch import (
+    PersonaScratch,
+)
+from LLM_Character.persona.memory_structures.spatial_memory import MemoryTree
 
 
-def perceive(cscratch: PersonaScratch,
-             camem: AssociativeMemory,
-             csmem: MemoryTree,
-             new_character_location: OneLocationData,
-             perceived_events: list[EventData],
-             model: LLM_API) -> list[ConceptNode]:
+def perceive(
+    cscratch: PersonaScratch,
+    camem: AssociativeMemory,
+    csmem: MemoryTree,
+    new_character_location: OneLocationData,
+    perceived_events: list[EventData],
+    model: LLM_API,
+) -> list[ConceptNode]:
     # update spatial knowledge
     csmem.update_oloc(new_character_location)
 
@@ -45,9 +52,9 @@ def perceive(cscratch: PersonaScratch,
 
             desc_embedding_in = desc
             if "(" in desc:
-                desc_embedding_in = (desc_embedding_in.split("(")[1]
-                                                      .split(")")[0]
-                                                      .strip())
+                desc_embedding_in = (
+                    desc_embedding_in.split("(")[1].split(")")[0].strip()
+                )
 
             if desc_embedding_in in camem.embeddings:
                 event_embedding = camem.embeddings[desc_embedding_in]
@@ -57,8 +64,7 @@ def perceive(cscratch: PersonaScratch,
 
             # NOTE: different poig score for thoughts, convo and events? or
             # same function?
-            event_poignancy = generate_poig_score(
-                cscratch, desc_embedding_in, model)
+            event_poignancy = generate_poig_score(cscratch, desc_embedding_in, model)
 
             chat_node_ids = []
 
@@ -97,7 +103,9 @@ def perceive(cscratch: PersonaScratch,
                     keywords,
                     event_poignancy,
                     event_embedding_pair,
-                    chat_node_ids)]
+                    chat_node_ids,
+                )
+            ]
             cscratch.importance_trigger_curr -= event_poignancy
             cscratch.importance_ele_n += 1
 
@@ -105,18 +113,18 @@ def perceive(cscratch: PersonaScratch,
 
 
 if __name__ == "__main__":
+    from LLM_Character.llm_comms.llm_openai import OpenAIComms
     from LLM_Character.persona.persona import Persona
     from LLM_Character.persona.user import User
-    from LLM_Character.llm_comms.llm_openai import OpenAIComms
-    from LLM_Character.llm_comms.llm_local import LocalComms
     from LLM_Character.util import BASE_DIR
+
     print("starting take off ...")
 
     # person = Persona("Camila", BASE_DIR + "/LLM_Character/storage/initial/personas/Camila")
     person = Persona("Florian")
     person.load_from_file(
-        BASE_DIR +
-        "/LLM_Character/storage/localhost/default/personas/Florian")
+        BASE_DIR + "/LLM_Character/storage/localhost/default/personas/Florian"
+    )
     user = User("Louis")
 
     modelc = OpenAIComms()
@@ -125,10 +133,7 @@ if __name__ == "__main__":
     model = LLM_API(modelc)
 
     location_data = OneLocationData(
-        world="Graz",
-        sector="Saint Martin's Church",
-        arena="cage",
-        obj="refrigerator"
+        world="Graz", sector="Saint Martin's Church", arena="cage", obj="refrigerator"
     )
 
     perceived_events = [
@@ -136,12 +141,15 @@ if __name__ == "__main__":
             action_event_subject="Graz:Saint Martin's Church:cafe:Florian",
             action_event_predicate="picked up",
             action_event_object="box",
-            action_event_description="The robot picked up the box from the ground."),
+            action_event_description="The robot picked up the box from the ground.",
+        ),
         EventData(
             action_event_subject="Graz:Saint Martin's Church:cafe:Florian",
             action_event_predicate=None,
             action_event_object=None,
-            action_event_description=None)]
+            action_event_description=None,
+        ),
+    ]
 
     events = perceive(
         person.scratch,
@@ -149,4 +157,5 @@ if __name__ == "__main__":
         person.s_mem,
         location_data,
         perceived_events,
-        model)
+        model,
+    )

@@ -1,19 +1,16 @@
-
-from LLM_Character.util import BASE_DIR
 from LLM_Character.llm_comms.llm_api import LLM_API
 from LLM_Character.messages_dataclass import AIMessages
+from LLM_Character.persona.memory_structures.scratch.persona_scratch import (
+    PersonaScratch,
+)
 from LLM_Character.persona.prompt_modules.prompt import generate_prompt
-from LLM_Character.persona.memory_structures.scratch.persona_scratch import PersonaScratch
+from LLM_Character.util import BASE_DIR
 
 COUNTER_LIMIT = 5
 
 
-def _create_prompt_input(scratch: PersonaScratch,
-                         description: str):
-    prompt_input = [scratch.name,
-                    scratch.get_str_iss(),
-                    scratch.name,
-                    description]
+def _create_prompt_input(scratch: PersonaScratch, description: str):
+    prompt_input = [scratch.name, scratch.get_str_iss(), scratch.name, description]
     return prompt_input
 
 
@@ -41,15 +38,15 @@ def _get_valid_output(model, prompt: AIMessages, counter_limit):
     return _get_fail_safe()
 
 
-def run_prompt_poignancy_chat(cscratch: PersonaScratch,
-                              description: str,
-                              model: LLM_API,
-                              verbose=False):
-    prompt_template = BASE_DIR + \
-        "/LLM_Character/persona/prompt_modules/templates/poignancy_chat.txt"
+def run_prompt_poignancy_chat(
+    cscratch: PersonaScratch, description: str, model: LLM_API, verbose=False
+):
+    prompt_template = (
+        BASE_DIR + "/LLM_Character/persona/prompt_modules/templates/poignancy_chat.txt"
+    )
     prompt_input = _create_prompt_input(cscratch, description)
-#   example_output = "5" ########
-#   special_instruction = "The output should ONLY contain ONE integer valu
+    #   example_output = "5" ########
+    #   special_instruction = "The output should ONLY contain ONE integer valu
     prompt = generate_prompt(prompt_input, prompt_template)
     am = AIMessages()
     am.add_message(prompt, None, "user", "system")  # NOTE: not really user btw

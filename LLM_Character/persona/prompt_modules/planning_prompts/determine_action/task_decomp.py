@@ -2,9 +2,11 @@ import datetime
 
 from LLM_Character.llm_comms.llm_api import LLM_API
 from LLM_Character.messages_dataclass import AIMessages
-from LLM_Character.util import BASE_DIR
+from LLM_Character.persona.memory_structures.scratch.persona_scratch import (
+    PersonaScratch,
+)
 from LLM_Character.persona.prompt_modules.prompt import generate_prompt
-from LLM_Character.persona.memory_structures.scratch.persona_scratch import PersonaScratch
+from LLM_Character.util import BASE_DIR
 
 COUNTER_LIMIT = 5
 
@@ -23,10 +25,12 @@ def _find_start_and_end_time(index: int, f_daily_schedule_hourly):
         start_min += f_daily_schedule_hourly[i][1]
     end_min = start_min + f_daily_schedule_hourly[index][1]
 
-    start_time = (datetime.datetime.strptime("00:00:00", "%H:%M:%S")
-                  + datetime.timedelta(minutes=start_min))
-    end_time = (datetime.datetime.strptime("00:00:00", "%H:%M:%S")
-                + datetime.timedelta(minutes=end_min))
+    start_time = datetime.datetime.strptime(
+        "00:00:00", "%H:%M:%S"
+    ) + datetime.timedelta(minutes=start_min)
+    end_time = datetime.datetime.strptime("00:00:00", "%H:%M:%S") + datetime.timedelta(
+        minutes=end_min
+    )
 
     start_time_str = start_time.strftime("%H:%M%p")
     end_time_str = end_time.strftime("%H:%M%p")
@@ -34,19 +38,16 @@ def _find_start_and_end_time(index: int, f_daily_schedule_hourly):
     return start_time_str, end_time_str
 
 
-def _get_curr_time_and_summary(time,
-                               all_indices,
-                               f_daily_schedule,
-                               fullname,
-                               curr_f_org_index):
+def _get_curr_time_and_summary(
+    time, all_indices, f_daily_schedule, fullname, curr_f_org_index
+):
     curr_time_range = ""
-    summ_str = f'Today is {time}. From '
+    summ_str = f"Today is {time}. From "
     for index in all_indices:
-        start_time_str, end_time_str = _find_start_and_end_time(
-            index, f_daily_schedule)
+        start_time_str, end_time_str = _find_start_and_end_time(index, f_daily_schedule)
         summ_str += f"{start_time_str} ~ {end_time_str}, {fullname} is planning on {f_daily_schedule[index][0]}, "
         if curr_f_org_index + 1 == index:
-            curr_time_range = f'{start_time_str} ~ {end_time_str}'
+            curr_time_range = f"{start_time_str} ~ {end_time_str}"
     summ_str = summ_str[:-2] + "."
     return summ_str, curr_time_range
 
@@ -62,11 +63,9 @@ def _create_prompt_input(scratch: PersonaScratch, task, duration):
 
     curr_f_org_index = scratch.get_f_daily_schedule_hourly_org_index()
     all_indices = _get_all_indices(curr_f_org_index, amount_activities)
-    summ_str, curr_time_range = _get_curr_time_and_summary(time,
-                                                           all_indices,
-                                                           f_daily_schedule,
-                                                           fullname,
-                                                           curr_f_org_index)
+    summ_str, curr_time_range = _get_curr_time_and_summary(
+        time, all_indices, f_daily_schedule, fullname, curr_f_org_index
+    )
     prompt_input = []
     prompt_input += [commonset]
     prompt_input += [summ_str]
@@ -77,6 +76,7 @@ def _create_prompt_input(scratch: PersonaScratch, task, duration):
     prompt_input += [duration]
     prompt_input += [firstname]
     return prompt_input
+
 
 # FIXME: check if you can rewrite this peice of junk.
 
@@ -98,17 +98,20 @@ def _clean_up_response(prompt: str, response: str):
         duration = int(k[1].split(",")[0].strip())
         cr += [[task, duration]]
 
-    total_expected_min = int(prompt.split("(total duration in minutes")[-1]
-                                   .split("):")[0].strip())
+    total_expected_min = int(
+        prompt.split("(total duration in minutes")[-1].split("):")[0].strip()
+    )
 
     # TODO -- now, you need to make sure that this is the same as the sum of
     #         the current action sequence.
-    curr_min_slot = [["dummy", -1],]  # (task_name, task_index)
+    curr_min_slot = [
+        ["dummy", -1],
+    ]  # (task_name, task_index)
     for count, i in enumerate(cr):
         i_task = i[0]
         i_duration = i[1]
 
-        i_duration -= (i_duration % 5)
+        i_duration -= i_duration % 5
         if i_duration > 0:
             for j in range(i_duration):
                 curr_min_slot += [(i_task, count)]
@@ -123,7 +126,9 @@ def _clean_up_response(prompt: str, response: str):
         for i in range(total_expected_min - len(curr_min_slot)):
             curr_min_slot += [last_task]
 
-    cr_ret = [["dummy", -1],]
+    cr_ret = [
+        ["dummy", -1],
+    ]
     for task, task_index in curr_min_slot:
         if task != cr_ret[-1][0]:
             cr_ret += [[task, 1]]
@@ -155,13 +160,12 @@ def _get_valid_output(model, prompt, counter_limit):
     return _get_fail_safe()
 
 
-def run_prompt_task_decomp(scratch: PersonaScratch,
-                           model: LLM_API,
-                           task,
-                           duration,
-                           verbose=False):
-    prompt_template = BASE_DIR + \
-        "/LLM_Character/persona/prompt_modules/templates/task_decomp.txt"
+def run_prompt_task_decomp(
+    scratch: PersonaScratch, model: LLM_API, task, duration, verbose=False
+):
+    prompt_template = (
+        BASE_DIR + "/LLM_Character/persona/prompt_modules/templates/task_decomp.txt"
+    )
     prompt_input = _create_prompt_input(scratch, task, duration)
     prompt = generate_prompt(prompt_input, prompt_template)
 
@@ -186,7 +190,7 @@ def run_prompt_task_decomp(scratch: PersonaScratch,
         ftime_sum += fi_duration
 
     # print ("for debugging... line 365", fin_output)
-    fin_output[-1][1] += (duration - ftime_sum)
+    fin_output[-1][1] += duration - ftime_sum
     output = fin_output
 
     task_decomp = output
@@ -209,7 +213,4 @@ if __name__ == "__main__":
     modelc.init(model_id)
 
     model = LLM_API(modelc)
-    run_prompt_task_decomp(person,
-                           model,
-                           "i will drive to the broeltorens.",
-                           5)
+    run_prompt_task_decomp(person, model, "i will drive to the broeltorens.", 5)

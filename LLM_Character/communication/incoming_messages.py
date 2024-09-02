@@ -1,12 +1,24 @@
-from pydantic import BaseModel, field_validator
-from typing import Any, Dict, List, Optional
 from enum import Enum
+from typing import Any, Dict, List, Optional
+
+from pydantic import BaseModel
 
 
 class MessageTypes(Enum):
     STARTMESSAGE = "StartMessage"
     PROMPTMESSAGE = "PromptMessage"
     MOVEMESSAGE = "MoveMessage"
+
+    ADD_PERSONA_MESSAGE = "AddPersonaMessage"
+    UPDATE_META_MESSAGE = "UpdateMetaMessage"
+    UPDATE_PERSONA_MESSAGE = "UpdatePersonaMessage"
+    UPDATE_USER_MESSAGE = "UpdateUserMessage"
+
+    GET_PERSONAS_MESSAGE = "GetPersonasMessage"
+    GET_USERS_MESSAGE = "GetUsersMessage"
+    GET_PERSONA_MESSAGE = "GetPresonaDetailsMessage"
+    GET_META_MESSAGE = "GetMetaMessage"
+    GET_SAVED_GAMES_MESSAGE = "GetSavedGamesMessage"
 
 
 class BaseMessage(BaseModel):
@@ -16,10 +28,9 @@ class BaseMessage(BaseModel):
 # ---------------------------------------------------------------------------
 # PUTTERS/ POSTERS
 # ---------------------------------------------------------------------------
-
-
-# ---------------------------------------------------------------------------
 # class data sent from unity to python endpoint for sending chat messages.
+
+
 class PromptData(BaseModel):
     persona_name: str
     user_name: str
@@ -108,6 +119,7 @@ class UpdatePersonaMessage(BaseMessage):
 class UpdateUserMessage(BaseMessage):
     data: UserData
 
+
 # ---------------------------------------------------------------------------
 # class data sent from unity to python endpoint for sending intial setup data.
 
@@ -119,6 +131,7 @@ class StartData(BaseModel):
 
 class StartMessage(BaseMessage):
     data: StartData
+
 
 # ---------------------------------------------------------------------------
 # https://stackoverflow.com/questions/67699451/make-every-field-as-optional-with-pydantic
@@ -133,6 +146,7 @@ class FullPersonaScratchData(BaseModel):
     learned: str
     currently: str
     lifestyle: str
+    look: str
     living_area: OneLocationData
 
     recency_w: int
@@ -171,7 +185,7 @@ class PersonID(BaseModel):
     name: str
 
 
-class GetPersonaDetailsMessage(BaseMessage):
+class GetPersonaMessage(BaseMessage):
     data: PersonID
 
 
@@ -179,5 +193,5 @@ class GetSavedGamesMessage(BaseMessage):
     data: None
 
 
-class GetMetaDataMessage(BaseMessage):
+class GetMetaMessage(BaseMessage):
     data: None

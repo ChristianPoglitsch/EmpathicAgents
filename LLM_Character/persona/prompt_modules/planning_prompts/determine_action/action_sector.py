@@ -5,34 +5,31 @@ return the suitable sector where this action can take place.
 
 from LLM_Character.llm_comms.llm_api import LLM_API
 from LLM_Character.messages_dataclass import AIMessages
-from LLM_Character.persona.prompt_modules.prompt import generate_prompt
-from LLM_Character.persona.memory_structures.scratch.persona_scratch import PersonaScratch
-from LLM_Character.persona.memory_structures.associative_memory.associative_memory import AssociativeMemory
+from LLM_Character.persona.memory_structures.scratch.persona_scratch import (
+    PersonaScratch,
+)
 from LLM_Character.persona.memory_structures.spatial_memory import MemoryTree
+from LLM_Character.persona.prompt_modules.prompt import generate_prompt
 from LLM_Character.util import BASE_DIR
+
 COUNTER_LIMIT = 5
 
 
 def _create_prompt_input(
-        scratch: PersonaScratch,
-        s_mem: MemoryTree,
-        action_description: str):
-
-    act_world = scratch.get_curr_location()['world']
-    act_sector = scratch.get_curr_location()['sector']
-    liv_sector = scratch.get_living_area()['sector']
+    scratch: PersonaScratch, s_mem: MemoryTree, action_description: str
+):
+    act_world = scratch.get_curr_location()["world"]
+    act_sector = scratch.get_curr_location()["sector"]
+    liv_sector = scratch.get_living_area()["sector"]
     name = scratch.get_str_name()
 
     # NOTE world < sectors < arenas < gameobjects
-    possible_arenas1 = s_mem.get_str_accessible_sector_arenas(
-        act_world, liv_sector)
-    possible_arenas2 = s_mem.get_str_accessible_sector_arenas(
-        act_world, act_sector)
+    possible_arenas1 = s_mem.get_str_accessible_sector_arenas(act_world, liv_sector)
+    possible_arenas2 = s_mem.get_str_accessible_sector_arenas(act_world, act_sector)
     possible_sectors = s_mem.get_str_accessible_sectors(act_world)
 
     daily_plan = scratch.get_str_daily_plan_req()
-    action_description_1, action_description_2 = _decomp_action_desc(
-        action_description)
+    action_description_1, action_description_2 = _decomp_action_desc(action_description)
 
     prompt_input = []
     prompt_input += [name]
@@ -78,7 +75,7 @@ def _validate_response(response: str):
 
 
 def _get_fail_safe():
-    fs = ("kitchen")
+    fs = "kitchen"
     return fs
 
 
@@ -91,13 +88,15 @@ def _get_valid_output(model, prompt, counter_limit):
 
 
 def run_prompt_action_sector(
-        scratch: PersonaScratch,
-        s_mem: MemoryTree,
-        model: LLM_API,
-        action_description: str,
-        verbose=False):
-    prompt_template = BASE_DIR + \
-        "/LLM_Character/persona/prompt_modules/templates/action_sector.txt"
+    scratch: PersonaScratch,
+    s_mem: MemoryTree,
+    model: LLM_API,
+    action_description: str,
+    verbose=False,
+):
+    prompt_template = (
+        BASE_DIR + "/LLM_Character/persona/prompt_modules/templates/action_sector.txt"
+    )
     prompt_input = _create_prompt_input(scratch, s_mem, action_description)
     prompt = generate_prompt(prompt_input, prompt_template)
 
@@ -106,10 +105,10 @@ def run_prompt_action_sector(
 
     output = _get_valid_output(model, am, COUNTER_LIMIT)
 
-    y = scratch.get_curr_location()['world']
+    y = scratch.get_curr_location()["world"]
     x = [i.strip() for i in s_mem.get_str_accessible_sectors(y).split(",")]
     if output not in x:
-        output = scratch.get_living_area()['sector']
+        output = scratch.get_living_area()["sector"]
 
     return output, [output, prompt, prompt_input]
 

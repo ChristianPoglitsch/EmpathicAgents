@@ -1,7 +1,7 @@
-""" Module providing dataclasses responsible for storing messages. """
+"""Module providing dataclasses responsible for storing messages."""
 
 import json
-from typing import List, Union
+from typing import List
 
 
 class AIMessage:
@@ -94,12 +94,7 @@ class AIMessages:
     def __init__(self):
         self.messages: List[AIMessage] = []
 
-    def add_message(
-            self,
-            message: str,
-            sender: str,
-            role: str,
-            class_type: str):
+    def add_message(self, message: str, sender: str, role: str, class_type: str):
         """
         Creates an AIMessage instance with the given `message` and `role`.
 
@@ -214,8 +209,8 @@ class AIMessages:
 
 
 if __name__ == "__main__":
-
     from LLM_Character.communication.incoming_messages import PromptMessage
+
     pm = PromptMessage(1, "Hallo Wereld")
     print("JSON ", pm.toJSON())
 
@@ -245,8 +240,10 @@ if __name__ == "__main__":
     aimessages.write_messages_to_json(file_path)
     print(f"written to {file_path}")
 
-    print("read from JSON: ", AIMessages.read_messages_from_json(
-        file_path).prints_messages())
+    print(
+        "read from JSON: ",
+        AIMessages.read_messages_from_json(file_path).prints_messages(),
+    )
 
     print("\n")
     print("--------------------")

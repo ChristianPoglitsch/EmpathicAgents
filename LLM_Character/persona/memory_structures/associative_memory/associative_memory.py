@@ -1,9 +1,11 @@
-import json
 import datetime
+import json
 import os
 from typing import Union
 
-from LLM_Character.persona.memory_structures.associative_memory.concept_node import ConceptNode
+from LLM_Character.persona.memory_structures.associative_memory.concept_node import (
+    ConceptNode,
+)
 
 
 class AssociativeMemory:
@@ -25,9 +27,19 @@ class AssociativeMemory:
     def load_from_file(self, f_saved: str):
         self.load(f_saved)
 
-    def add_thought(self, created, expiration, s, p, o,
-                    description, keywords, poignancy,
-                    embedding_pair, filling):
+    def add_thought(
+        self,
+        created,
+        expiration,
+        s,
+        p,
+        o,
+        description,
+        keywords,
+        poignancy,
+        embedding_pair,
+        filling,
+    ):
         # Setting up the node ID and counts.
         node_count = len(self.id_to_node.keys()) + 1
         type_count = len(self.seq_thought) + 1
@@ -56,7 +68,8 @@ class AssociativeMemory:
             embedding_pair[0],
             poignancy,
             keywords,
-            filling)
+            filling,
+        )
 
         # Creating various dictionary cache for fast access.
         self.seq_thought[0:0] = [node]
@@ -80,9 +93,19 @@ class AssociativeMemory:
 
         return node
 
-    def add_chat(self, created, expiration, s, p, o,
-                 description, keywords, poignancy,
-                 embedding_pair, filling):
+    def add_chat(
+        self,
+        created,
+        expiration,
+        s,
+        p,
+        o,
+        description,
+        keywords,
+        poignancy,
+        embedding_pair,
+        filling,
+    ):
         # Setting up the node ID and counts.
         node_count = len(self.id_to_node.keys()) + 1
         type_count = len(self.seq_chat) + 1
@@ -106,7 +129,8 @@ class AssociativeMemory:
             embedding_pair[0],
             poignancy,
             keywords,
-            filling)
+            filling,
+        )
 
         # Creating various dictionary cache for fast access.
         self.seq_chat[0:0] = [node]
@@ -122,9 +146,19 @@ class AssociativeMemory:
 
         return node
 
-    def add_event(self, created, expiration, s, p, o,
-                  description, keywords, poignancy,
-                  embedding_pair, filling):
+    def add_event(
+        self,
+        created,
+        expiration,
+        s,
+        p,
+        o,
+        description,
+        keywords,
+        poignancy,
+        embedding_pair,
+        filling,
+    ):
         node_count = len(self.id_to_node.keys()) + 1
         type_count = len(self.seq_event) + 1
         node_type = "event"
@@ -132,15 +166,29 @@ class AssociativeMemory:
         depth = 0
 
         if "(" in description:
-            description = (" ".join(description.split()[:3])
-                           + " "
-                           + description.split("(")[-1][:-1])
+            description = (
+                " ".join(description.split()[:3])
+                + " "
+                + description.split("(")[-1][:-1]
+            )
 
-        node = ConceptNode(node_id, node_count, type_count, node_type, depth,
-                           created, expiration,
-                           s, p, o,
-                           description, embedding_pair[0],
-                           poignancy, keywords, filling)
+        node = ConceptNode(
+            node_id,
+            node_count,
+            type_count,
+            node_type,
+            depth,
+            created,
+            expiration,
+            s,
+            p,
+            o,
+            description,
+            embedding_pair[0],
+            poignancy,
+            keywords,
+            filling,
+        )
 
         self.seq_event[0:0] = [node]
         keywords = [i.lower() for i in keywords]
@@ -163,10 +211,8 @@ class AssociativeMemory:
         return node
 
     def retrieve_relevant_thoughts(
-            self,
-            s_content,
-            p_content,
-            o_content) -> set[ConceptNode]:
+        self, s_content, p_content, o_content
+    ) -> set[ConceptNode]:
         contents = [s_content, p_content, o_content]
 
         ret = []
@@ -178,10 +224,8 @@ class AssociativeMemory:
         return ret
 
     def retrieve_relevant_events(
-            self,
-            s_content,
-            p_content,
-            o_content) -> set[ConceptNode]:
+        self, s_content, p_content, o_content
+    ) -> set[ConceptNode]:
         contents = [s_content, p_content, o_content]
 
         ret = []
@@ -207,10 +251,9 @@ class AssociativeMemory:
                 ret_str += f"{row[0]}: {row[1]}\n"
         return ret_str
 
-    def get_last_chat(self,
-                      target_persona_name: Union[str,
-                                                 None]) -> Union[ConceptNode,
-                                                                 None]:
+    def get_last_chat(
+        self, target_persona_name: Union[str, None]
+    ) -> Union[ConceptNode, None]:
         if target_persona_name and target_persona_name.lower() in self.kw_to_chat:
             return self.kw_to_chat[target_persona_name.lower()][0]
         return None
@@ -222,10 +265,11 @@ class AssociativeMemory:
         return ret_set
 
     def load(self, f_saved: str):
-     # TODO check if file exists ...
+        # TODO check if file exists ...
 
         self.embeddings: dict[str, list[float]] = json.load(
-            open(f_saved + "/embeddings.json"))
+            open(f_saved + "/embeddings.json")
+        )
 
         nodes_load = json.load(open(f_saved + "/nodes.json"))
         for count in range(len(nodes_load.keys())):
@@ -238,12 +282,14 @@ class AssociativeMemory:
             node_type = node_details["type"]
             depth = node_details["depth"]
 
-            created = datetime.datetime.strptime(node_details["created"],
-                                                 '%Y-%m-%d %H:%M:%S')
+            created = datetime.datetime.strptime(
+                node_details["created"], "%Y-%m-%d %H:%M:%S"
+            )
             expiration = None
             if node_details["expiration"]:
                 expiration = datetime.datetime.strptime(
-                    node_details["expiration"], '%Y-%m-%d %H:%M:%S')
+                    node_details["expiration"], "%Y-%m-%d %H:%M:%S"
+                )
 
             s = node_details["subject"]
             p = node_details["predicate"]
@@ -251,7 +297,9 @@ class AssociativeMemory:
 
             description = node_details["description"]
             embedding_pair = (
-                node_details["embedding_key"], self.embeddings[node_details["embedding_key"]])
+                node_details["embedding_key"],
+                self.embeddings[node_details["embedding_key"]],
+            )
             poignancy = node_details["poignancy"]
             keywords = set(node_details["keywords"])
             filling = node_details["filling"]
@@ -267,7 +315,8 @@ class AssociativeMemory:
                     keywords,
                     poignancy,
                     embedding_pair,
-                    filling)
+                    filling,
+                )
             elif node_type == "thought":
                 self.add_thought(
                     created,
@@ -279,7 +328,8 @@ class AssociativeMemory:
                     keywords,
                     poignancy,
                     embedding_pair,
-                    filling)
+                    filling,
+                )
 
         kw_strength_load = json.load(open(f_saved + "/kw_strength.json"))
         if kw_strength_load["kw_strength_event"]:
@@ -301,11 +351,10 @@ class AssociativeMemory:
             r[node_id]["type"] = node.type
             r[node_id]["depth"] = node.depth
 
-            r[node_id]["created"] = node.created.strftime('%Y-%m-%d %H:%M:%S')
+            r[node_id]["created"] = node.created.strftime("%Y-%m-%d %H:%M:%S")
             r[node_id]["expiration"] = None
             if node.expiration:
-                r[node_id]["expiration"] = (node.expiration
-                                                .strftime('%Y-%m-%d %H:%M:%S'))
+                r[node_id]["expiration"] = node.expiration.strftime("%Y-%m-%d %H:%M:%S")
 
             r[node_id]["subject"] = node.subject
             r[node_id]["predicate"] = node.predicate

@@ -1,19 +1,24 @@
-from LLM_Character.util import BASE_DIR
 from LLM_Character.llm_comms.llm_api import LLM_API
 from LLM_Character.messages_dataclass import AIMessages
-from LLM_Character.persona.prompt_modules.prompt import generate_prompt
 from LLM_Character.persona.cognitive_modules.retrieve import EventContext
-from LLM_Character.persona.memory_structures.scratch.persona_scratch import PersonaScratch
-from LLM_Character.persona.memory_structures.associative_memory.associative_memory import AssociativeMemory
+from LLM_Character.persona.memory_structures.associative_memory.associative_memory import (
+    AssociativeMemory,
+)
+from LLM_Character.persona.memory_structures.scratch.persona_scratch import (
+    PersonaScratch,
+)
+from LLM_Character.persona.prompt_modules.prompt import generate_prompt
+from LLM_Character.util import BASE_DIR
 
 COUNTER_LIMIT = 5
 
 
-def _create_prompt_input(init_scratch: PersonaScratch,
-                         init_amem: AssociativeMemory,
-                         target_scratch: PersonaScratch,
-                         retrieved: EventContext):
-
+def _create_prompt_input(
+    init_scratch: PersonaScratch,
+    init_amem: AssociativeMemory,
+    target_scratch: PersonaScratch,
+    retrieved: EventContext,
+):
     last_chat = init_amem.get_last_chat(target_scratch.name)
     last_chatted_time = ""
     last_chat_about = ""
@@ -95,18 +100,20 @@ def _get_valid_output(model, prompt, counter_limit):
     return _get_fail_safe()
 
 
-def run_prompt_decide_to_talk(init_scratch: PersonaScratch,
-                              init_amem: AssociativeMemory,
-                              target_scratch: PersonaScratch,
-                              retrieved: EventContext,
-                              model: LLM_API,
-                              verbose=False):
-    prompt_template = BASE_DIR + \
-        "/LLM_Character/persona/prompt_modules/templates/decide_to_talk.txt"
-    prompt_input = _create_prompt_input(init_scratch,
-                                        init_amem,
-                                        target_scratch,
-                                        retrieved)
+def run_prompt_decide_to_talk(
+    init_scratch: PersonaScratch,
+    init_amem: AssociativeMemory,
+    target_scratch: PersonaScratch,
+    retrieved: EventContext,
+    model: LLM_API,
+    verbose=False,
+):
+    prompt_template = (
+        BASE_DIR + "/LLM_Character/persona/prompt_modules/templates/decide_to_talk.txt"
+    )
+    prompt_input = _create_prompt_input(
+        init_scratch, init_amem, target_scratch, retrieved
+    )
     prompt = generate_prompt(prompt_input, prompt_template)
 
     am = AIMessages()

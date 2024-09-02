@@ -1,19 +1,21 @@
 import datetime
 
 from LLM_Character.llm_comms.llm_api import LLM_API
-from LLM_Character.persona.prompt_modules.converse_prompts.decomp_schedule import run_prompt_decomp_schedule
-from LLM_Character.persona.memory_structures.associative_memory.associative_memory import AssociativeMemory
-from LLM_Character.persona.memory_structures.scratch.persona_scratch import PersonaScratch
+from LLM_Character.persona.memory_structures.scratch.persona_scratch import (
+    PersonaScratch,
+)
 from LLM_Character.persona.memory_structures.scratch.user_scratch import UserScratch
+from LLM_Character.persona.prompt_modules.converse_prompts.decomp_schedule import (
+    run_prompt_decomp_schedule,
+)
+from LLM_Character.persona.prompt_modules.converse_prompts.summarize_conversation import (
+    run_prompt_summarize_conversation,
+)
 
-from LLM_Character.persona.prompt_modules.converse_prompts.summarize_conversation import run_prompt_summarize_conversation
-from LLM_Character.persona.prompt_modules.converse_prompts.decomp_schedule import run_prompt_decomp_schedule
 
-
-def _end_conversation(user_scratch: UserScratch,
-                      character_scratch: PersonaScratch,
-                      model: LLM_API):
-
+def _end_conversation(
+    user_scratch: UserScratch, character_scratch: PersonaScratch, model: LLM_API
+):
     convo = user_scratch.chat
     convo_summary = generate_convo_summary(convo, model)
 
@@ -29,17 +31,19 @@ def _end_conversation(user_scratch: UserScratch,
     chatting_end_time = character_scratch.curr_time
     act_start_time = user_scratch.start_time_chatting
 
-    _create_react(character_scratch,
-                  model,
-                  inserted_act,
-                  inserted_act_dur,
-                  act_address,
-                  act_event,
-                  chatting_with,
-                  convo,
-                  chatting_with_buffer,
-                  chatting_end_time,
-                  act_start_time)
+    _create_react(
+        character_scratch,
+        model,
+        inserted_act,
+        inserted_act_dur,
+        act_address,
+        act_event,
+        chatting_with,
+        convo,
+        chatting_with_buffer,
+        chatting_end_time,
+        act_start_time,
+    )
 
 
 def generate_convo_summary(convo, model):
@@ -47,33 +51,58 @@ def generate_convo_summary(convo, model):
     return convo_summary
 
 
-def _create_react(cscratch: PersonaScratch,
-                  model: LLM_API,
-                  inserted_act,
-                  inserted_act_dur,
-                  act_address,
-                  act_event,
-                  chatting_with,
-                  chat,
-                  chatting_with_buffer,
-                  chatting_end_time,
-                  act_start_time=None):
-
+def _create_react(
+    cscratch: PersonaScratch,
+    model: LLM_API,
+    inserted_act,
+    inserted_act_dur,
+    act_address,
+    act_event,
+    chatting_with,
+    chat,
+    chatting_with_buffer,
+    chatting_end_time,
+    act_start_time=None,
+):
     min_sum = 0
     for i in range(cscratch.get_f_daily_schedule_hourly_org_index()):
         min_sum += cscratch.f_daily_schedule_hourly_org[i][1]
     start_hour = int(min_sum / 60)
 
     if cscratch.f_daily_schedule_hourly_org:  # NOTE ibr: added
-        if (cscratch.f_daily_schedule_hourly_org[cscratch.get_f_daily_schedule_hourly_org_index(
-        )][1] >= 120):
-            end_hour = start_hour + \
-                cscratch.f_daily_schedule_hourly_org[cscratch.get_f_daily_schedule_hourly_org_index()][1] / 60
+        if (
+            cscratch.f_daily_schedule_hourly_org[
+                cscratch.get_f_daily_schedule_hourly_org_index()
+            ][1]
+            >= 120
+        ):
+            end_hour = (
+                start_hour
+                + cscratch.f_daily_schedule_hourly_org[
+                    cscratch.get_f_daily_schedule_hourly_org_index()
+                ][1]
+                / 60
+            )
 
-        elif (cscratch.f_daily_schedule_hourly_org[cscratch.get_f_daily_schedule_hourly_org_index()][1] +
-              cscratch.f_daily_schedule_hourly_org[cscratch.get_f_daily_schedule_hourly_org_index() + 1][1]):
-            end_hour = start_hour + ((cscratch.f_daily_schedule_hourly_org[cscratch.get_f_daily_schedule_hourly_org_index(
-            )][1] + cscratch.f_daily_schedule_hourly_org[cscratch.get_f_daily_schedule_hourly_org_index() + 1][1]) / 60)
+        elif (
+            cscratch.f_daily_schedule_hourly_org[
+                cscratch.get_f_daily_schedule_hourly_org_index()
+            ][1]
+            + cscratch.f_daily_schedule_hourly_org[
+                cscratch.get_f_daily_schedule_hourly_org_index() + 1
+            ][1]
+        ):
+            end_hour = start_hour + (
+                (
+                    cscratch.f_daily_schedule_hourly_org[
+                        cscratch.get_f_daily_schedule_hourly_org_index()
+                    ][1]
+                    + cscratch.f_daily_schedule_hourly_org[
+                        cscratch.get_f_daily_schedule_hourly_org_index() + 1
+                    ][1]
+                )
+                / 60
+            )
 
         else:
             end_hour = start_hour + 2
@@ -91,33 +120,30 @@ def _create_react(cscratch: PersonaScratch,
             dur_sum += dur
             count += 1
 
-        ret = generate_new_decomp_schedule(cscratch,
-                                           model,
-                                           inserted_act,
-                                           inserted_act_dur,
-                                           start_hour,
-                                           end_hour)
+        ret = generate_new_decomp_schedule(
+            cscratch, model, inserted_act, inserted_act_dur, start_hour, end_hour
+        )
         cscratch.f_daily_schedule[start_index:end_index] = ret
 
-    cscratch.add_new_action(act_address,
-                            inserted_act_dur,
-                            inserted_act,
-                            act_event,
-                            chatting_with,
-                            chat,
-                            chatting_with_buffer,
-                            chatting_end_time,
-                            act_start_time)
+    cscratch.add_new_action(
+        act_address,
+        inserted_act_dur,
+        inserted_act,
+        act_event,
+        chatting_with,
+        chat,
+        chatting_with_buffer,
+        chatting_end_time,
+        act_start_time,
+    )
 
 
-def generate_new_decomp_schedule(cscratch,
-                                 model: LLM_API,
-                                 inserted_act,
-                                 inserted_act_dur,
-                                 start_hour,
-                                 end_hour):
-    today_min_pass = (int(cscratch.curr_time.hour) * 60 +
-                      int(cscratch.curr_time.minute) + 1)
+def generate_new_decomp_schedule(
+    cscratch, model: LLM_API, inserted_act, inserted_act_dur, start_hour, end_hour
+):
+    today_min_pass = (
+        int(cscratch.curr_time.hour) * 60 + int(cscratch.curr_time.minute) + 1
+    )
     main_act_dur = []
     truncated_act_dur = []
     dur_sum = 0
@@ -130,9 +156,10 @@ def generate_new_decomp_schedule(cscratch,
             if dur_sum <= today_min_pass:
                 truncated_act_dur += [[act, dur]]
             elif dur_sum > today_min_pass and not truncated_fin:
-                truncated_act_dur += [[cscratch.f_daily_schedule[count]
-                                       [0], dur_sum - today_min_pass]]
-                truncated_act_dur[-1][-1] -= (dur_sum - today_min_pass)
+                truncated_act_dur += [
+                    [cscratch.f_daily_schedule[count][0], dur_sum - today_min_pass]
+                ]
+                truncated_act_dur[-1][-1] -= dur_sum - today_min_pass
                 truncated_fin = True
         dur_sum += dur
         count += 1
@@ -143,29 +170,35 @@ def generate_new_decomp_schedule(cscratch,
     truncated_act_dur[-1][0] = x
 
     if "(" in truncated_act_dur[-1][0]:
-        inserted_act = truncated_act_dur[-1][0].split(
-            "(")[0].strip() + " (" + inserted_act + ")"
+        inserted_act = (
+            truncated_act_dur[-1][0].split("(")[0].strip() + " (" + inserted_act + ")"
+        )
 
     truncated_act_dur += [[inserted_act, inserted_act_dur]]
-    start_time_hour = (datetime.datetime(2022, 10, 31, 0, 0)
-                       + datetime.timedelta(hours=start_hour))
-    end_time_hour = (datetime.datetime(2022, 10, 31, 0, 0)
-                     + datetime.timedelta(hours=end_hour))
+    start_time_hour = datetime.datetime(2022, 10, 31, 0, 0) + datetime.timedelta(
+        hours=start_hour
+    )
+    end_time_hour = datetime.datetime(2022, 10, 31, 0, 0) + datetime.timedelta(
+        hours=end_hour
+    )
 
-    return run_prompt_decomp_schedule(cscratch,
-                                      main_act_dur,
-                                      truncated_act_dur,
-                                      start_time_hour,
-                                      end_time_hour,
-                                      inserted_act,
-                                      inserted_act_dur,
-                                      model)[0]
+    return run_prompt_decomp_schedule(
+        cscratch,
+        main_act_dur,
+        truncated_act_dur,
+        start_time_hour,
+        end_time_hour,
+        inserted_act,
+        inserted_act_dur,
+        model,
+    )[0]
 
 
 if __name__ == "__main__":
+    from llm_comms.llm_local import LocalComms
+
     from LLM_Character.persona.persona import Persona
     from LLM_Character.persona.user import User
-    from llm_comms.llm_local import LocalComms
 
     person = Persona("MIKE", "nice")
     user = User("MIKE", "nice")

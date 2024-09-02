@@ -39,8 +39,9 @@ from LLM_Character.llm_comms.llm_openai import OpenAIComms
 from LLM_Character.main import start_server
 from LLM_Character.util import receive
 
-logging.basicConfig(level=logging.DEBUG,
-                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.DEBUG, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
 
 # --------------------------------------------------------------------------------------
 # START SERVER WITH THE FOLLOWING EXAMPLES USING OPENAI.
@@ -50,7 +51,8 @@ logging.basicConfig(level=logging.DEBUG,
 def running_examples(client_sock: UdpComms, sim):
     start_mess = StartMessage(
         type=MessageTypes.STARTMESSAGE,
-        data=StartData(fork_sim_code="FORK123", sim_code=sim))
+        data=StartData(fork_sim_code="FORK123", sim_code=sim),
+    )
 
     json1 = start_mess.model_dump_json()
     client_sock.SendData(json1)
@@ -61,11 +63,8 @@ def running_examples(client_sock: UdpComms, sim):
 
     prompt_mess = PromptMessage(
         type=MessageTypes.PROMPTMESSAGE,
-        data=PromptData(
-            persona_name="Camila",
-            user_name="Louis",
-            message="hi"
-        )
+        data=PromptData(persona_name="Camila",
+                        user_name="Louis", message="hi"),
     )
     json2 = prompt_mess.model_dump_json()
     client_sock.SendData(json2)
@@ -76,20 +75,24 @@ def running_examples(client_sock: UdpComms, sim):
 
     move_mess = MoveMessage(
         type=MessageTypes.MOVEMESSAGE,
-        data=[PerceivingData(
-            name="Camila",
-            curr_loc=OneLocationData(
-                world="Graz",
-                sector="JakominiPlatz",
-                arena="Bäckerei Sorger",
-            ),
-            events=[
-                EventData(action_event_subject="Florian",
-                          action_event_predicate=None,
-                          action_event_object=None,
-                          action_event_description=None)
-            ]
-        )]
+        data=[
+            PerceivingData(
+                name="Camila",
+                curr_loc=OneLocationData(
+                    world="Graz",
+                    sector="JakominiPlatz",
+                    arena="Bäckerei Sorger",
+                ),
+                events=[
+                    EventData(
+                        action_event_subject="Florian",
+                        action_event_predicate=None,
+                        action_event_object=None,
+                        action_event_description=None,
+                    )
+                ],
+            )
+        ],
     )
 
     json3 = move_mess.model_dump_json()
@@ -101,10 +104,8 @@ def running_examples(client_sock: UdpComms, sim):
 
     update_meta_mess = UpdateMetaMessage(
         type=MessageTypes.UPDATE_META_MESSAGE,
-        data=MetaData(
-            curr_time="July 25, 2024, 09:15:45",
-            sec_per_step=30
-        ))
+        data=MetaData(curr_time="July 25, 2024, 09:15:45", sec_per_step=30),
+    )
 
     json4 = update_meta_mess.model_dump_json()
     client_sock.SendData(json.dumps(json4))
@@ -122,14 +123,14 @@ def running_examples(client_sock: UdpComms, sim):
                 last_name="Smith",
                 age=30,
                 living_area=OneLocationData(
-                    world="Graz",
-                    sector="DownTown",
-                    arena="Someone's Appartement"
+                    world="Graz", sector="DownTown", arena="Someone's Appartement"
                 ),
                 recency_w=5,
                 relevance_w=7,
-                importance_ele_n=3)
-        ))
+                importance_ele_n=3,
+            ),
+        ),
+    )
 
     json5 = update_persona_mess.model_dump_json()
     client_sock.SendData(json5)
@@ -140,10 +141,7 @@ def running_examples(client_sock: UdpComms, sim):
 
     update_user_mess = UpdateUserMessage(
         type=MessageTypes.UPDATE_USER_MESSAGE,
-        data=UserData(
-            old_name="Louis",
-            name="John Smith"
-        )
+        data=UserData(old_name="Louis", name="John Smith"),
     )
 
     json6 = update_user_mess.model_dump_json()
@@ -159,9 +157,7 @@ def running_examples(client_sock: UdpComms, sim):
             name="Ahmed",
             scratch_data=FullPersonaScratchData(
                 curr_location=OneLocationData(
-                    world="Graz",
-                    sector="JakominiPlatz",
-                    arena="Home"
+                    world="Graz", sector="JakominiPlatz", arena="Home"
                 ),
                 first_name="Ahmed",
                 last_name="El Bouzid",
@@ -177,14 +173,17 @@ def running_examples(client_sock: UdpComms, sim):
                     often worn clothing that reflects his no-nonsense attitude.",
                 learned="Ahmed grew up in a working-class neighborhood in Casablanca,\
                     where he learned the art of street smarts and survival. \
-                    His education came from life experience rather than formal schooling.\
+                    His education came from life experience rather than \
+                    formal schooling.\
                     He picked up his extensive vocabulary of colorful language from \
                     the rough-and-tumble social circles he navigated. His bluntness \
-                    and familiarity with vulgarity are as much a product of his environment\
+                    and familiarity with vulgarity are as much a product of his \
+                    environment\
                     as they are a personal choice.",
                 currently="Ahmed is in Casablanca, sitting in a crowded, noisy café \
                     in the heart of the city. His presence is commanding, \
-                    and he’s not shy about expressing his opinions loudly and colorfully.",
+                    and he’s not shy about expressing his opinions loudly and \
+                    colorfully.",
                 lifestyle="Ahmed’s days are characterized by a blend of laborious work \
                     and boisterous socializing. He wakes up early to start his  \
                     day at the auto repair shop, where he tackles complex mechanical \
@@ -192,17 +191,17 @@ def running_examples(client_sock: UdpComms, sim):
                     day's work, he heads to his favorite local café, where he meets \
                     friends and engages in animated conversations. His language is \
                     as intense as his personality; he curses freely and speaks \
-                    with a raw honesty that can be off-putting to some but is appreciated \
+                    with a raw honesty that can be off-putting to some but is \
+                    appreciated \
                     by those who value his straightforwardness. Evenings are \
                     typically spent at bustling marketplaces or local watering holes,\
                     where Ahmed's laughter and loud voice contribute to the vibrant \
                     atmosphere. His lifestyle is marked by a blend of hard work and \
-                    a lively social life, punctuated by his unmistakable way of speaking.",
+                    a lively social life, punctuated by his unmistakable way of \
+                    speaking.",
                 living_area={
                     OneLocationData(
-                        world="Graz",
-                        sector="DownTown",
-                        arena="Ahmed's Appartement"
+                        world="Graz", sector="DownTown", arena="Ahmed's Appartement"
                     )
                 },
                 recency_w=5,
@@ -211,21 +210,19 @@ def running_examples(client_sock: UdpComms, sim):
                 recency_decay=2,
                 importance_trigger_max=10,
                 importance_trigger_curr=6,
-                importance_ele_n=3
+                importance_ele_n=3,
             ),
             spatial_data={
                 "spatial_data": {
-                    "FantasyLand":
-                    {
-                        "Northern Realm":
-                        {
+                    "FantasyLand": {
+                        "Northern Realm": {
                             "Dragon's Lair": ["Dragon", "Treasure Chest"],
-                            "Ice Cavern": ["Ice Golem", "Frozen Statue"]
+                            "Ice Cavern": ["Ice Golem", "Frozen Statue"],
                         }
                     }
                 }
-            }
-        )
+            },
+        ),
     )
 
     json7 = add_persona_mess.model_dump_json()
@@ -236,8 +233,7 @@ def running_examples(client_sock: UdpComms, sim):
     # ------------------------------------------
 
     get_personas_mess = GetPersonasMessage(
-        type=MessageTypes.GET_PERSONAS_MESSAGE,
-        data=None
+        type=MessageTypes.GET_PERSONAS_MESSAGE, data=None
     )
     json8 = get_personas_mess.model_dump_json()
     client_sock.SendData(json8)
@@ -247,9 +243,7 @@ def running_examples(client_sock: UdpComms, sim):
     # ------------------------------------------
 
     get_users_mess = GetUsersMessage(
-        type=MessageTypes.GET_USERS_MESSAGE,
-        data=None
-    )
+        type=MessageTypes.GET_USERS_MESSAGE, data=None)
     json9 = get_users_mess.model_dump_json()
     client_sock.SendData(json9)
     response = receive(client_sock)
@@ -258,10 +252,7 @@ def running_examples(client_sock: UdpComms, sim):
     # ------------------------------------------
 
     get_persona_mess = GetPersonaMessage(
-        type=MessageTypes.GET_PERSONA_MESSAGE,
-        data=PersonID(
-            name="Camila"
-        )
+        type=MessageTypes.GET_PERSONA_MESSAGE, data=PersonID(name="Camila")
     )
     json10 = get_persona_mess.model_dump_json()
     client_sock.SendData(json10)
@@ -271,8 +262,7 @@ def running_examples(client_sock: UdpComms, sim):
     # ------------------------------------------
 
     get_saved_games_mes = GetSavedGamesMessage(
-        type=MessageTypes.GET_SAVED_GAMES_MESSAGE,
-        data=None
+        type=MessageTypes.GET_SAVED_GAMES_MESSAGE, data=None
     )
 
     json11 = get_saved_games_mes.model_dump_json()
@@ -283,9 +273,7 @@ def running_examples(client_sock: UdpComms, sim):
     # ------------------------------------------
 
     get_meta_message = GetMetaMessage(
-        type=MessageTypes.GET_META_MESSAGE,
-        data=None
-    )
+        type=MessageTypes.GET_META_MESSAGE, data=None)
     json12 = get_meta_message.model_dump_json()
     client_sock.SendData(json12)
     response = receive(client_sock)

@@ -1,10 +1,9 @@
 import re
 
-from LLM_Character.util import BASE_DIR
 from LLM_Character.llm_comms.llm_api import LLM_API
 from LLM_Character.messages_dataclass import AIMessages
 from LLM_Character.persona.prompt_modules.prompt import generate_prompt
-from LLM_Character.persona.memory_structures.scratch.persona_scratch import PersonaScratch
+from LLM_Character.util import BASE_DIR
 
 COUNTER_LIMIT = 5
 
@@ -21,7 +20,7 @@ def _clean_up_response(response: str):
         row = i.split(". ")[-1]
         thought = row.split("(because of ")[0].strip()
         evi_raw = row.split("(because of ")[1].split(")")[0].strip()
-        evi_raw = re.findall(r'\d+', evi_raw)
+        evi_raw = re.findall(r"\d+", evi_raw)
         evi_raw = [int(i.strip()) for i in evi_raw]
         ret[thought] = evi_raw
     return ret
@@ -47,13 +46,12 @@ def _get_valid_output(model, prompt, n, counter_limit):
 
 
 def run_prompt_insight_and_evidence(
-        model: LLM_API,
-        n: int,
-        all_utt: str,
-        verbose=False):
-
-    prompt_template = BASE_DIR + \
-        "/LLM_Character/persona/prompt_modules/templates/insight_and_evidence.txt"
+    model: LLM_API, n: int, all_utt: str, verbose=False
+):
+    prompt_template = (
+        BASE_DIR
+        + "/LLM_Character/persona/prompt_modules/templates/insight_and_evidence.txt"
+    )
     prompt_input = _create_prompt_input(n, all_utt)
     prompt = generate_prompt(prompt_input, prompt_template)
     am = AIMessages()
@@ -74,5 +72,4 @@ if __name__ == "__main__":
     modelc.init(model_id)
 
     model = LLM_API(modelc)
-    run_prompt_insight_and_evidence(
-        model, 3, "i will drive to the broeltorens.")
+    run_prompt_insight_and_evidence(model, 3, "i will drive to the broeltorens.")

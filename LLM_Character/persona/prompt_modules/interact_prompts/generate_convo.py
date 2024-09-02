@@ -1,39 +1,52 @@
-
 from typing import Union
-from LLM_Character.util import BASE_DIR
+
 from LLM_Character.llm_comms.llm_api import LLM_API
 from LLM_Character.messages_dataclass import AIMessages
-
-from LLM_Character.persona.memory_structures.scratch.persona_scratch import PersonaScratch
-from LLM_Character.persona.memory_structures.associative_memory.associative_memory import AssociativeMemory
-from LLM_Character.persona.memory_structures.associative_memory.concept_node import ConceptNode
-
+from LLM_Character.persona.memory_structures.associative_memory.associative_memory import (
+    AssociativeMemory,
+)
+from LLM_Character.persona.memory_structures.associative_memory.concept_node import (
+    ConceptNode,
+)
+from LLM_Character.persona.memory_structures.scratch.persona_scratch import (
+    PersonaScratch,
+)
+from LLM_Character.persona.prompt_modules.converse_prompts.generate_iterative_chat import (
+    extract_first_json_dict,
+)
 from LLM_Character.persona.prompt_modules.prompt import generate_prompt
-from LLM_Character.persona.prompt_modules.converse_prompts.generate_iterative_chat import extract_first_json_dict
+from LLM_Character.util import BASE_DIR
 
 COUNTER_LIMIT = 5
 
 
-def _create_prompt_input(init_scratch: PersonaScratch,
-                         init_a_mem: AssociativeMemory,
-                         target_scratch: PersonaScratch,
-                         retrieved: dict[str, list[ConceptNode]],
-                         curr_chat: list[str],
-                         curr_context: str):
-
+def _create_prompt_input(
+    init_scratch: PersonaScratch,
+    init_a_mem: AssociativeMemory,
+    target_scratch: PersonaScratch,
+    retrieved: dict[str, list[ConceptNode]],
+    curr_chat: list[str],
+    curr_context: str,
+):
     prev_convo_insert = "\n"
     if init_a_mem.seq_chat:
         for i in init_a_mem.seq_chat:
             if i.object == target_scratch.name:
-                v1 = int(
-                    (init_scratch.curr_time - i.created).total_seconds() / 60)
-                prev_convo_insert += f'{str(v1)} minutes ago, {init_scratch.name} and {target_scratch.name} were already {i.description} This context takes place after that conversation.'
+                v1 = int((init_scratch.curr_time - i.created).total_seconds() / 60)
+                prev_convo_insert += f"{str(v1)} minutes ago, {init_scratch.name} and {target_scratch.name} were already {i.description} This context takes place after that conversation."
                 break
     if prev_convo_insert == "\n":
         prev_convo_insert = ""
     if init_a_mem.seq_chat:
-        if int((init_scratch.curr_time -
-               init_a_mem.seq_chat[-1].created).total_seconds() / 60) > 480:
+        if (
+            int(
+                (
+                    init_scratch.curr_time - init_a_mem.seq_chat[-1].created
+                ).total_seconds()
+                / 60
+            )
+            > 480
+        ):
             prev_convo_insert = ""
 
     curr_sector = f"{init_scratch.get_curr_location()['sector']}"
@@ -66,7 +79,8 @@ def _create_prompt_input(init_scratch: PersonaScratch,
         target_scratch.name,
         init_scratch.name,
         init_scratch.name,
-        init_scratch.name]
+        init_scratch.name,
+    ]
     return prompt_input
 
 
@@ -109,22 +123,23 @@ def _get_valid_output(model, prompt, counter_limit):
     return _get_fail_safe()
 
 
-def run_prompt_generative_iterative_personas_chat(init_scratch: PersonaScratch,
-                                                  init_amem: AssociativeMemory,
-                                                  target_scratch: PersonaScratch,
-                                                  retrieved: dict[str, list[ConceptNode]],
-                                                  curr_chat: list[str],
-                                                  curr_context: str,
-                                                  model: LLM_API,
-                                                  verbose=False):
-    prompt_template = BASE_DIR + \
-        "/LLM_Character/persona/prompt_modules/templates/interative_convo_personas.txt"
-    prompt_input = _create_prompt_input(init_scratch,
-                                        init_amem,
-                                        target_scratch,
-                                        retrieved,
-                                        curr_chat,
-                                        curr_context)
+def run_prompt_generative_iterative_personas_chat(
+    init_scratch: PersonaScratch,
+    init_amem: AssociativeMemory,
+    target_scratch: PersonaScratch,
+    retrieved: dict[str, list[ConceptNode]],
+    curr_chat: list[str],
+    curr_context: str,
+    model: LLM_API,
+    verbose=False,
+):
+    prompt_template = (
+        BASE_DIR
+        + "/LLM_Character/persona/prompt_modules/templates/interative_convo_personas.txt"
+    )
+    prompt_input = _create_prompt_input(
+        init_scratch, init_amem, target_scratch, retrieved, curr_chat, curr_context
+    )
     prompt = generate_prompt(prompt_input, prompt_template)
 
     am = AIMessages()
@@ -147,4 +162,5 @@ if __name__ == "__main__":
 
     model = LLM_API(modelc)
     run_prompt_generative_iterative_personas_chat(
-        person, model, "i will drive to the broeltorens.", "kortrijk")
+        person, model, "i will drive to the broeltorens.", "kortrijk"
+    )

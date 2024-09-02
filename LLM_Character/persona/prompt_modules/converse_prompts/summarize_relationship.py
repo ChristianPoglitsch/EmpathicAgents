@@ -1,16 +1,22 @@
 from typing import Union
-from LLM_Character.util import BASE_DIR
+
 from LLM_Character.llm_comms.llm_api import LLM_API
-from LLM_Character.messages_dataclass import AIMessage, AIMessages
-from LLM_Character.persona.prompt_modules.prompt import generate_prompt
-from LLM_Character.persona.memory_structures.scratch.persona_scratch import PersonaScratch
+from LLM_Character.messages_dataclass import AIMessages
+from LLM_Character.persona.memory_structures.scratch.persona_scratch import (
+    PersonaScratch,
+)
 from LLM_Character.persona.memory_structures.scratch.user_scratch import UserScratch
+from LLM_Character.persona.prompt_modules.prompt import generate_prompt
+from LLM_Character.util import BASE_DIR
 
 COUNTER_LIMIT = 5
 
 
 def _create_prompt_input(
-        iscratch: Union[UserScratch, PersonaScratch], tscratch: PersonaScratch, statements: str):
+    iscratch: Union[UserScratch, PersonaScratch],
+    tscratch: PersonaScratch,
+    statements: str,
+):
     prompt_input = [statements, iscratch.name, tscratch.name]
     return prompt_input
 
@@ -38,16 +44,21 @@ def _get_valid_output(model: LLM_API, prompt: AIMessages, counter_limit):
             return success
     return _get_fail_safe()
 
+
 # FIXME: COULD BE BETTER, the prompt is a mess.
 
 
-def run_prompt_summarize_relationship(iscratch: UserScratch,
-                                      tscratch: PersonaScratch,
-                                      model: LLM_API,
-                                      statements: str,
-                                      verbose=False):
-    prompt_template = BASE_DIR + \
-        "/LLM_Character/persona/prompt_modules/templates/summarize_chat_relationship.txt"
+def run_prompt_summarize_relationship(
+    iscratch: UserScratch,
+    tscratch: PersonaScratch,
+    model: LLM_API,
+    statements: str,
+    verbose=False,
+):
+    prompt_template = (
+        BASE_DIR
+        + "/LLM_Character/persona/prompt_modules/templates/summarize_chat_relationship.txt"
+    )
     prompt_input = _create_prompt_input(iscratch, tscratch, statements)
     prompt = generate_prompt(prompt_input, prompt_template)
     am = AIMessages()
@@ -69,4 +80,5 @@ if __name__ == "__main__":
 
     model = LLM_API(modelc)
     run_prompt_summarize_relationship(
-        person, model, "i will drive to the broeltorens.", "kortrijk")
+        person, model, "i will drive to the broeltorens.", "kortrijk"
+    )

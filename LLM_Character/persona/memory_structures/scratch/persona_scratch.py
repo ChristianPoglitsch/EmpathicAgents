@@ -1,12 +1,15 @@
-""" Short term memory """
+"""Short term memory"""
 
-import json
 import datetime
+import json
 import os
 from typing import Tuple, Union
 
+from LLM_Character.communication.incoming_messages import (
+    FullPersonaScratchData,
+    PersonaScratchData,
+)
 from LLM_Character.messages_dataclass import AIMessages
-from LLM_Character.communication.incoming_messages import FullPersonaScratchData, PersonaScratchData
 from LLM_Character.util import check_if_file_exists
 
 
@@ -64,16 +67,18 @@ class PersonaScratch:
         self.chatting_end_time = None
 
     # --- SETTERS -----
-    def add_new_action(self,
-                       action_address,
-                       action_duration,
-                       action_description,
-                       action_event,
-                       chatting_with,
-                       chat,
-                       chatting_with_buffer,
-                       chatting_end_time,
-                       act_start_time=None):
+    def add_new_action(
+        self,
+        action_address,
+        action_duration,
+        action_description,
+        action_event,
+        chatting_with,
+        chat,
+        chatting_with_buffer,
+        chatting_end_time,
+        act_start_time=None,
+    ):
         self.act_address = action_address
         self.act_duration = action_duration
         self.act_description = action_description
@@ -98,13 +103,12 @@ class PersonaScratch:
 
         if x.second != 0:
             x = x.replace(second=0)
-            x = (x + datetime.timedelta(minutes=1))
-        end_time = (x + datetime.timedelta(minutes=self.act_duration))
+            x = x + datetime.timedelta(minutes=1)
+        end_time = x + datetime.timedelta(minutes=self.act_duration)
 
         # FIXME: why not <= ???, you depend on the while true loop in the
         # reverie.
-        if end_time.strftime(
-                "%H:%M:%S") == self.curr_time.strftime("%H:%M:%S"):
+        if end_time.strftime("%H:%M:%S") == self.curr_time.strftime("%H:%M:%S"):
             return True
         return False
 
@@ -135,14 +139,17 @@ class PersonaScratch:
         return curr_index
 
     def get_curr_event_and_desc(
-            self) -> Tuple[str, Union[str, None], Union[str, None], Union[str, None]]:
+        self,
+    ) -> Tuple[str, Union[str, None], Union[str, None], Union[str, None]]:
         if not self.act_address:
             return (self.name, None, None, None)
         else:
-            return (self.act_event[0],
-                    self.act_event[1],
-                    self.act_event[2],
-                    self.act_description)
+            return (
+                self.act_event[0],
+                self.act_event[1],
+                self.act_event[2],
+                self.act_description,
+            )
 
     def get_f_daily_schedule_hourly_org(self, advance=0):
         return self.f_daily_schedule_hourly_org
@@ -221,8 +228,7 @@ class PersonaScratch:
             return self.act_event
 
     def act_summary_str(self):
-        start_datetime_str = self.act_start_time.strftime(
-            "%A %B %d -- %H:%M %p")
+        start_datetime_str = self.act_start_time.strftime("%A %B %d -- %H:%M %p")
         ret = f"[{start_datetime_str}]\n"
         ret += f"Activity: {self.name} is {self.act_description}\n"
         ret += f"Address: {self.act_address}\n"
@@ -260,20 +266,22 @@ class PersonaScratch:
             currently=self.currently,
             lifestyle=self.lifestyle,
             living_area=self.living_area,
-
             recency_w=self.recency_w,
             relevance_w=self.relevance_w,
             importance_w=self.importance_w,
             recency_decay=self.recency_decay,
             importance_trigger_max=self.importance_trigger_max,
             importance_trigger_curr=self.importance_trigger_curr,
-            importance_ele_n=self.importance_ele_n
+            importance_ele_n=self.importance_ele_n,
         )
 
     # LOADING AND SAVING
     def update(self, data: PersonaScratchData):
-        self.curr_location = data.curr_location.model_dump(
-        ) if data.curr_location else self.curr_location
+        self.curr_location = (
+            data.curr_location.model_dump()
+            if data.curr_location
+            else self.curr_location
+        )
         self.first_name = data.first_name or self.first_name
         self.last_name = data.last_name or self.last_name
         self.age = data.age or self.age
@@ -281,14 +289,19 @@ class PersonaScratch:
         self.learned = data.learned or self.learned
         self.currently = data.currently or self.learned
         self.lifestyle = data.lifestyle or self.lifestyle
-        self.living_area = data.living_area.model_dump(
-        ) if data.living_area else self.living_area
+        self.living_area = (
+            data.living_area.model_dump() if data.living_area else self.living_area
+        )
         self.recency_w = data.recency_w or self.recency_w
         self.relevance_w = data.relevance_w or self.relevance_w
         self.importance_w = data.importance_w or self.importance_w
         self.recency_decay = data.recency_decay or self.recency_decay
-        self.importance_trigger_max = data.importance_trigger_max or self.importance_trigger_max
-        self.importance_trigger_curr = data.importance_trigger_curr or self.importance_trigger_curr
+        self.importance_trigger_max = (
+            data.importance_trigger_max or self.importance_trigger_max
+        )
+        self.importance_trigger_curr = (
+            data.importance_trigger_curr or self.importance_trigger_curr
+        )
         self.importance_ele_n = data.importance_ele_n or self.importance_ele_n
 
     def load_from_data(self, data: FullPersonaScratchData):
@@ -300,8 +313,7 @@ class PersonaScratch:
 
             ct = scratch_load["curr_time"]
             if ct:
-                self.curr_time = datetime.datetime.strptime(
-                    ct, "%B %d, %Y, %H:%M:%S")
+                self.curr_time = datetime.datetime.strptime(ct, "%B %d, %Y, %H:%M:%S")
 
             self.curr_location = scratch_load["curr_location"]
             self.daily_plan_req = scratch_load["daily_plan_req"]
@@ -329,13 +341,16 @@ class PersonaScratch:
 
             self.daily_req = scratch_load["daily_req"]
             self.f_daily_schedule = scratch_load["f_daily_schedule"]
-            self.f_daily_schedule_hourly_org = scratch_load["f_daily_schedule_hourly_org"]
+            self.f_daily_schedule_hourly_org = scratch_load[
+                "f_daily_schedule_hourly_org"
+            ]
 
             self.act_address = scratch_load["act_address"]
 
             ast = scratch_load["act_start_time"]
-            self.act_start_time = datetime.datetime.strptime(
-                ast, "%B %d, %Y, %H:%M:%S") if ast else None
+            self.act_start_time = (
+                datetime.datetime.strptime(ast, "%B %d, %Y, %H:%M:%S") if ast else None
+            )
 
             self.act_duration = scratch_load["act_duration"]
             self.act_description = scratch_load["act_description"]
@@ -345,8 +360,9 @@ class PersonaScratch:
             self.chatting_with_buffer = scratch_load["chatting_with_buffer"]
 
             cet = scratch_load["chatting_end_time"]
-            self.chatting_end_time = datetime.datetime.strptime(
-                cet, "%B %d, %Y, %H:%M:%S") if cet else None
+            self.chatting_end_time = (
+                datetime.datetime.strptime(cet, "%B %d, %Y, %H:%M:%S") if cet else None
+            )
 
             path = os.path.dirname(f_saved)
             self.chat.read_messages_from_json(path + "/messages.json")
@@ -355,8 +371,9 @@ class PersonaScratch:
         os.makedirs(os.path.dirname(out_json), exist_ok=True)
 
         scratch = dict()
-        scratch["curr_time"] = self.curr_time.strftime(
-            "%B %d, %Y, %H:%M:%S") if self.curr_time else None
+        scratch["curr_time"] = (
+            self.curr_time.strftime("%B %d, %Y, %H:%M:%S") if self.curr_time else None
+        )
         scratch["curr_location"] = self.curr_location
         scratch["daily_plan_req"] = self.daily_plan_req
 
@@ -385,16 +402,22 @@ class PersonaScratch:
         scratch["f_daily_schedule_hourly_org"] = self.f_daily_schedule_hourly_org
 
         scratch["act_address"] = self.act_address
-        scratch["act_start_time"] = self.act_start_time.strftime(
-            "%B %d, %Y, %H:%M:%S") if self.act_start_time else None
+        scratch["act_start_time"] = (
+            self.act_start_time.strftime("%B %d, %Y, %H:%M:%S")
+            if self.act_start_time
+            else None
+        )
         scratch["act_duration"] = self.act_duration
         scratch["act_description"] = self.act_description
         scratch["act_event"] = self.act_event
 
         scratch["chatting_with"] = self.chatting_with
         scratch["chatting_with_buffer"] = self.chatting_with_buffer
-        scratch["chatting_end_time"] = self.chatting_end_time.strftime(
-            "%B %d, %Y, %H:%M:%S") if self.chatting_end_time else None
+        scratch["chatting_end_time"] = (
+            self.chatting_end_time.strftime("%B %d, %Y, %H:%M:%S")
+            if self.chatting_end_time
+            else None
+        )
 
         with open(out_json, "w") as outfile:
             json.dump(scratch, outfile, indent=2)

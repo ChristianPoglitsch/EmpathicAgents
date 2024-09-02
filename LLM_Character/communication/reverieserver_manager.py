@@ -1,7 +1,7 @@
 from LLM_Character.world.game import ReverieServer
 
 
-class ReverieServerManager():
+class ReverieServerManager:
     def __init__(self):
         self._connections: dict[str, ReverieServer] = {}
 

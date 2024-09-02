@@ -1,41 +1,44 @@
-from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig, GenerationConfig, pipeline
-from transformers import PreTrainedTokenizer, PreTrainedModel
 import torch
+from transformers import (
+    AutoModelForCausalLM,
+    AutoTokenizer,
+    BitsAndBytesConfig,
+    GenerationConfig,
+    PreTrainedModel,
+    PreTrainedTokenizer,
+    pipeline,
+)
 
 
 def load_pipeline(
-        model: PreTrainedModel,
-        tokenizer: PreTrainedTokenizer,
-        max_length: int):
+    model: PreTrainedModel, tokenizer: PreTrainedTokenizer, max_length: int
+):
     return pipeline(
-        "text-generation",
-        model=model,
-        tokenizer=tokenizer,
-        max_new_tokens=max_length)
+        "text-generation", model=model, tokenizer=tokenizer, max_new_tokens=max_length
+    )
 
 
 def generate_pipe_text(pipe, prompt, max_length=100000, temperature=0.7):
     result = pipe(prompt, max_length=max_length, temperature=temperature)
-    return result[0]['generated_text']
+    return result[0]["generated_text"]
 
 
 def generate_text(
-        prompt: str,
-        model: PreTrainedModel,
-        tokenizer: PreTrainedTokenizer,
-        generation_config: GenerationConfig,
-        max_num_token: int):
-    inputs = tokenizer(prompt, return_tensors="pt")['input_ids']
+    prompt: str,
+    model: PreTrainedModel,
+    tokenizer: PreTrainedTokenizer,
+    generation_config: GenerationConfig,
+    max_num_token: int,
+):
+    inputs = tokenizer(prompt, return_tensors="pt")["input_ids"]
     output_tokens = model.generate(
         input_ids=inputs.to(model.device),
         generation_config=generation_config,
         max_new_tokens=max_num_token,
         pad_token_id=tokenizer.eos_token_id,
-        do_sample=True
+        do_sample=True,
     )
-    output_text = tokenizer.decode(
-        output_tokens.squeeze(),
-        skip_special_tokens=True)
+    output_text = tokenizer.decode(output_tokens.squeeze(), skip_special_tokens=True)
     return output_text
 
 
@@ -48,8 +51,8 @@ def load_base_model(model_id: str):
             load_in_4bit=True,
             bnb_4bit_compute_dtype=torch.bfloat16,
             bnb_4bit_use_double_quant=True,
-            bnb_4bit_quant_type='nf4'
-        )
+            bnb_4bit_quant_type="nf4",
+        ),
     )
 
 
@@ -58,17 +61,14 @@ def load_mistral_instr_model():
         load_in_4bit=True,
         bnb_4bit_quant_type="nf4",
         bnb_4bit_use_double_quant=True,
-        bnb_4bit_compute_dtype=torch.bfloat16
+        bnb_4bit_compute_dtype=torch.bfloat16,
     )
 
     # "mistralai/Mistral-7B-Instruct-v0.1
     model_id = "mistralai/Mistral-7B-Instruct-v0.2"
 
     model = AutoModelForCausalLM.from_pretrained(
-        model_id,
-        device_map='auto',
-        quantization_config=nf4_config,
-        use_cache=False
+        model_id, device_map="auto", quantization_config=nf4_config, use_cache=False
     )
 
     tokenizer = AutoTokenizer.from_pretrained(model_id)

@@ -1,11 +1,5 @@
-class UdpComms():
-    def __init__(
-            self,
-            udpIP,
-            portTX,
-            portRX,
-            enableRX=False,
-            suppressWarnings=True):
+class UdpComms:
+    def __init__(self, udpIP, portTX, portRX, enableRX=False, suppressWarnings=True):
         """
         udpIP: Must be string e.g. "127.0.0.1"
         portTX: integer number e.g. 8000. Port to transmit from i.e From Python to other application
@@ -34,8 +28,8 @@ class UdpComms():
         # Create Receiving thread if required
         if enableRX:
             import threading
-            self.rxThread = threading.Thread(
-                target=self.ReadUdpThreadFunc, daemon=True)
+
+            self.rxThread = threading.Thread(target=self.ReadUdpThreadFunc, daemon=True)
             self.rxThread.start()
 
     def __del__(self):
@@ -47,8 +41,7 @@ class UdpComms():
 
     def SendData(self, strToSend):
         # Use this function to send string to C#
-        self.udpSock.sendto(bytes(strToSend, 'utf-8'),
-                            (self.udpIP, self.udpSendPort))
+        self.udpSock.sendto(bytes(strToSend, "utf-8"), (self.udpIP, self.udpSendPort))
 
     def ReceiveData(self):
         """
@@ -62,21 +55,25 @@ class UdpComms():
         """
         if not self.enableRX:  # if RX is not enabled, raise error
             raise ValueError(
-                "Attempting to receive data without enabling this setting. Ensure this is enabled from the constructor")
+                "Attempting to receive data without enabling this setting. Ensure this is enabled from the constructor"
+            )
 
         data = None
         try:
             data, _ = self.udpSock.recvfrom(1024)
-            data = data.decode('utf-8')
+            data = data.decode("utf-8")
         except WindowsError as e:
-            if e.winerror == 10054:  # An error occurs if you try to receive before connecting to other application
+            if (
+                e.winerror == 10054
+            ):  # An error occurs if you try to receive before connecting to other application
                 if not self.suppressWarnings:
                     print("Are You connected to the other application? Connect to it!")
                 else:
                     pass
             else:
                 raise ValueError(
-                    "Unexpected Error. Are you sure that the received data can be converted to a string")
+                    "Unexpected Error. Are you sure that the received data can be converted to a string"
+                )
 
         return data
 

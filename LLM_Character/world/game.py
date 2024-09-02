@@ -3,22 +3,29 @@ import json
 import os
 from typing import Tuple, Union
 
+from LLM_Character.communication.incoming_messages import (
+    FullPersonaData,
+    MetaData,
+    PerceivingData,
+    PersonaData,
+    PersonID,
+    UserData,
+)
+from LLM_Character.llm_comms.llm_api import LLM_API
 from LLM_Character.persona.persona import Persona
 from LLM_Character.persona.user import User
-from LLM_Character.llm_comms.llm_api import LLM_API
-from LLM_Character.util import copyanything, BASE_DIR
-from LLM_Character.communication.incoming_messages import FullPersonaData, PerceivingData, MetaData, PersonID, PersonaData, UserData
+from LLM_Character.util import BASE_DIR, copyanything
 
 FS_STORAGE = BASE_DIR + "/LLM_Character/storage"
 
 
 class ReverieServer:
-    def __init__(self,
-                 sim_code: str,
-                 cid: str,
-                 fork_sim_code: str = "default",
-                 ):
-
+    def __init__(
+        self,
+        sim_code: str,
+        cid: str,
+        fork_sim_code: str = "default",
+    ):
         self.fork_sim_code = fork_sim_code
         self.sim_code = sim_code
         self.client_id = cid
@@ -32,17 +39,14 @@ class ReverieServer:
     # SECTION: Main Logic
     # =============================================================================
 
-    def prompt_processor(self,
-                         user_name: str,
-                         persona_name: str,
-                         message: str,
-                         model: LLM_API) -> Tuple[str,
-                                                  str,
-                                                  int]:
+    def prompt_processor(
+        self, user_name: str, persona_name: str, message: str, model: LLM_API
+    ) -> Tuple[str, str, int]:
         if self.loaded:
             user = self.users[user_name]
             out = self.personas[persona_name].open_convo_session(
-                user.scratch, message, self.curr_time, model)
+                user.scratch, message, self.curr_time, model
+            )
             self.curr_time += datetime.timedelta(seconds=self.sec_per_step)
             self.step += 1
 
@@ -51,35 +55,30 @@ class ReverieServer:
             return out
         return None
 
-    def move_processor(
-            self,
-            perceivements: list[PerceivingData],
-            model: LLM_API):
+    def move_processor(self, perceivements: list[PerceivingData], model: LLM_API):
         if self.loaded:
             sim_folder = f"{FS_STORAGE}/{self.client_id}/{self.sim_code}"
 
-            movements = {"persona": dict(),
-                         "meta": dict()}
+            movements = {"persona": dict(), "meta": dict()}
 
             for p in perceivements:
                 if p.name in self.personas.keys():
                     persona = self.personas[p.name]
-                    personas_data = {name: (p.scratch, p.a_mem)
-                                     for name, p in self.personas.items()}
+                    personas_data = {
+                        name: (p.scratch, p.a_mem) for name, p in self.personas.items()
+                    }
 
                     plan = persona.move(
-                        p.curr_loc,
-                        p.events,
-                        personas_data,
-                        self.curr_time,
-                        model)
+                        p.curr_loc, p.events, personas_data, self.curr_time, model
+                    )
 
                     movements["persona"][p.name] = {
                         "plan": plan,
-                        "chat": persona.scratch.chat.prints_messages_sender()
+                        "chat": persona.scratch.chat.prints_messages_sender(),
                     }
             movements["meta"]["curr_time"] = self.curr_time.strftime(
-                "%B %d, %Y, %H:%M:%S")
+                "%B %d, %Y, %H:%M:%S"
+            )
 
             self.curr_time += datetime.timedelta(seconds=self.sec_per_step)
             self.step += 1
@@ -103,7 +102,8 @@ class ReverieServer:
             # that data.curr_time conforms to the format "July 25, 2024,
             # 09:15:45"
             self.curr_time = datetime.datetime.strptime(
-                data.curr_time, "%B %d, %Y, %H:%M:%S")
+                data.curr_time, "%B %d, %Y, %H:%M:%S"
+            )
         if data.sec_per_step:
             self.sec_per_step = data.sec_per_step
 
@@ -162,8 +162,10 @@ class ReverieServer:
         return None
 
     def get_meta_data(self) -> MetaData:
-        return MetaData(curr_time=self.curr_time.strftime(
-            "%B %d, %Y, %H:%M:%S"), sec_per_step=self.sec_per_step)
+        return MetaData(
+            curr_time=self.curr_time.strftime("%B %d, %Y, %H:%M:%S"),
+            sec_per_step=self.sec_per_step,
+        )
 
     def get_saved_games(self) -> list[str]:
         return os.listdir(f"{FS_STORAGE}/{self.client_id}/")
@@ -188,12 +190,13 @@ class ReverieServer:
             reverie_meta = json.load(json_file)
 
         self.curr_time = datetime.datetime.strptime(
-            reverie_meta['curr_time'], "%B %d, %Y, %H:%M:%S")
-        self.sec_per_step = reverie_meta['sec_per_step']
-        self.step = reverie_meta['step']
+            reverie_meta["curr_time"], "%B %d, %Y, %H:%M:%S"
+        )
+        self.sec_per_step = reverie_meta["sec_per_step"]
+        self.step = reverie_meta["step"]
 
         self.personas: dict[str, Persona] = dict()
-        for persona_name in reverie_meta['persona_names']:
+        for persona_name in reverie_meta["persona_names"]:
             persona_folder = f"{sim_folder}/personas/{persona_name}"
             curr_persona = Persona(persona_name)
             curr_persona.load_from_file(persona_folder)
@@ -202,7 +205,7 @@ class ReverieServer:
         # NOTE its a single player game, so this can be adjusted to only one field of user, but for generality,
         # a dict has been chosen.
         self.users: dict[str, User] = dict()
-        for user_name in reverie_meta['user_names']:
+        for user_name in reverie_meta["user_names"]:
             curr_user = User(user_name)
             self.users[user_name] = curr_user
 
@@ -213,8 +216,7 @@ class ReverieServer:
         if self.loaded:
             reverie_meta = dict()
             reverie_meta["fork_sim_code"] = self.fork_sim_code
-            reverie_meta["curr_time"] = self.curr_time.strftime(
-                "%B %d, %Y, %H:%M:%S")
+            reverie_meta["curr_time"] = self.curr_time.strftime("%B %d, %Y, %H:%M:%S")
             reverie_meta["sec_per_step"] = self.sec_per_step
             reverie_meta["persona_names"] = list(self.personas.keys())
             reverie_meta["user_names"] = list(self.users.keys())
@@ -230,19 +232,18 @@ class ReverieServer:
 
 
 if __name__ == "__main__":
+    from LLM_Character.llm_comms.llm_openai import OpenAIComms
     from LLM_Character.persona.persona import Persona
     from LLM_Character.persona.user import User
-    from LLM_Character.llm_comms.llm_openai import OpenAIComms
-    from LLM_Character.llm_comms.llm_local import LocalComms
     from LLM_Character.util import BASE_DIR
-    import shutil
+
     print("starting take off ...")
 
     # person = Persona("Camila", BASE_DIR + "/LLM_Character/storage/initial/personas/Camila")
     person = Persona(
         "Florian",
-        BASE_DIR +
-        "/LLM_Character/storage/localhost/default/personas/Florian")
+        BASE_DIR + "/LLM_Character/storage/localhost/default/personas/Florian",
+    )
     user = User("Louis")
 
     # modelc = LocalComms()
@@ -259,21 +260,13 @@ if __name__ == "__main__":
     r = ReverieServer("sim_code", "notlocalhost")
 
     a = r.is_loaded()
-    out1 = r.prompt_processor(
-        user.scratch.name,
-        person.scratch.name,
-        message,
-        model)
+    out1 = r.prompt_processor(user.scratch.name, person.scratch.name, message, model)
     assert a == False
     assert out1 is None
 
     r.start_processor()
 
     a = r.is_loaded()
-    out1 = r.prompt_processor(
-        user.scratch.name,
-        person.scratch.name,
-        message,
-        model)
+    out1 = r.prompt_processor(user.scratch.name, person.scratch.name, message, model)
     assert a
     assert out1 is not None

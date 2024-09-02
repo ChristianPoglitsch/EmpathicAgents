@@ -1,30 +1,32 @@
-from LLM_Character.llm_comms.llm_abstract import LLMComms
-from LLM_Character.finetuning.models import load_base_model
-from LLM_Character.messages_dataclass import AIMessages, AIMessage
-
-from transformers import AutoModelForCausalLM, AutoTokenizer, GenerationConfig, AutoModel
-from sentence_transformers import SentenceTransformer
-from transformers import PreTrainedTokenizer, PreTrainedModel
-from transformers import BitsAndBytesConfig
-from openai.types import Embedding
-from peft import PeftModel
-
-import torch
-import torch.nn.functional as F
-from torch import Tensor
-
-import time
+import logging
 import os
-
-from typing import List, Optional, Union
+import time
 
 # in order to prevent the terminal to be cluttered from all the
 # torch/transformers warnings.
 import warnings
-import logging
+from typing import List, Optional, Union
 
-warnings.filterwarnings('ignore')
-logging.getLogger('transformers').setLevel(logging.ERROR)
+import torch
+from openai.types import Embedding
+from peft import PeftModel
+from sentence_transformers import SentenceTransformer
+from torch import Tensor
+from transformers import (
+    AutoModelForCausalLM,
+    AutoTokenizer,
+    BitsAndBytesConfig,
+    GenerationConfig,
+    PreTrainedModel,
+    PreTrainedTokenizer,
+)
+
+from LLM_Character.finetuning.models import load_base_model
+from LLM_Character.llm_comms.llm_abstract import LLMComms
+from LLM_Character.messages_dataclass import AIMessage, AIMessages
+
+warnings.filterwarnings("ignore")
+logging.getLogger("transformers").setLevel(logging.ERROR)
 
 
 class LocalComms(LLMComms):
@@ -57,13 +59,15 @@ class LocalComms(LLMComms):
 
         if finetuned_model_id:
             self._model, self._tokenizer = self._load_model_loc(
-                base_model_id, finetuned_model_id)
+                base_model_id, finetuned_model_id
+            )
         else:
             self._model, self._tokenizer = self._load_model_hf(base_model_id)
 
         # FIXME: change model !! cannot use mistral.
         self._embedding_model = SentenceTransformer(
-            'sentence-transformers/all-MiniLM-L6-v2')
+            "sentence-transformers/all-MiniLM-L6-v2"
+        )
 
     def send_text(self, prompt: AIMessages, max_length=100) -> Optional[str]:
         """
@@ -72,11 +76,7 @@ class LocalComms(LLMComms):
         if len(prompt) == 0:
             return None
 
-        response = self._request(
-            self._model,
-            self._tokenizer,
-            prompt,
-            max_length)
+        response = self._request(self._model, self._tokenizer, prompt, max_length)
         response_decoded = self._decode_request(response)
 
         return response_decoded
@@ -100,23 +100,24 @@ class LocalComms(LLMComms):
     # there will be parameters present in a certain model that will not be in another model etc.
     # see huggingface.
     def set_params(
-            self,
-            max_tokens: int,
-            temperature: int,
-            top_p: int,
-            amount_responses: int,
-            max_retry_attemps: int,
-            presence_penalty=None,
-            frequency_penalty=None):
-
+        self,
+        max_tokens: int,
+        temperature: int,
+        top_p: int,
+        amount_responses: int,
+        max_retry_attemps: int,
+        presence_penalty=None,
+        frequency_penalty=None,
+    ):
         if not self._validate_inputs(
-                max_tokens,
-                temperature,
-                top_p,
-                amount_responses,
-                max_retry_attemps,
-                presence_penalty,
-                frequency_penalty):
+            max_tokens,
+            temperature,
+            top_p,
+            amount_responses,
+            max_retry_attemps,
+            presence_penalty,
+            frequency_penalty,
+        ):
             return None
 
         self.max_tokens = max_tokens
@@ -134,25 +135,22 @@ class LocalComms(LLMComms):
     # FIXME: should be changed, validate the parameters via Huggingface API of the model.
     # certain models will have diferent parameters limits.
     def _validate_inputs(
-            self,
-            max_tokens,
-            temperature,
-            top_p,
-            n,
-            max_retry_attemps,
-            presence_penalty,
-            frequency_penalty):
+        self,
+        max_tokens,
+        temperature,
+        top_p,
+        n,
+        max_retry_attemps,
+        presence_penalty,
+        frequency_penalty,
+    ):
         b1 = max_tokens > 0
         b2 = temperature >= 0 and temperature <= 2
         b3 = top_p >= 0 and top_p <= 1
         b4 = n >= 1 and n <= 128
         b5 = max_retry_attemps >= 0
-        b6 = presence_penalty or (
-            presence_penalty >= -
-            2 and presence_penalty <= 2)
-        b7 = frequency_penalty or (
-            frequency_penalty >= -
-            2 and frequency_penalty <= 2)
+        b6 = presence_penalty or (presence_penalty >= -2 and presence_penalty <= 2)
+        b7 = frequency_penalty or (frequency_penalty >= -2 and frequency_penalty <= 2)
 
         if all[b1, b2, b3, b4, b5, b6, b7]:
             return True
@@ -164,20 +162,20 @@ class LocalComms(LLMComms):
     # FIXME:
     # this function should maybe be placed in models.py in finetuning,
     # some refactoring/ restructuring may be needed.
-    def _load_model_loc(self,
-                        model_id: str,
-                        finetuned_model_id) -> tuple[PreTrainedModel,
-                                                     PreTrainedTokenizer]:
+    def _load_model_loc(
+        self, model_id: str, finetuned_model_id
+    ) -> tuple[PreTrainedModel, PreTrainedTokenizer]:
         base_model = load_base_model(model_id)
         path = f"trained\\{finetuned_model_id}"
         model = PeftModel.from_pretrained(base_model, path)
         tokenizer = AutoTokenizer.from_pretrained(
-            model_id, padding_side="right", use_fast=False)
+            model_id, padding_side="right", use_fast=False
+        )
         return model, tokenizer
 
-    def _load_model_hf(self,
-                       model_id: str) -> tuple[PreTrainedModel,
-                                               PreTrainedTokenizer]:
+    def _load_model_hf(
+        self, model_id: str
+    ) -> tuple[PreTrainedModel, PreTrainedTokenizer]:
         """
         Load the model and tokenizer from the specified model ID.
 
@@ -188,14 +186,12 @@ class LocalComms(LLMComms):
         # The `load_in_4bit` and `load_in_8bit` arguments are deprecated and will be removed in the future versions.
         # Please, pass a `BitsAndBytesConfig` object in `quantization_config`
         # argument instead.
-        quantization_config = BitsAndBytesConfig(
-            load_in_4bit=True
-        )
+        quantization_config = BitsAndBytesConfig(load_in_4bit=True)
 
         model = AutoModelForCausalLM.from_pretrained(  # device_map="auto"
             model_id,
             quantization_config=quantization_config,
-            torch_dtype=torch.bfloat16
+            torch_dtype=torch.bfloat16,
         )
 
         model.config.sliding_window = 4096
@@ -207,11 +203,13 @@ class LocalComms(LLMComms):
         tokenizer.mask_token = "<mask>"
         return model, tokenizer
 
-    def _request(self,
-                 model: PreTrainedModel,
-                 tokenizer: PreTrainedTokenizer,
-                 message: Union[AIMessages, AIMessage],
-                 max_length: int) -> str:
+    def _request(
+        self,
+        model: PreTrainedModel,
+        tokenizer: PreTrainedTokenizer,
+        message: Union[AIMessages, AIMessage],
+        max_length: int,
+    ) -> str:
         """
         Generate a response from the model based on the input messages.
 
@@ -227,21 +225,21 @@ class LocalComms(LLMComms):
 
         device = "cuda"
         inputs = tokenizer.apply_chat_template(
-            message.get_formatted(),
-            return_tensors="pt").to(device)  # tokenize=False)
+            message.get_formatted(), return_tensors="pt"
+        ).to(device)  # tokenize=False)
 
         generation_config = GenerationConfig(
             do_sample=True,
             temperature=0.2,  # 1.0
             pad_token_id=tokenizer.eos_token_id,
-            max_new_tokens=max_length
+            max_new_tokens=max_length,
         )
         generation_config.eos_token_id = tokenizer.eos_token_id
 
         outputs = model.generate(inputs, generation_config=generation_config)
         response = tokenizer.decode(outputs[0], skip_special_tokens=True)
 
-        print('Processing time: ' + str(time.process_time() - start_time) + ' sec')
+        print("Processing time: " + str(time.process_time() - start_time) + " sec")
         return response
 
     def _decode_request(self, message: str) -> str:
@@ -257,33 +255,32 @@ class LocalComms(LLMComms):
         response = message.replace("[/INST]", "[INST]").split("[INST]")
         return response[len(response) - 1]
 
+    # FIXME: something completly different.
+    # source : https://huggingface.co/tasks/feature-extraction
+    # https://huggingface.co/tasks/sentence-similarity
 
-# FIXME: something completly different.
-# source : https://huggingface.co/tasks/feature-extraction
-# https://huggingface.co/tasks/sentence-similarity
+    # What is Sentence Similarity?
+    # Sentence Similarity is a task that, given a source sentence and a set of
+    # target sentences, calculates how similar the target sentences are to the
+    # source.
 
-# What is Sentence Similarity?
-# Sentence Similarity is a task that, given a source sentence and a set of
-# target sentences, calculates how similar the target sentences are to the
-# source.
+    # Sentence similarity models convert input text, like “Hello”, into vectors (called embeddings)
+    # that capture semantic information. We call this step to embed. Then, we calculate how close (similar) they are using cosine similarity.
+    # -> exactly what the paper 'generative agents' did.
 
-# Sentence similarity models convert input text, like “Hello”, into vectors (called embeddings)
-# that capture semantic information. We call this step to embed. Then, we calculate how close (similar) they are using cosine similarity.
-# -> exactly what the paper 'generative agents' did.
+    # https://stackoverflow.com/questions/60492839/how-to-compare-sentence-similarities-using-embeddings-from-bert
+    # FIXME: You should NOT use BERT's output as sentence embeddings for semantic similarity.
+    # otherwise in init, give model id for a model specifically or semtnatic
+    # comparason?
 
-
-# https://stackoverflow.com/questions/60492839/how-to-compare-sentence-similarities-using-embeddings-from-bert
-# FIXME: You should NOT use BERT's output as sentence embeddings for semantic similarity.
-# otherwise in init, give model id for a model specifically or semtnatic
-# comparason?
-
-# TODO: convert output to Optional[List[Embedding]]  !!!
+    # TODO: convert output to Optional[List[Embedding]]  !!!
 
     def _requese_emb(self, keywords: str) -> Tensor:
-        embeddings = self._embedding_model.encode(
-            keywords, convert_to_tensor=True)
+        embeddings = self._embedding_model.encode(keywords, convert_to_tensor=True)
         return embeddings.cpu().tolist()
         # return embeddings
+
+
 #
 #         OR
 #

@@ -31,18 +31,14 @@ class MemoryTree:
                     if location_name not in self.tree[world_name][city_name]:
                         self.tree[world_name][city_name][location_name] = []
 
-                    self.tree[world_name][city_name][location_name].extend(
-                        details)
-
-        # self.print_tree()
+                    self.tree[world_name][city_name][location_name].extend(details)
 
     def update_oloc(self, data: OneLocationData):
         if data.world not in self.tree:
             self.tree[data.world] = {}
         if data.sector not in self.tree[data.world]:
             self.tree[data.world][data.sector] = {}
-        if data.arena and (
-                data.arena not in self.tree[data.world][data.sector]):
+        if data.arena and (data.arena not in self.tree[data.world][data.sector]):
             self.tree[data.world][data.sector][data.arena] = []
 
     def get_info(self):
@@ -53,32 +49,17 @@ class MemoryTree:
         with open(out_json, "w") as outfile:
             json.dump(self.tree, outfile)
 
-    def print_tree(self):
-        def _print_tree(tree, depth):
-            dash = " >" * depth
-
-
-if isinstance(tree, type(list())):
-                if tree:
-                    print(dash, tree)
-                return
-
-            for key, val in tree.items():
-                if key:
-                    print(dash, key)
-                _print_tree(val, depth + 1)
-
-        _print_tree(self.tree, 0)
-
-    def get_str_accessible_sectors(self , world: str):
+    def get_str_accessible_sectors(self, world: str):
         return ", ".join(list(self.tree[world].keys()))
 
-    def get_str_accessible_sector_arenas(self, world: str, sector: Union[str,None]):
+    def get_str_accessible_sector_arenas(self, world: str, sector: Union[str, None]):
         if not sector:
             return ""
         return ", ".join(list(self.tree[world][sector].keys()))
 
-    def get_str_accessible_arena_game_objects(self, world: str, sector: Union[str,None], arena:Union[str,None]):
+    def get_str_accessible_arena_game_objects(
+        self, world: str, sector: Union[str, None], arena: Union[str, None]
+    ):
         if not arena:
             return ""
         try:
@@ -88,16 +69,14 @@ if isinstance(tree, type(list())):
         return x
 
 
-if __name__ == '__main__':
-    f = f"..\\..\\storage\initial\personas\Isabella\spatial_memory.json"
+if __name__ == "__main__":
+    f = "..\\..\\storage\\initial\\personas\\Isabella\\spatial_memory.json"
     x = MemoryTree(f)
 
-    # print(x.get_str_accessible_sector_arenas("dolores double studio:double studio"))
     print(x.get_str_accessible_sectors("Kortrijk"))
-    print(x.get_str_accessible_sector_arenas(
-        "Kortrijk", "Beguinage of Courtrai"))
+    print(x.get_str_accessible_sector_arenas("Kortrijk", "Beguinage of Courtrai"))
     print(
         x.get_str_accessible_arena_game_objects(
-        "Kortrijk",
-        "Beguinage of Courtrai",
-        "supply store"))
+            "Kortrijk", "Beguinage of Courtrai", "supply store"
+        )
+    )

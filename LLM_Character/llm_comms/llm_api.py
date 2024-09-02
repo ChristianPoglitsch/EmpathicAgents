@@ -1,16 +1,15 @@
-from LLM_Character.messages_dataclass import AIMessages, AIMessage
-from LLM_Character.llm_comms.llm_abstract import LLMComms
-from LLM_Character.llm_comms.llm_local import LocalComms
-from LLM_Character.llm_comms.llm_openai import OpenAIComms
-from sentence_transformers import util
+import logging
 
 # in order to prevent the terminal to be cluttered from all the
 # torch/transformers warnings.
 import warnings
-import logging
 
-warnings.filterwarnings('ignore')
-logging.getLogger('transformers').setLevel(logging.ERROR)
+from LLM_Character.llm_comms.llm_abstract import LLMComms
+from LLM_Character.llm_comms.llm_local import LocalComms
+from LLM_Character.messages_dataclass import AIMessage, AIMessages
+
+warnings.filterwarnings("ignore")
+logging.getLogger("transformers").setLevel(logging.ERROR)
 
 # make safe request by making the prompt safe. see gpt_structure.
 #   prompt = 'GPT-3 Prompt:\n"""\n' + prompt + '\n"""\n'
@@ -19,7 +18,7 @@ logging.getLogger('transformers').setLevel(logging.ERROR)
 #   prompt += '{"output": "' + str(example_output) + '"}'
 
 
-class LLM_API():
+class LLM_API:
     """
     A class to handle operations related to LLM models,
     including loading models, querying models, and summarizing messages.
@@ -51,9 +50,9 @@ class LLM_API():
     def query_chat_summary(self, chat: AIMessages) -> tuple[AIMessages, str]:
         user_messages_concatenated = chat.get_user_message()
         message = AIMessage(
-            "Summerize the chat: " +
-            user_messages_concatenated.get_user_message(),
-            "user")
+            "Summerize the chat: " + user_messages_concatenated.get_user_message(),
+            "user",
+        )
 
         messages = AIMessages()
         messages.add_message(message)
@@ -74,7 +73,7 @@ class LLM_API():
 
 if __name__ == "__main__":
     x = LocalComms()
-#    model_id = "mistralai/Mistral-7B-Instruct-v0.2"
+    #    model_id = "mistralai/Mistral-7B-Instruct-v0.2"
     model_id = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
 
     x.init(model_id)
@@ -87,13 +86,12 @@ if __name__ == "__main__":
 
     messages = AIMessages()
     m1 = AIMessage("Hello, how are you?", "user")
-    m2 = AIMessage(
-        "I'm fine, thank you! How can I assist you today?",
-        "assistant")
+    m2 = AIMessage("I'm fine, thank you! How can I assist you today?", "assistant")
     m3 = AIMessage("Can you tell me a joke?", "user")
     m4 = AIMessage(
         "Why don't scientists trust atoms? Because they make up everything!",
-        "assistant")
+        "assistant",
+    )
 
     messages.add_message(m1)
     messages.add_message(m2)
