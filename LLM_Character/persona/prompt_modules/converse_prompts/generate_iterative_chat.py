@@ -19,7 +19,8 @@ def _create_prompt_input_1(uscratch:UserScratch,
                          ca_mem:AssociativeMemory, 
                          retrieved:dict[str, list[ConceptNode]], 
                          curr_context:str, 
-                         curr_chat:list[AIMessage]): 
+                         curr_chat:list[AIMessage], 
+                         ending: str): 
 
     prev_convo_insert = "\n"
     if ca_mem.seq_chat:
@@ -65,8 +66,8 @@ def _create_prompt_input_1(uscratch:UserScratch,
                     uscratch.name,
                     convo_str,
                     cscratch.curr_emotion,
-                    trust_str 
-                    ]
+                    trust_str,
+                    ending]
     return prompt_input
 def _create_prompt_input_2(cscratch:PersonaScratch, 
                          curr_chat:list[AIMessage]): 
@@ -132,7 +133,7 @@ def _validate_response(output:str, clean_up_response:callable):
 def _get_fail_safe(): 
     return {"utterance": "...", "end": False}
 
-def _get_valid_output(model, prompt, clean_up_response:callable, counter_limit):
+def _get_valid_output(model:LLM_API, prompt, clean_up_response:callable, counter_limit):
     for _ in range(counter_limit):
         output = model.query_text(prompt).strip()
         success = _validate_response(output, clean_up_response)
@@ -148,43 +149,55 @@ def run_prompt_iterative_chat(uscratch:UserScratch,
                               curr_context:str, 
                               curr_chat:list[AIMessage], 
                               verbose=False) -> Union[str, dict[str, str]]:
-    prompt_template = BASE_DIR + "/LLM_Character/persona/prompt_modules/templates/iterative_convo.txt" 
-    prompt_input = _create_prompt_input_1(uscratch, cscratch, camem, retrieved, curr_context, curr_chat)
+    prompt_template = BASE_DIR + "/LLM_Character/persona/prompt_modules/templates/is_convo_ending.txt" 
+    prompt_input = _create_prompt_input_2(cscratch, curr_chat)
     prompt = generate_prompt(prompt_input, prompt_template)
     
-    # print("BEGIN 1") 
-    # print(prompt)
-
     am = AIMessages()
     am.add_message(prompt, None, "user", "system")
-   
+    output2 = _get_valid_output(model, am, _clean_up_response_2, COUNTER_LIMIT)
+
+    prompt_template = BASE_DIR + "/LLM_Character/persona/prompt_modules/templates/iterative_convo.txt" 
+    prompt_input = _create_prompt_input_1(uscratch, cscratch, camem, retrieved, curr_context, curr_chat, output2["end"])
+    prompt = generate_prompt(prompt_input, prompt_template)
+    
+    am = AIMessages()
+    am.add_message(prompt, None, "user", "system")
     output1 = _get_valid_output(model, am, _clean_up_response_1, COUNTER_LIMIT)
 
-    message = output1["utterance"]
-    new_chat = curr_chat + [AIMessage(cscratch.name, message, "user", "MessageAI")] 
-    
-    prompt_template = BASE_DIR + "/LLM_Character/persona/prompt_modules/templates/is_convo_ending.txt" 
-    prompt_input = _create_prompt_input_2(cscratch, new_chat)
-    prompt = generate_prompt(prompt_input, prompt_template)
-    
-    # print("BEGIN 2") 
-    # print(prompt)
-    
-    am = AIMessages()
-    am.add_message(prompt, None, "user", "system")
-    
-    output2 = _get_valid_output(model, am, _clean_up_response_2, COUNTER_LIMIT)
     return output1, output2 
+
 
 if __name__ == "__main__":
     from LLM_Character.llm_comms.llm_local import LocalComms
+    from LLM_Character.llm_comms.llm_openai import OpenAIComms 
     from LLM_Character.persona.persona import Persona
+    from LLM_Character.persona.user import User
+    import torch
+    import datetime
 
-    person = Persona("FRERO", "nice")
+    # Set HF_HOME for cache folder
+    # CUDA recommended!
+    print("CUDA found " + str(torch.cuda.is_available()))
 
-    modelc = LocalComms()
     model_id = "mistralai/Mistral-7B-Instruct-v0.2"
+    modelc = LocalComms()
+    # model_id = "gpt-4"
+    # modelc = OpenAIComms()
     modelc.init(model_id)
-
     model = LLM_API(modelc)
-    # run_prompt_iterative_chat(Null,Null, Null, Null, Null, "", "")
+
+    person = Persona("Florian")
+    person.load_from_file(BASE_DIR + "/LLM_Character/storage/localhost/default/personas/Florian")
+    
+    user = User("Louis")
+   
+    user_scratch = user.scratch 
+    # message = "hi!!"
+    message = "bye, see you later"
+    curr_time =  datetime.datetime.strptime("July 25, 2024, 09:15:45",  "%B %d, %Y, %H:%M:%S") 
+    y = person.open_convo_session(user_scratch, message, curr_time, model) 
+    print(y)
+
+    # x = run_prompt_iterative_chat(user_scratch, person.scratch, person.a_mem, model, {}, "", [])
+    # print(x)

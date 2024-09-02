@@ -100,8 +100,7 @@ class Persona:
                         message:str,
                         curr_time:str,
                         model:LLM_API) -> Tuple[str, str, int]: 
-    # FIXME:
-    # self.scratch.curr_time = curr_time
+    self.scratch.curr_time = curr_time
     return chatting(user_scratch, 
                     self.scratch, 
                     self.a_mem,

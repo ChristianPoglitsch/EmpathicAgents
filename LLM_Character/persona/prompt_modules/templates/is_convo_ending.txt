@@ -5,14 +5,39 @@ is_convo_ending.txt
 !<INPUT 1>! -- persona name
 
 <commentblockmarker>###</commentblockmarker>
-Task: determine wether the conversation has ended or not. 
-Here is an extract of a chat:
 
+The follwing is an extract of a chat conversation: 
 !<INPUT 0>!
 
+You have been given an extract of a chat conversation. 
+Based on this extract, you need to determine whether the conversation has ended. 
+The persona's name is provided by !<INPUT 1>!. Your task is to analyze the extract and 
+decide if the conversation should end with the last utterance from the persona identified by !<INPUT 1>!.
 
-Format your response in JSON with format 
+Please respond with the following JSON structure:
 {
-"End the conversation with !<INPUT 1>!'s utterance?: "<json Boolean>"
+  "End the conversation with !<INPUT 1>!'s utterance?": "<json Boolean>"
 }
-No text outside JSON struct allowed. 
+
+Examples:
+    Input:
+    !<INPUT 1>!: I'm good, thank you for asking! How can I help you today?
+    User: bye.
+    !<INPUT 1>!: oh, that was soon, you sure dont wanna share some info with me?  
+
+    Output:
+    {
+    "End the conversation with !<INPUT 1>!'s utterance?": "true"
+    }
+
+    Input:
+    User: Thanks for your help!
+    !<INPUT 1>!: You're welcome. If you have any more questions, feel free to ask.
+    User: No, that will be all for now.
+
+    Output:
+    {
+      "End the conversation with !<INPUT 1>!'s utterance?": "true"
+    }
+
+Note: Ensure your response is formatted strictly according to the JSON structure provided.

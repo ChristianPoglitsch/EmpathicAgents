@@ -184,7 +184,7 @@ class LocalComms(LLMComms):
         Returns:
             str: The model's response.
         """
-        startTime = time.process_time()
+        start_time = time.process_time()
         
         device = "cuda"
         inputs = tokenizer.apply_chat_template(message.get_formatted(), return_tensors="pt").to(device)  # tokenize=False)
@@ -200,7 +200,7 @@ class LocalComms(LLMComms):
         outputs = model.generate(inputs, generation_config=generation_config)
         response = tokenizer.decode(outputs[0], skip_special_tokens=True)
     
-        print('Processing time: ' + str(time.process_time() - startTime) + ' sec')
+        print('Processing time: ' + str(time.process_time() - start_time) + ' sec')
         return response
 
     def _decode_request(self, message:str) -> str:
