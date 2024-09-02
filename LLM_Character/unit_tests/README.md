@@ -1,3 +1,3 @@
-# TODO
+# Info
 
-ibrahim : add explanatio
+Some examples in order to understand the codebase. 
