@@ -3,10 +3,11 @@
 import json
 from typing import List, Union
 
+
 class AIMessage:
     """A single message of a chat."""
 
-    def __init__(self, sender:str, message:str, role: str, class_type:str):
+    def __init__(self, sender: str, message: str, role: str, class_type: str):
         """
         Initializes the AIMessage instance.
 
@@ -19,7 +20,7 @@ class AIMessage:
         self.message = message
         self.role = role
         self.sender = sender
-        self.class_type= class_type 
+        self.class_type = class_type
 
     def get_formatted(self) -> dict[str, str]:
         """
@@ -42,7 +43,7 @@ class AIMessage:
         """
         return "[" + self.role + "] " + self.message + "\n"
 
-    def print_message_sender(self) -> str : 
+    def print_message_sender(self) -> str:
         """
         Formats the message as a string with the format `sender: content \\n`.
         """
@@ -62,7 +63,7 @@ class AIMessage:
             return self.message
         return None
 
-    def get_message(self) -> str: 
+    def get_message(self) -> str:
         return self.message
 
     def get_role(self) -> str:
@@ -93,7 +94,12 @@ class AIMessages:
     def __init__(self):
         self.messages: List[AIMessage] = []
 
-    def add_message(self, message: str, sender:str, role: str, class_type:str):
+    def add_message(
+            self,
+            message: str,
+            sender: str,
+            role: str,
+            class_type: str):
         """
         Creates an AIMessage instance with the given `message` and `role`.
 
@@ -105,6 +111,7 @@ class AIMessages:
             AIMessage: The created AIMessage instance.
         """
         self.messages.append(AIMessage(sender, message, role, class_type))
+
     def get_messages(self) -> List[AIMessage]:
         """
         Retrieves all the messages stored in this chat.
@@ -177,7 +184,7 @@ class AIMessages:
         """
         with open(file_path, "w") as json_file:
             json.dump(self.get_formatted(), json_file, indent=4)
-    
+
     @staticmethod
     def read_messages_from_json(file_path):
         """
@@ -190,7 +197,7 @@ class AIMessages:
             AIMessages: An AIMessages instance populated with the messages read from the file.
         """
         messages_ai = AIMessages()
-        try :
+        try:
             with open(file_path, "r") as json_file:
                 data = json.load(json_file)
                 for item in data:
@@ -202,8 +209,8 @@ class AIMessages:
         finally:
             return messages_ai
 
-    def  __len__(self):
-        return  len(self.messages)
+    def __len__(self):
+        return len(self.messages)
 
 
 if __name__ == "__main__":
@@ -215,7 +222,7 @@ if __name__ == "__main__":
     print("\n")
     print("--------------------")
     print("\n")
-    
+
     ai_message = AIMessage("Hallo", "user", class_type="MessageAI")
     print("message_formatted: ", ai_message.get_message_formatted())
     print("print_message: ", ai_message.print_message())
@@ -233,17 +240,18 @@ if __name__ == "__main__":
     aimessages.add_message(AIMessage("How are you?", "user"))
 
     print("get_messages_formatted: ", aimessages.get_messages_formatted())
-    
+
     file_path = "dialogues/test_messages.json"
     aimessages.write_messages_to_json(file_path)
     print(f"written to {file_path}")
 
-    print("read from JSON: ", AIMessages.read_messages_from_json(file_path).prints_messages())
+    print("read from JSON: ", AIMessages.read_messages_from_json(
+        file_path).prints_messages())
 
     print("\n")
     print("--------------------")
     print("\n")
-    
+
     struct_message = {
         "message": "Hello",
         "Trust": "3",
@@ -257,21 +265,19 @@ if __name__ == "__main__":
     messages_dict = m.get_message_formatted()
     print("serialised_message: ", messages_dict)
 
-
-
     print("\n")
     print("--------------------")
     print("\n")
 
     aimessages = AIMessages()
-    aimessage  = AIMessage("Hello", "user")
+    aimessage = AIMessage("Hello", "user")
     aimessages.add_message(aimessage)
     aimessages.add_message(AIMessage("Hi", "assistant"))
     aimessages.add_message(AIMessage("How are you?", "user"))
 
     # b = [i.__dict__ for i in aimessages.get_messages()]
     b = aimessages.get_messages_formatted()
-    print(b)    
+    print(b)
     print("--------------------")
 
     json_string2 = json.dumps(b)

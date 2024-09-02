@@ -1,5 +1,5 @@
-﻿from transformers import AutoModelForCausalLM, AutoTokenizer, GenerationConfig, BitsAndBytesConfig
-from peft import  PeftModel
+from transformers import AutoModelForCausalLM, AutoTokenizer, GenerationConfig, BitsAndBytesConfig
+from peft import PeftModel
 
 from training import train_mistral, train_model
 from models import load_base_model, load_mistral_instr_model, load_pipeline, generate_pipe_text, generate_text
@@ -10,14 +10,17 @@ from datasets import load_dataset
 import torch
 import os
 
-# in order to prevent the terminal to be cluttered from all the torch/transformers warnings. 
+# in order to prevent the terminal to be cluttered from all the
+# torch/transformers warnings.
 import warnings
 import logging
 
 warnings.filterwarnings('ignore')
 logging.getLogger('transformers').setLevel(logging.ERROR)
 
-# QUESTION: why does the pipeline function perform better than the generate_text function. What kind of pre/processing is being missed? 
+# QUESTION: why does the pipeline function perform better than the
+# generate_text function. What kind of pre/processing is being missed?
+
 
 def load_and_train_mistral_example():
 
@@ -32,10 +35,15 @@ def load_and_train_mistral_example():
 
     pipe = load_pipeline(model, tokenizer, max_length)
 
-    for prompt in prompts: 
+    for prompt in prompts:
         text1 = generate_pipe_text(pipe, f"<s>[INST] {prompt} [/INST]")
-        text2 = generate_text(prompt, model, tokenizer, generation_config, max_length)
-        
+        text2 = generate_text(
+            prompt,
+            model,
+            tokenizer,
+            generation_config,
+            max_length)
+
         print("\n " + prompt)
         print_generated_text("before fine tuning", prompt, text1, text2)
 
@@ -45,50 +53,75 @@ def load_and_train_mistral_example():
     tokenizer = trainer.tokenizer
 
     text1 = generate_pipe_text(pipe, f"<s>[INST] {prompt} [/INST]")
-    text2 = generate_text(prompt, model, tokenizer, generation_config, max_length)
-    
-    for prompt in prompts: 
+    text2 = generate_text(
+        prompt,
+        model,
+        tokenizer,
+        generation_config,
+        max_length)
+
+    for prompt in prompts:
         text1 = generate_pipe_text(pipe, f"<s>[INST] {prompt} [/INST]")
-        text2 = generate_text(prompt, model, tokenizer, generation_config, max_length)
-        
+        text2 = generate_text(
+            prompt,
+            model,
+            tokenizer,
+            generation_config,
+            max_length)
+
         print_generated_text("\n after fine tuning", prompt, text1, text2)
+
 
 def load_mistral_example():
     model, tokenizer = load_mistral_instr_model()
-    
-    adapters_id = "trained\Mistral-7b-v2-finetune"
+
+    adapters_id = "trained\\Mistral-7b-v2-finetune"
     model = PeftModel.from_pretrained(model, adapters_id)
 
     question = 'What is the research focus of Christian Poglitsch from Austria?'
     generation_config = GenerationConfig(temperature=0.1)
-    
-    text1 = generate_text(question, model, tokenizer, generation_config, 50)      
+
+    text1 = generate_text(question, model, tokenizer, generation_config, 50)
     print_generated_text("\n after fine tuning", question, text1, "")
+
 
 def run_formatting_example(model_id):
     model = AutoModelForCausalLM.from_pretrained(model_id,
-                                                 load_in_4bit=True, # Lade Modell 4-Bit quantisiert
-                                                 torch_dtype=torch.bfloat16, # Verwende BFloat16-Datentyp für Berechnungen
-                                                 device_map="auto" # Weise Modellgewichtungen automatisch zu: GPU > CPU > Festplatte
+                                                 load_in_4bit=True,  # Lade Modell 4-Bit quantisiert
+                                                 torch_dtype=torch.bfloat16,  # Verwende BFloat16-Datentyp für Berechnungen
+                                                 device_map="auto"  # Weise Modellgewichtungen automatisch zu: GPU > CPU > Festplatte
                                                  )
-    tokenizer = AutoTokenizer.from_pretrained(model_id, padding_side="right", use_fast=False)
+    tokenizer = AutoTokenizer.from_pretrained(
+        model_id, padding_side="right", use_fast=False)
 
     torch.manual_seed(1337)
 
     generation_config = GenerationConfig(
-        temperature=0.1, # Diversity of the generated text , "greedy vs random" "exploration vs exploitation" choice for probability of the prediction of the next token,  (<1 makes the results more deterministic, while >1 increases randomness in choosing the next token)
-        top_k=40,        # Select the next token from the 40 most likely next tokens (kNN strategy)
+        temperature=0.1,
+        # Diversity of the generated text , "greedy vs random" "exploration vs
+        # exploitation" choice for probability of the prediction of the next
+        # token,  (<1 makes the results more deterministic, while >1 increases
+        # randomness in choosing the next token)
+        # Select the next token from the 40 most likely next tokens (kNN
+        # strategy)
+        top_k=40,
         top_p=0.75,      # Choose the next output token from a subset of all likely next tokens where the cumulative probability of the subset is greater than 0.75. Since top_k is also defined, the subset contains at most 40 tokens.
     )
 
     prompt = "Question: How many federal states does Germany have? Answer:"
-    generated_text = generate_text(prompt, model, tokenizer, generation_config, 30) # .split("Answer:")[1]
+    generated_text = generate_text(
+        prompt,
+        model,
+        tokenizer,
+        generation_config,
+        30)  # .split("Answer:")[1]
     # loop
     print_generated_text("", prompt, generated_text, "")
 
     prompt = "I have extreme pain in my lower back."
     formatted_prompt = get_formatted_prompt(prompt)
-    generated_text = generate_text(formatted_prompt, model, tokenizer, None, 60)
+    generated_text = generate_text(
+        formatted_prompt, model, tokenizer, None, 60)
     print_generated_text("", prompt, generated_text, "")
 
     # formatted_prompt = get_formatted_prompt(prompt)
@@ -96,23 +129,34 @@ def run_formatting_example(model_id):
     # outputs = model.generate(inputs=inputs.input_ids, max_new_tokens=60)
     # print(tokenizer.decode(outputs[0], skip_special_tokens=True))
 
+
 def run_train_model_example(model_id, trained_path):
 
-    tokenizer = AutoTokenizer.from_pretrained(model_id, padding_side="right", use_fast=False)
+    tokenizer = AutoTokenizer.from_pretrained(
+        model_id, padding_side="right", use_fast=False)
 
     def preprocess_function(sample):
         MAX_SEQUENCE_LENGTH = 512
         preprocessed_prompt = ""
 
-        # Jeder Turn besteht aus menschlicher Anweisung und Antwort vom Assistenten
+        # Jeder Turn besteht aus menschlicher Anweisung und Antwort vom
+        # Assistenten
         turn_delimiter = "### Human:"
-        turns = [turn_delimiter + turn for turn in sample['text'].split(turn_delimiter) if turn]
+        turns = [
+            turn_delimiter +
+            turn for turn in sample['text'].split(turn_delimiter) if turn]
         for turn in turns:
-            # Verarbeite Turn nur wenn Antwort vom Assistenten ebenfalls enthalten ist
+            # Verarbeite Turn nur wenn Antwort vom Assistenten ebenfalls
+            # enthalten ist
             if "### Assistant:" in turn:
-                # Jeder Turn beginnt mit einem Satzbeginn- und endet mit einem Satzende-Token
+                # Jeder Turn beginnt mit einem Satzbeginn- und endet mit einem
+                # Satzende-Token
                 preprocessed_prompt += tokenizer.bos_token + turn + tokenizer.eos_token
-        result = tokenizer(preprocessed_prompt, max_length=MAX_SEQUENCE_LENGTH, truncation=True, add_special_tokens=False)
+        result = tokenizer(
+            preprocessed_prompt,
+            max_length=MAX_SEQUENCE_LENGTH,
+            truncation=True,
+            add_special_tokens=False)
 
         result["labels"] = result["input_ids"].copy()
         return result
@@ -123,13 +167,21 @@ def run_train_model_example(model_id, trained_path):
 
     # ---
     bnb_config = BitsAndBytesConfig(
-        load_in_4bit=True, # Modell wird 4-Bit quantisiert geladen
-        bnb_4bit_use_double_quant=True, # Quantisiuerungskonstanten werden ebenfalls quantisiert (reduziert Speicherbedarf)
-        bnb_4bit_quant_type="nf4", # spezifischer Datentyp 'nf4' wird als 4-Bit Datentyp verwendet (optimal für normalverteilte Modellgewichtungen)
-        bnb_4bit_compute_dtype=torch.bfloat16 # Datentyp 'bfloat16' wird für Berechnungen verwendet. Hierfür werden 4-Bit Modellgewichtungen bzw. Teile der Gewichtungen zur Laufzeit zu BFloat16 dequantisiert sodass Matrizenmultiplikation mit 16-bit Genauigkeit durchgeführt werden können
+        load_in_4bit=True,  # Modell wird 4-Bit quantisiert geladen
+        bnb_4bit_use_double_quant=True,
+        # Quantisiuerungskonstanten werden ebenfalls quantisiert (reduziert
+        # Speicherbedarf)
+        bnb_4bit_quant_type="nf4",
+        # spezifischer Datentyp 'nf4' wird als 4-Bit Datentyp verwendet
+        # (optimal für normalverteilte Modellgewichtungen)
+        bnb_4bit_compute_dtype=torch.bfloat16  # Datentyp 'bfloat16' wird für Berechnungen verwendet. Hierfür werden 4-Bit Modellgewichtungen bzw. Teile der Gewichtungen zur Laufzeit zu BFloat16 dequantisiert sodass Matrizenmultiplikation mit 16-bit Genauigkeit durchgeführt werden können
     )
 
-    model = AutoModelForCausalLM.from_pretrained(model_id, quantization_config=bnb_config, device_map="auto", torch_dtype=torch.bfloat16)
+    model = AutoModelForCausalLM.from_pretrained(
+        model_id,
+        quantization_config=bnb_config,
+        device_map="auto",
+        torch_dtype=torch.bfloat16)
     model.config.torch_dtype = torch.bfloat16
 
     trainer = train_model(model, tokenizer, trained_path)
@@ -141,11 +193,13 @@ def run_train_model_example(model_id, trained_path):
     outputs = model.generate(inputs=inputs.input_ids, max_new_tokens=300)
     print(tokenizer.decode(outputs[0], skip_special_tokens=True))
 
+
 def run_trained_model(model_id, trained_path):
     adapters_id = trained_path
     base_model = load_base_model(model_id)
     model = PeftModel.from_pretrained(base_model, adapters_id)
-    tokenizer = AutoTokenizer.from_pretrained(model_id, padding_side="right", use_fast=False)
+    tokenizer = AutoTokenizer.from_pretrained(
+        model_id, padding_side="right", use_fast=False)
 
     prompt = "Ich habe extreme Schmerzen im unteren Rücken."
     formatted_prompt = get_formatted_prompt(prompt)
@@ -157,12 +211,12 @@ def run_trained_model(model_id, trained_path):
 
 # --- main function ---
 if __name__ == "__main__":
-    path = os.getcwd() 
+    path = os.getcwd()
     # Extracting all the contents in the directory corresponding to path
-    l_files = os.listdir(path) 
+    l_files = os.listdir(path)
 
     load_and_train_mistral_example()
-    
+
     # load_and_train_mistral_example()
     # load_mistral_example()
 
@@ -170,6 +224,6 @@ if __name__ == "__main__":
     # trained_path = "thisserand/health_care_german"
 
     run_formatting_example(model_id)
-    # FIXME: 
+    # FIXME:
     # run_train_model_example(model_id, trained_path)
     # run_trained_model(model_id, trained_path)

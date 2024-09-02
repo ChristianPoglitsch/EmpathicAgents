@@ -17,7 +17,7 @@ def retrieve_recent_sorted_nodes(a_mem: AssociativeMemory):
     return nodes
 
 
-def extract_recency(scratch:PersonaScratch, nodes:list[ConceptNode]):
+def extract_recency(scratch: PersonaScratch, nodes: list[ConceptNode]):
     recency_vals = [scratch.recency_decay ** i
                     for i in range(1, len(nodes) + 1)]
 
@@ -27,14 +27,18 @@ def extract_recency(scratch:PersonaScratch, nodes:list[ConceptNode]):
     return recency_out
 
 
-def extract_importance(nodes:list[ConceptNode]):
+def extract_importance(nodes: list[ConceptNode]):
     importance_out = dict()
-    for _ , node in enumerate(nodes):
+    for _, node in enumerate(nodes):
         importance_out[node.node_id] = node.poignancy
     return importance_out
 
 
-def extract_relevance(a_mem:AssociativeMemory, nodes:list[ConceptNode], focal_pt:str, model: LLM_API):
+def extract_relevance(
+        a_mem: AssociativeMemory,
+        nodes: list[ConceptNode],
+        focal_pt: str,
+        model: LLM_API):
     focal_embedding = model.get_embedding(focal_pt)
     relevance_out = dict()
     for _, node in enumerate(nodes):
@@ -43,7 +47,7 @@ def extract_relevance(a_mem:AssociativeMemory, nodes:list[ConceptNode], focal_pt
     return relevance_out
 
 
-def cos_sim(a:list[float], b:list[float]):
+def cos_sim(a: list[float], b: list[float]):
     return util.pytorch_cos_sim(a, b)
     # return dot(a, b)/(norm(a)*norm(b))
 
@@ -56,15 +60,15 @@ def normalize_dict_floats(d: dict, target_min: float, target_max: float):
 
         if range_val == 0:
             for key, val in d.items():
-                d[key] = (target_max - target_min)/2
+                d[key] = (target_max - target_min) / 2
         else:
             for key, val in d.items():
                 d[key] = ((val - min_val) * (target_max - target_min)
-                        / range_val + target_min)
+                          / range_val + target_min)
     return d
 
 
-def top_highest_x_values(d:dict, x:int):
+def top_highest_x_values(d: dict, x: int):
     top_v = dict(sorted(d.items(),
                         key=lambda item: item[1],
                         reverse=True)[:x])

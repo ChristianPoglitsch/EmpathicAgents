@@ -1,16 +1,17 @@
 from abc import ABC, abstractmethod
 
+
 class LLMComms(ABC):
     @abstractmethod
     def init():
         pass
-    
+
     @abstractmethod
-    def send_text(self, message:str):
+    def send_text(self, message: str):
         pass
 
     @abstractmethod
-    def send_embedding(text:str):
+    def send_embedding(text: str):
         pass
 
     @abstractmethod
