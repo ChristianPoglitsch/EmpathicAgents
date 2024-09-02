@@ -1,3 +1,6 @@
+# see paper for overall explanation of the design.
+Ibrahim: add link
+
 # tasks
 
 * would recommend converting from udp to tcp, as the communication doesnt happen frequently, and you want your initial data to be sent in without data loss. 
