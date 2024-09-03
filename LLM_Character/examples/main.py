@@ -1,7 +1,7 @@
 import json
 import logging
-
-import torch
+import shutil
+import threading
 
 from LLM_Character.communication.incoming_messages import (
     AddPersonaMessage,
@@ -13,7 +13,7 @@ from LLM_Character.communication.incoming_messages import (
     GetPersonasMessage,
     GetSavedGamesMessage,
     GetUsersMessage,
-    MessageTypes,
+    MessageType,
     MetaData,
     MoveMessage,
     OneLocationData,
@@ -31,49 +31,64 @@ from LLM_Character.communication.incoming_messages import (
     UserData,
 )
 from LLM_Character.communication.message_processor import MessageProcessor
+from LLM_Character.communication.outgoing_messages import (
+    AddPersonaResponse,
+    ErrorResponse,
+    GetMetaResponse,
+    GetPersonaResponse,
+    GetPersonasResponse,
+    GetSavedGamesResponse,
+    GetUsersResponse,
+    MoveResponse,
+    PromptReponse,
+    StartResponse,
+    UpdateMetaResponse,
+    UpdatePersonaResponse,
+    UpdateUserResponse,
+)
 from LLM_Character.communication.reverieserver_manager import ReverieServerManager
 from LLM_Character.communication.udp_comms import UdpComms
 from LLM_Character.llm_comms.llm_api import LLM_API
 from LLM_Character.llm_comms.llm_local import LocalComms
 from LLM_Character.llm_comms.llm_openai import OpenAIComms
 from LLM_Character.main import start_server
-from LLM_Character.util import receive
-
-logging.basicConfig(
-    level=logging.DEBUG, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
+from LLM_Character.util import BASE_DIR, LOGGER_NAME, receive, setup_logging
 
 # --------------------------------------------------------------------------------------
 # START SERVER WITH THE FOLLOWING EXAMPLES USING OPENAI.
 # --------------------------------------------------------------------------------------
 
 
-def running_examples(client_sock: UdpComms, sim):
+def running_examples(client_sock: UdpComms):
     start_mess = StartMessage(
-        type=MessageTypes.STARTMESSAGE,
-        data=StartData(fork_sim_code="FORK123", sim_code=sim),
+        type=MessageType.STARTMESSAGE,
+        data=StartData(fork_sim_code="FORK123", sim_code="SIM456"),
     )
 
     json1 = start_mess.model_dump_json()
     client_sock.SendData(json1)
     response = receive(client_sock)
+    logger.info(response)
     assert response is not None
+    _ = StartResponse(**json.loads(response))
 
     # ------------------------------------------
 
     prompt_mess = PromptMessage(
-        type=MessageTypes.PROMPTMESSAGE,
+        type=MessageType.PROMPTMESSAGE,
         data=PromptData(persona_name="Camila", user_name="Louis", message="hi"),
     )
     json2 = prompt_mess.model_dump_json()
     client_sock.SendData(json2)
     response = receive(client_sock)
+    logger.info(response)
     assert response is not None
+    _ = PromptReponse(**json.loads(response))
 
     # ------------------------------------------
 
     move_mess = MoveMessage(
-        type=MessageTypes.MOVEMESSAGE,
+        type=MessageType.MOVEMESSAGE,
         data=[
             PerceivingData(
                 name="Camila",
@@ -88,7 +103,32 @@ def running_examples(client_sock: UdpComms, sim):
                         action_event_predicate=None,
                         action_event_object=None,
                         action_event_description=None,
-                    )
+                    ),
+                    # object always need to have hierarchy in subject!
+                    EventData(
+                        action_event_subject="Graz:Saint Martin's Church:cafe:Hammer",
+                        action_event_predicate=None,
+                        action_event_object=None,
+                        action_event_description=None,
+                    ),
+                    EventData(
+                        action_event_subject="Graz:Saint Martin's Church:cafe:Sword",
+                        action_event_predicate=None,
+                        action_event_object=None,
+                        action_event_description=None,
+                    ),
+                    EventData(
+                        action_event_subject="Graz:Saint Martin's Church:cafe:Bible",
+                        action_event_predicate=None,
+                        action_event_object=None,
+                        action_event_description=None,
+                    ),
+                    EventData(
+                        action_event_subject="Camila",
+                        action_event_predicate="is using",
+                        action_event_object="knife",
+                        action_event_description="using knife to cut an arm of",
+                    ),
                 ],
             )
         ],
@@ -97,24 +137,40 @@ def running_examples(client_sock: UdpComms, sim):
     json3 = move_mess.model_dump_json()
     client_sock.SendData(json3)
     response = receive(client_sock)
+    logger.info(response)
     assert response is not None
-
+    _ = MoveResponse(**json.loads(response))
     # ------------------------------------------
 
     update_meta_mess = UpdateMetaMessage(
-        type=MessageTypes.UPDATE_META_MESSAGE,
-        data=MetaData(curr_time="July 25, 2024, 09:15:45", sec_per_step=30),
+        type=MessageType.UPDATE_META_MESSAGE,
+        data=MetaData(
+            curr_time="July 25, 2024, 18:15:45",
+            # sec_per_step=25
+        ),
     )
 
     json4 = update_meta_mess.model_dump_json()
-    client_sock.SendData(json.dumps(json4))
+    client_sock.SendData(json4)
     response = receive(client_sock)
+    logger.info(response)
     assert response is not None
+    _ = UpdateMetaResponse(**json.loads(response))
+
+    # -----------------------------------------
+
+    # send move again.
+    gson = move_mess.model_dump_json()
+    client_sock.SendData(gson)
+    response = receive(client_sock)
+    logger.info(response)
+    assert response is not None
+    _ = MoveResponse(**json.loads(response))
 
     # ------------------------------------------
 
     update_persona_mess = UpdatePersonaMessage(
-        type=MessageTypes.UPDATE_PERSONA_MESSAGE,
+        type=MessageType.UPDATE_PERSONA_MESSAGE,
         data=PersonaData(
             name="Camila",
             scratch_data=PersonaScratchData(
@@ -134,24 +190,28 @@ def running_examples(client_sock: UdpComms, sim):
     json5 = update_persona_mess.model_dump_json()
     client_sock.SendData(json5)
     response = receive(client_sock)
+    logger.info(response)
     assert response is not None
+    _ = UpdatePersonaResponse(**json.loads(response))
 
     # ------------------------------------------
 
     update_user_mess = UpdateUserMessage(
-        type=MessageTypes.UPDATE_USER_MESSAGE,
+        type=MessageType.UPDATE_USER_MESSAGE,
         data=UserData(old_name="Louis", name="John Smith"),
     )
 
     json6 = update_user_mess.model_dump_json()
     client_sock.SendData(json6)
     response = receive(client_sock)
+    logger.info(response)
     assert response is not None
+    _ = UpdateUserResponse(**json.loads(response))
 
     # ------------------------------------------
 
     add_persona_mess = AddPersonaMessage(
-        type=MessageTypes.ADD_PERSONA_MESSAGE,
+        type=MessageType.ADD_PERSONA_MESSAGE,
         data=FullPersonaData(
             name="Ahmed",
             scratch_data=FullPersonaScratchData(
@@ -198,11 +258,9 @@ def running_examples(client_sock: UdpComms, sim):
                     atmosphere. His lifestyle is marked by a blend of hard work and \
                     a lively social life, punctuated by his unmistakable way of \
                     speaking.",
-                living_area={
-                    OneLocationData(
-                        world="Graz", sector="DownTown", arena="Ahmed's Appartement"
-                    )
-                },
+                living_area=OneLocationData(
+                    world="Graz", sector="DownTown", arena="Ahmed's Appartement"
+                ),
                 recency_w=5,
                 relevance_w=7,
                 importance_w=9,
@@ -212,12 +270,10 @@ def running_examples(client_sock: UdpComms, sim):
                 importance_ele_n=3,
             ),
             spatial_data={
-                "spatial_data": {
-                    "FantasyLand": {
-                        "Northern Realm": {
-                            "Dragon's Lair": ["Dragon", "Treasure Chest"],
-                            "Ice Cavern": ["Ice Golem", "Frozen Statue"],
-                        }
+                "FantasyLand": {
+                    "Northern Realm": {
+                        "Dragon's Lair": ["Dragon", "Treasure Chest"],
+                        "Ice Cavern": ["Ice Golem", "Frozen Statue"],
                     }
                 }
             },
@@ -227,103 +283,128 @@ def running_examples(client_sock: UdpComms, sim):
     json7 = add_persona_mess.model_dump_json()
     client_sock.SendData(json7)
     response = receive(client_sock)
+    logger.info(response)
     assert response is not None
+    _ = AddPersonaResponse(**json.loads(response))
 
     # ------------------------------------------
 
     get_personas_mess = GetPersonasMessage(
-        type=MessageTypes.GET_PERSONAS_MESSAGE, data=None
+        type=MessageType.GET_PERSONAS_MESSAGE, data=None
     )
     json8 = get_personas_mess.model_dump_json()
     client_sock.SendData(json8)
     response = receive(client_sock)
+    logger.info(response)
     assert response is not None
+    _ = GetPersonasResponse(**json.loads(response))
 
     # ------------------------------------------
 
-    get_users_mess = GetUsersMessage(type=MessageTypes.GET_USERS_MESSAGE, data=None)
+    get_users_mess = GetUsersMessage(type=MessageType.GET_USERS_MESSAGE, data=None)
     json9 = get_users_mess.model_dump_json()
     client_sock.SendData(json9)
     response = receive(client_sock)
+    logger.info(response)
     assert response is not None
+    _ = GetUsersResponse(**json.loads(response))
 
     # ------------------------------------------
 
     get_persona_mess = GetPersonaMessage(
-        type=MessageTypes.GET_PERSONA_MESSAGE, data=PersonID(name="Camila")
+        type=MessageType.GET_PERSONA_MESSAGE, data=PersonID(name="Camila")
     )
     json10 = get_persona_mess.model_dump_json()
     client_sock.SendData(json10)
     response = receive(client_sock)
+    logger.info(response)
     assert response is not None
+    _ = GetPersonaResponse(**json.loads(response))
 
     # ------------------------------------------
 
     get_saved_games_mes = GetSavedGamesMessage(
-        type=MessageTypes.GET_SAVED_GAMES_MESSAGE, data=None
+        type=MessageType.GET_SAVED_GAMES_MESSAGE, data=None
     )
 
     json11 = get_saved_games_mes.model_dump_json()
     client_sock.SendData(json11)
     response = receive(client_sock)
+    logger.info(response)
     assert response is not None
+    _ = GetSavedGamesResponse(**json.loads(response))
 
     # ------------------------------------------
 
-    get_meta_message = GetMetaMessage(type=MessageTypes.GET_META_MESSAGE, data=None)
+    get_meta_message = GetMetaMessage(type=MessageType.GET_META_MESSAGE, data=None)
     json12 = get_meta_message.model_dump_json()
     client_sock.SendData(json12)
     response = receive(client_sock)
+    logger.info(response)
     assert response is not None
+    _ = GetMetaResponse(**json.loads(response))
+
+    # ------------------------------------------
+
+    error_message = "KAMARADEN,  Deutschland ist nun erwacht."
+    client_sock.SendData(error_message)
+    response = receive(client_sock)
+    logger.info(response)
+    assert response is not None
+    _ = ErrorResponse(**json.loads(response))
 
 
 if __name__ == "__main__":
-    logging.INFO("CUDA found " + str(torch.cuda.is_available()))
+    setup_logging("examples_main")
+    logger = logging.getLogger(LOGGER_NAME)
+
+    try:
+        # CLEAN UP
+        shutil.rmtree(BASE_DIR + "/LLM_Character/storage/127.0.0.18080")
+        shutil.rmtree(BASE_DIR + "/LLM_Character/storage/127.0.0.19090")
+    except Exception:
+        pass
+
+    modela = OpenAIComms()
+    modelb = LocalComms()
+    model_id1 = "gpt-4"
+    model_id2 = "mistralai/Mistral-7B-Instruct-v0.2"
 
     udpIP = "127.0.0.1"
-    portTX = 9090
-    portRX = 9091
+    port1 = 8080
+    port2 = 9090
+    models = [(modela, model_id1, port1)]  # , (modelb, model_id2, port2)]
+    for model, model_id, port in models:
+        portTX = port
+        portRX = port + 1
 
-    server_sock = UdpComms(
-        udpIP=udpIP, portTX=portTX, portRX=portRX, enableRX=True, suppressWarnings=True
-    )
+        server_sock = UdpComms(
+            udpIP=udpIP,
+            portTX=portTX,
+            portRX=portRX,
+            enableRX=True,
+            suppressWarnings=True,
+        )
 
-    client_sock = UdpComms(
-        udpIP=udpIP, portTX=portRX, portRX=portTX, enableRX=True, suppressWarnings=True
-    )
+        client_sock = UdpComms(
+            udpIP=udpIP,
+            portTX=portRX,
+            portRX=portTX,
+            enableRX=True,
+            suppressWarnings=True,
+        )
 
-    modelc = OpenAIComms()
-    model_id = "gpt-4"
-    modelc.init(model_id)
-    model = LLM_API(modelc)
+        model.init(model_id)
+        wrapper_model = LLM_API(model)
 
-    dispatcher = MessageProcessor()
-    server_manager = ReverieServerManager()
+        dispatcher = MessageProcessor()
+        server_manager = ReverieServerManager()
 
-    start_server(server_sock, server_manager, dispatcher, model)
-    running_examples(client_sock, "SIM456")
+        server_thread = threading.Thread(
+            target=start_server,
+            args=(server_sock, server_manager, dispatcher, wrapper_model),
+        )
+        server_thread.daemon = True
+        server_thread.start()
 
-    # ------------------------------------------
-    # other example, other port, other objects, but LocalLLM.
-    # ------------------------------------------
-
-    portTX = 8090
-    portRX = 8081
-
-    server_sock = UdpComms(
-        udpIP=udpIP, portTX=portTX, portRX=portRX, enableRX=True, suppressWarnings=True
-    )
-
-    client_sock = UdpComms(
-        udpIP=udpIP, portTX=portRX, portRX=portTX, enableRX=True, suppressWarnings=True
-    )
-
-    model_id = "mistralai/Mistral-7B-Instruct-v0.2"
-    modelc = LocalComms()
-    modelc.init(model_id)
-    model = LLM_API(modelc)
-
-    dispatcher = MessageProcessor()
-    server_manager = ReverieServerManager()
-
-    running_examples(client_sock, "SIM123")
+        running_examples(client_sock)
