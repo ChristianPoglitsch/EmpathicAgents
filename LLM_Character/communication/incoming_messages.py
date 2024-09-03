@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Optional
 from pydantic import BaseModel
 
 
-class MessageTypes(Enum):
+class MessageType(Enum):
     STARTMESSAGE = "StartMessage"
     PROMPTMESSAGE = "PromptMessage"
     MOVEMESSAGE = "MoveMessage"
@@ -22,7 +22,7 @@ class MessageTypes(Enum):
 
 
 class BaseMessage(BaseModel):
-    type: MessageTypes
+    type: MessageType
     data: Any
 
 
@@ -83,6 +83,7 @@ class PersonaScratchData(BaseModel):
     innate: Optional[str] = None
     learned: Optional[str] = None
     currently: Optional[str] = None
+    look: Optional[str] = None
     lifestyle: Optional[str] = None
     living_area: Optional[OneLocationData] = None
 
@@ -98,7 +99,7 @@ class PersonaScratchData(BaseModel):
 class PersonaData(BaseModel):
     name: str
     scratch_data: Optional[PersonaScratchData] = None
-    spatial_data: Dict[str, Dict[str, Dict[str, List[str]]]]
+    spatial_data: Optional[Dict[str, Dict[str, Dict[str, List[str]]]]] = None
 
 
 class UserData(BaseModel):
@@ -155,7 +156,7 @@ class FullPersonaScratchData(BaseModel):
     recency_w: int
     relevance_w: int
     importance_w: int
-    recency_decay: int
+    recency_decay: float
     importance_trigger_max: int
     importance_trigger_curr: int
     importance_ele_n: int

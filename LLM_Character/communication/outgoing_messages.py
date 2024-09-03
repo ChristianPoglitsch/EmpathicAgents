@@ -18,6 +18,13 @@ class ResponseType(Enum):
     GET_SAVED_GAMES_RESPONSE = "GetSavedGamesResponse"
     GET_META_RESPONSE = "GetMetaResponse"
 
+    UPDATE_PERSONA_RESPONSE = "UpdatePersonaResponse"
+    UPDATE_USER_RESPONSE = "UpdateUsersResponse"
+    UPDATE_META_RESPONSE = "UpdateMetaResponse"
+    UPDATE_PERSONAS_RESPONSE = "UpdatePersonasResponse"
+
+    ADD_PERSONA_RESPONSE = "AddPersonaResponse"
+
 
 class StatusType(Enum):
     SUCCESS = "Success"
@@ -73,6 +80,25 @@ class MoveResponse(BaseResponse):
 # ---------------------------------------------------------------------------
 
 
+class UpdateMetaResponse(BaseResponse):
+    pass
+
+
+class UpdatePersonaResponse(BaseResponse):
+    pass
+
+
+class UpdateUserResponse(BaseResponse):
+    pass
+
+
+class AddPersonaResponse(BaseResponse):
+    pass
+
+
+# ---------------------------------------------------------------------------
+
+
 class GetPersonasResponse(BaseResponse):
     data: list[str]
 
@@ -81,7 +107,7 @@ class GetUsersResponse(BaseResponse):
     data: list[str]
 
 
-class GetPersonaDetailsResponse(BaseResponse):
+class GetPersonaResponse(BaseResponse):
     data: FullPersonaData
 
 
@@ -89,5 +115,5 @@ class GetSavedGamesResponse(BaseResponse):
     data: list[str]
 
 
-class GetMetaDataResponse(BaseResponse):
+class GetMetaResponse(BaseResponse):
     data: MetaData
