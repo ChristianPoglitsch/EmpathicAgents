@@ -1,9 +1,5 @@
 import logging
 import os
-import time
-
-# in order to prevent the terminal to be cluttered from all the
-# torch/transformers warnings.
 import warnings
 from typing import List, Optional, Union
 
@@ -25,8 +21,11 @@ from LLM_Character.finetuning.models import load_base_model
 from LLM_Character.llm_comms.llm_abstract import LLMComms
 from LLM_Character.messages_dataclass import AIMessage, AIMessages
 
+# in order to prevent the terminal to be cluttered from all the
+# torch/transformers warnings.
 warnings.filterwarnings("ignore")
 logging.getLogger("transformers").setLevel(logging.ERROR)
+logging.getLogger("sentence_transformers").setLevel(logging.ERROR)
 
 
 class LocalComms(LLMComms):
@@ -53,7 +52,8 @@ class LocalComms(LLMComms):
 
         # FIXME: check if the model id's are valid before laoding them.
         # or use try catch when loading them.
-        # especially for semantic comparason, you have to check if the model is made for that.
+        # especially for semantic comparason,
+        # you have to check if the model is made for that.
         # the same can be done for chatting, checking if the model is a text
         # generator type.
 
@@ -64,7 +64,7 @@ class LocalComms(LLMComms):
         else:
             self._model, self._tokenizer = self._load_model_hf(base_model_id)
 
-        # FIXME: change model !! cannot use mistral.
+        # FIXME: cannot use mistral, since it is not an embedding model.
         self._embedding_model = SentenceTransformer(
             "sentence-transformers/all-MiniLM-L6-v2"
         )
@@ -97,7 +97,8 @@ class LocalComms(LLMComms):
         return self._requese_emb(keywords)
 
     # FIXME: change parameters to dictionary via args or kwargs or whatever.
-    # there will be parameters present in a certain model that will not be in another model etc.
+    # there will be parameters present in a certain
+    # model that will not be in another model etc.
     # see huggingface.
     def set_params(
         self,
@@ -132,7 +133,8 @@ class LocalComms(LLMComms):
     #  PRIVATE
     # ---------
 
-    # FIXME: should be changed, validate the parameters via Huggingface API of the model.
+    # FIXME: should be changed, validate the parameters
+    # via Huggingface API of the model.
     # certain models will have diferent parameters limits.
     def _validate_inputs(
         self,
@@ -159,11 +161,8 @@ class LocalComms(LLMComms):
     def _check_local(self, finetuned_model_id):
         return os.path.isdir(f"trained\\{finetuned_model_id}")
 
-    # FIXME:
-    # this function should maybe be placed in models.py in finetuning,
-    # some refactoring/ restructuring may be needed.
     def _load_model_loc(
-        self, model_id: str, finetuned_model_id
+        self, model_id: str, finetuned_model_id: str
     ) -> tuple[PreTrainedModel, PreTrainedTokenizer]:
         base_model = load_base_model(model_id)
         path = f"trained\\{finetuned_model_id}"
@@ -183,7 +182,8 @@ class LocalComms(LLMComms):
             tuple: A tuple containing the model and tokenizer.
         """
 
-        # The `load_in_4bit` and `load_in_8bit` arguments are deprecated and will be removed in the future versions.
+        # The `load_in_4bit` and `load_in_8bit` arguments
+        # are deprecated and will be removed in the future versions.
         # Please, pass a `BitsAndBytesConfig` object in `quantization_config`
         # argument instead.
         quantization_config = BitsAndBytesConfig(load_in_4bit=True)
@@ -221,7 +221,7 @@ class LocalComms(LLMComms):
         Returns:
             str: The model's response.
         """
-        start_time = time.process_time()
+        # start_time = time.process_time()
 
         device = "cuda"
         inputs = tokenizer.apply_chat_template(
@@ -239,7 +239,7 @@ class LocalComms(LLMComms):
         outputs = model.generate(inputs, generation_config=generation_config)
         response = tokenizer.decode(outputs[0], skip_special_tokens=True)
 
-        print("Processing time: " + str(time.process_time() - start_time) + " sec")
+        # print("Processing time: " + str(time.process_time() - start_time) + " sec")
         return response
 
     def _decode_request(self, message: str) -> str:
@@ -248,95 +248,13 @@ class LocalComms(LLMComms):
 
         Example:
             Given a raw response message:
-            "[INST] nice [/INST] indeed [INST] nice [/INST] indeed [INST] nice [/INST] indeed"
+            "[INST] nice [/INST] indeed [INST] nice [/INST] indeed [INST] nice [/INST]n"
             It will return:
-            " indeed"
+            "n"
         """
         response = message.replace("[/INST]", "[INST]").split("[INST]")
         return response[len(response) - 1]
 
-    # FIXME: something completly different.
-    # source : https://huggingface.co/tasks/feature-extraction
-    # https://huggingface.co/tasks/sentence-similarity
-
-    # What is Sentence Similarity?
-    # Sentence Similarity is a task that, given a source sentence and a set of
-    # target sentences, calculates how similar the target sentences are to the
-    # source.
-
-    # Sentence similarity models convert input text, like “Hello”, into vectors (called embeddings)
-    # that capture semantic information. We call this step to embed. Then, we calculate how close (similar) they are using cosine similarity.
-    # -> exactly what the paper 'generative agents' did.
-
-    # https://stackoverflow.com/questions/60492839/how-to-compare-sentence-similarities-using-embeddings-from-bert
-    # FIXME: You should NOT use BERT's output as sentence embeddings for semantic similarity.
-    # otherwise in init, give model id for a model specifically or semtnatic
-    # comparason?
-
-    # TODO: convert output to Optional[List[Embedding]]  !!!
-
     def _requese_emb(self, keywords: str) -> Tensor:
         embeddings = self._embedding_model.encode(keywords, convert_to_tensor=True)
         return embeddings.cpu().tolist()
-        # return embeddings
-
-
-#
-#         OR
-#
-#         # ibr: with this method, you can also use mistral, but it isnt recommended ig?
-
-#         # Without sentence-transformers,
-#         # you can use the model like this:
-#         # First, you pass your input through the transformer model,
-#         # then you have to apply the right pooling-operation on-top of the contextualized word embeddings.
-
-#         #Mean Pooling - Take attention mask into account for correct averaging
-#         def mean_pooling(model_output, attention_mask):
-#             token_embeddings = model_output[0] #First element of model_output contains all token embeddings
-#             input_mask_expanded = attention_mask.unsqueeze(-1).expand(token_embeddings.size()).float()
-# return torch.sum(token_embeddings * input_mask_expanded, 1) /
-# torch.clamp(input_mask_expanded.sum(1), min=1e-9)
-
-
-#         # Sentences we want sentence embeddings for
-#         sentences = ['This is an example sentence', 'Each sentence is converted']
-
-#         # Load model from HuggingFace Hub
-#         tokenizer = AutoTokenizer.from_pretrained('sentence-transformers/all-MiniLM-L6-v2')
-#         model = AutoModel.from_pretrained('sentence-transformers/all-MiniLM-L6-v2')
-
-#         # Tokenize sentences
-#         encoded_input = tokenizer(sentences, padding=True, truncation=True, return_tensors='pt')
-
-#         # Compute token embeddings
-#         with torch.no_grad():
-#             model_output = model(**encoded_input)
-
-#         # Perform pooling
-#         sentence_embeddings = mean_pooling(model_output, encoded_input['attention_mask'])
-
-#         # Normalize embeddings
-#         sentence_embeddings = F.normalize(sentence_embeddings, p=2, dim=1)
-
-#         print("Sentence embeddings:")
-#         print(sentence_embeddings)
-
-
-if __name__ == "__main__":
-    x = LocalComms()
-    model_id = "mistralai/Mistral-7B-Instruct-v0.2"
-    x.init(model_id)
-
-    aimessages = AIMessages()
-    aimessages.add_message(AIMessage("Hi", "user"))
-
-    res = x.send_text(aimessages)
-    res2 = x.send_embedding("inderdaad")
-
-    print(res)
-    print(res2)
-    if res and res2 is not None:
-        print("Dit is mooi")
-    else:
-        print("DAS IST EINE KOLOSALE KONSPIRAZION  ~Luis de Funes")

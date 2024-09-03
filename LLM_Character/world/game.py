@@ -1,5 +1,6 @@
 import datetime
 import json
+import logging
 import os
 from typing import Tuple, Union
 
@@ -14,9 +15,11 @@ from LLM_Character.communication.incoming_messages import (
 from LLM_Character.llm_comms.llm_api import LLM_API
 from LLM_Character.persona.persona import Persona
 from LLM_Character.persona.user import User
-from LLM_Character.util import BASE_DIR, copyanything
+from LLM_Character.util import BASE_DIR, LOGGER_NAME, copyanything
 
 FS_STORAGE = BASE_DIR + "/LLM_Character/storage"
+logger = logging.getLogger(LOGGER_NAME)
+date_format = "%B %d, %Y, %H:%M:%S"
 
 
 class ReverieServer:
@@ -41,7 +44,7 @@ class ReverieServer:
 
     def prompt_processor(
         self, user_name: str, persona_name: str, message: str, model: LLM_API
-    ) -> Tuple[str, str, int]:
+    ) -> Union[None, Tuple[str, str, int, bool]]:
         if self.loaded:
             user = self.users[user_name]
             out = self.personas[persona_name].open_convo_session(
@@ -59,7 +62,7 @@ class ReverieServer:
         if self.loaded:
             sim_folder = f"{FS_STORAGE}/{self.client_id}/{self.sim_code}"
 
-            movements = {"persona": dict(), "meta": dict()}
+            movements = {"persona": {}, "meta": {}}
 
             for p in perceivements:
                 if p.name in self.personas.keys():
@@ -76,9 +79,7 @@ class ReverieServer:
                         "plan": plan,
                         "chat": persona.scratch.chat.prints_messages_sender(),
                     }
-            movements["meta"]["curr_time"] = self.curr_time.strftime(
-                "%B %d, %Y, %H:%M:%S"
-            )
+            movements["meta"]["curr_time"] = self.curr_time.strftime(date_format)
 
             self.curr_time += datetime.timedelta(seconds=self.sec_per_step)
             self.step += 1
@@ -98,12 +99,10 @@ class ReverieServer:
 
     def update_meta_processor(self, data: MetaData):
         if data.curr_time:
-            # FIXME: proper error handling, make sure in the pydantic validation schema
+            # proper error handling, make sure in the pydantic validation schema
             # that data.curr_time conforms to the format "July 25, 2024,
             # 09:15:45"
-            self.curr_time = datetime.datetime.strptime(
-                data.curr_time, "%B %d, %Y, %H:%M:%S"
-            )
+            self.curr_time = datetime.datetime.strptime(data.curr_time, date_format)
         if data.sec_per_step:
             self.sec_per_step = data.sec_per_step
 
@@ -115,11 +114,6 @@ class ReverieServer:
             persona = self.personas[data.name]
             persona.update_scratch(data.scratch_data)
             persona.update_spatial(data.spatial_data)
-            # could be coded better, dont like this.
-            # if data.scratch_data.living_area:
-            #   persona.s_mem.update_oloc(data.scratch_data.living_area)
-            # if data.scratch_data.curr_location:
-            #   persona.s_mem.update_oloc(data.scratch_data.curr_location)
 
         # autosave?
         self._save()
@@ -127,20 +121,18 @@ class ReverieServer:
     def update_user_processor(self, data: UserData):
         if data.old_name in self.users.keys():
             user = self.users.pop(data.old_name)
-            # FIXME: not so good, law of demeter....
+            # not so good, law of demeter....
             user.scratch.name = data.name
             self.users[data.name] = user
 
         # autosave?
         self._save()
 
-    # TODO in every save function, if cannot be opned to write, make new dir
-    # and file
     def add_persona_processor(self, data: FullPersonaData):
         if data.name not in self.personas.keys():
             p = Persona(data.name)
             p.load_from_data(data.scratch_data, data.spatial_data)
-            # FIXME: not so good, law of demeter....
+            # not so good, law of demeter....
             p.scratch.curr_time = self.curr_time
             self.personas[data.name] = p
 
@@ -179,32 +171,29 @@ class ReverieServer:
         if not os.path.isdir(fork_folder):
             fork_folder = f"{FS_STORAGE}/localhost/default"
 
-        # FIXME: check if sim folder doesnt already exist, otherwise return error.
-        # or use that sim folder to load ? i guess the second.
         sim_folder = f"{FS_STORAGE}/{self.client_id}/{self.sim_code}"
         if not os.path.isdir(sim_folder):
-            # FIXME might raise exception, needs proper exception handling...
             copyanything(fork_folder, sim_folder)
 
         with open(f"{sim_folder}/meta.json") as json_file:
             reverie_meta = json.load(json_file)
 
         self.curr_time = datetime.datetime.strptime(
-            reverie_meta["curr_time"], "%B %d, %Y, %H:%M:%S"
+            reverie_meta["curr_time"], date_format
         )
         self.sec_per_step = reverie_meta["sec_per_step"]
         self.step = reverie_meta["step"]
 
-        self.personas: dict[str, Persona] = dict()
+        self.personas: dict[str, Persona] = {}
         for persona_name in reverie_meta["persona_names"]:
             persona_folder = f"{sim_folder}/personas/{persona_name}"
             curr_persona = Persona(persona_name)
             curr_persona.load_from_file(persona_folder)
             self.personas[persona_name] = curr_persona
 
-        # NOTE its a single player game, so this can be adjusted to only one field of user, but for generality,
-        # a dict has been chosen.
-        self.users: dict[str, User] = dict()
+        # NOTE its a single player game, so this can be adjusted to only one field of
+        # user, but for generality, a dict has been chosen.
+        self.users: dict[str, User] = {}
         for user_name in reverie_meta["user_names"]:
             curr_user = User(user_name)
             self.users[user_name] = curr_user
@@ -214,7 +203,7 @@ class ReverieServer:
     def _save(self):
         sim_folder = f"{FS_STORAGE}/{self.client_id}/{self.sim_code}"
         if self.loaded:
-            reverie_meta = dict()
+            reverie_meta = {}
             reverie_meta["fork_sim_code"] = self.fork_sim_code
             reverie_meta["curr_time"] = self.curr_time.strftime("%B %d, %Y, %H:%M:%S")
             reverie_meta["sec_per_step"] = self.sec_per_step
@@ -229,44 +218,3 @@ class ReverieServer:
             for persona_name, persona in self.personas.items():
                 save_folder = f"{sim_folder}/personas/{persona_name}"
                 persona.save(save_folder)
-
-
-if __name__ == "__main__":
-    from LLM_Character.llm_comms.llm_openai import OpenAIComms
-    from LLM_Character.persona.persona import Persona
-    from LLM_Character.persona.user import User
-    from LLM_Character.util import BASE_DIR
-
-    print("starting take off ...")
-
-    # person = Persona("Camila", BASE_DIR + "/LLM_Character/storage/initial/personas/Camila")
-    person = Persona(
-        "Florian",
-        BASE_DIR + "/LLM_Character/storage/localhost/default/personas/Florian",
-    )
-    user = User("Louis")
-
-    # modelc = LocalComms()
-    # model_id = "mistralai/Mistral-7B-Instruct-v0.2"
-    # modelc.init(model_id)
-
-    modelc = OpenAIComms()
-    model_id = "gpt-4"
-    modelc.init(model_id)
-
-    model = LLM_API(modelc)
-    message = "hi"
-
-    r = ReverieServer("sim_code", "notlocalhost")
-
-    a = r.is_loaded()
-    out1 = r.prompt_processor(user.scratch.name, person.scratch.name, message, model)
-    assert a == False
-    assert out1 is None
-
-    r.start_processor()
-
-    a = r.is_loaded()
-    out1 = r.prompt_processor(user.scratch.name, person.scratch.name, message, model)
-    assert a
-    assert out1 is not None

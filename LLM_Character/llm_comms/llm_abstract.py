@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
 
+from LLM_Character.messages_dataclass import AIMessages
+
 
 class LLMComms(ABC):
     @abstractmethod
@@ -7,7 +9,7 @@ class LLMComms(ABC):
         pass
 
     @abstractmethod
-    def send_text(self, message: str):
+    def send_text(self, prompt: AIMessages, max_length=100):
         pass
 
     @abstractmethod

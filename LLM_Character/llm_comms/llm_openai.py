@@ -6,6 +6,8 @@ https://github.com/joonspk-research/generative_agents
 
 """
 
+import logging
+import warnings
 from typing import List, Optional
 
 from openai import OpenAI
@@ -14,8 +16,16 @@ from openai import OpenAI
 from openai.types import ChatModel, CreateEmbeddingResponse, Embedding
 
 from LLM_Character.llm_comms.llm_abstract import LLMComms
-from LLM_Character.messages_dataclass import AIMessage, AIMessages
-from LLM_Character.util import API_KEY
+from LLM_Character.messages_dataclass import AIMessages
+from LLM_Character.util import API_KEY, LOGGER_NAME
+
+# in order to prevent the terminal to be cluttered from all the
+# torch/transformers warnings.
+warnings.filterwarnings("ignore")
+logging.getLogger("transformers").setLevel(logging.ERROR)
+logging.getLogger("httpx").setLevel(logging.ERROR)
+
+logger = logging.getLogger(LOGGER_NAME)
 
 
 class OpenAIComms(LLMComms):
@@ -40,7 +50,8 @@ class OpenAIComms(LLMComms):
         """
         if not self._check_valid_model_chat(model):
             raise ValueError(
-                "The model type does not exist or is not camptabible for chat completion."
+                "The model type does not exist or is not \
+                camptabible for chat completion."
             )
 
         self.model_name = model
@@ -152,8 +163,10 @@ class OpenAIComms(LLMComms):
                 model=self.model_name,
                 max_tokens=self.max_tokens,
                 n=self.n,
-                # FIXME: this could be very usefull for us, since we do use json object in which we want the reponse to be in, and the trust level, etc...
-                # response_format= ? "Must be one of `text` or `json_object`." bv. response_format={"type": "json_object"}
+                # FIXME: this could be very usefull for us, since we do use json object
+                # in which we want the reponse to be in, and the trust level, etc...
+                # response_format= ? "Must be one of `text` or `json_object`."
+                # bv. response_format={"type": "json_object"}
                 # temperature: float | NotGiven | None = NOT_GIVEN,
                 # top_p: float | NotGiven | None = NOT_GIVEN,
                 # frequency_penalty
@@ -161,8 +174,8 @@ class OpenAIComms(LLMComms):
                 # stop
             )
         except Exception as e:
-            print("openAI request failed")
-            print(e)
+            logger.error("openAI request failed")
+            logger.error(e)
             return None
 
         # see openai.yaml under
@@ -183,8 +196,8 @@ class OpenAIComms(LLMComms):
             )
 
         except Exception as e:
-            print("openAI request failed")
-            print(e)
+            logger.error("openAI request failed")
+            logger.error(e)
             return None
 
         embedding = response.data[0].embedding
@@ -213,21 +226,3 @@ class OpenAIComms(LLMComms):
             "text-embedding-3-small",
             "text-embedding-3-large",
         ]
-
-
-if __name__ == "__main__":
-    x = OpenAIComms()
-    model_id = "gpt-4"
-    x.init(model_id)
-
-    aimessages = AIMessages()
-    aimessages.add_message(AIMessage("Hi", "assistant"))
-
-    res = x.send_text(aimessages)
-    res2 = x.send_embedding("inderdaad")
-
-    if res and res2:
-        print("Dit is mooi")
-        print(res)
-    else:
-        print("DAS IST EINE KOLOSALE KONSPIRAZION  ~Luis de Funes")
