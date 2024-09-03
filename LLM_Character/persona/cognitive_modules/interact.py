@@ -7,9 +7,10 @@ from LLM_Character.persona.cognitive_modules.interacting.chatting import chat_re
 from LLM_Character.persona.cognitive_modules.interacting.reacting import should_react
 from LLM_Character.persona.cognitive_modules.interacting.waiting import wait_react
 from LLM_Character.persona.cognitive_modules.retrieve import EventContext
-from LLM_Character.persona.memory_structures.associative_memory.associative_memory import (
-    AssociativeMemory,
-)
+from LLM_Character.persona.memory_structures.associative_memory.\
+    associative_memory import (
+        AssociativeMemory,
+    )
 from LLM_Character.persona.memory_structures.scratch.persona_scratch import (
     PersonaScratch,
 )
@@ -27,10 +28,12 @@ def interact(
         focused_event = choose_retrieved(scratch, retrieved)
 
     if focused_event:
-        reaction_mode = should_react(scratch, mem, personas, focused_event, model)
+        reaction_mode = should_react(
+            scratch, mem, personas, focused_event, model)
         if reaction_mode:
             if reaction_mode[:9] == "chat with":
-                target_scratch, target_mem = personas[reaction_mode[9:].strip()]
+                target_scratch, target_mem = personas[reaction_mode[9:].strip(
+                )]
                 chat_react(scratch, mem, target_scratch, target_mem, personas)
             elif reaction_mode[:4] == "wait":
                 wait_react(scratch, reaction_mode)
@@ -41,7 +44,7 @@ def interact(
         scratch.chatting_end_time = None
 
     curr_persona_chat_buffer = scratch.chatting_with_buffer
-    for persona_name, buffer_count in curr_persona_chat_buffer.items():
+    for persona_name, _ in curr_persona_chat_buffer.items():
         if persona_name != scratch.chatting_with:
             scratch.chatting_with_buffer[persona_name] -= 1
 
@@ -61,7 +64,7 @@ def choose_retrieved(
 
     # Always choose persona first.
     priority = []
-    for event_desc, rel_ctx in retrieved.items():
+    for _, rel_ctx in retrieved.items():
         curr_event = rel_ctx.curr_event
         if ":" not in curr_event.subject and curr_event.subject != cscratch.name:
             priority += [rel_ctx]

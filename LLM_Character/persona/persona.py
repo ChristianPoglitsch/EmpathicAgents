@@ -20,9 +20,10 @@ from LLM_Character.persona.cognitive_modules.retrieve import (
     EventContext,
     retrieve_contextual_events,
 )
-from LLM_Character.persona.memory_structures.associative_memory.associative_memory import (
-    AssociativeMemory,
-)
+from LLM_Character.persona.memory_structures.associative_memory.\
+    associative_memory import (
+        AssociativeMemory,
+    )
 from LLM_Character.persona.memory_structures.associative_memory.concept_node import (
     ConceptNode,
 )
@@ -92,7 +93,7 @@ class Persona:
     def move(
         self,
         curr_location: OneLocationData,
-        perceived_events: list[EventData],
+        events: list[EventData],
         personas: dict[str, Tuple[PersonaScratch, AssociativeMemory]],
         curr_time: datetime.datetime,
         model: LLM_API,
@@ -109,7 +110,7 @@ class Persona:
 
         self.scratch.curr_time = curr_time
 
-        perceived = self.perceive(curr_location, perceived_events, model)
+        perceived = self.perceive(curr_location, events, model)
         retrieved = self.retrieve(perceived)
         self.plan(new_day, model)
         act = self.interact(personas, retrieved, model)
@@ -119,9 +120,13 @@ class Persona:
 
     def open_convo_session(
         self, user_scratch: UserScratch, message: str, curr_time: str, model: LLM_API
-    ) -> Tuple[str, str, int]:
+    ) -> Tuple[str, str, int, bool]:
+        original = self.scratch.curr_time
         self.scratch.curr_time = curr_time
-        return chatting(user_scratch, self.scratch, self.a_mem, message, model)
+        out = chatting(user_scratch, self.scratch, self.a_mem, message, model)
+        if not original:
+            self.scratch.curr_time = original
+        return out
 
     def update_scratch(self, data: Union[PersonaScratchData, None]):
         if data:
@@ -142,21 +147,3 @@ class Persona:
             name=self.scratch.name, scratch_data=scratch_data, spatial_data=spatial_data
         )
         return data
-
-
-if __name__ == "__main__":
-    # from LLM_Character.persona.persona import Persona
-    # from LLM_Character.persona.user import User
-    # from LLM_Character.llm_comms.llm_openai import OpenAIComms
-    # from LLM_Character.llm_comms.llm_local import LocalComms
-    # from LLM_Character.util import BASE_DIR
-    # print("starting take off ...")
-
-    # # person = Persona("Camila", BASE_DIR + "/LLM_Character/storage/initial/personas/Camila")
-    # person = Persona("Florian", BASE_DIR + "/LLM_Character/storage/localhost/default/personas/Florian")
-    # user = User("Louis")
-
-    # modelc = OpenAIComms()
-    # model_id = "gpt-4"
-    # modelc.init(model_id)
-    pass
