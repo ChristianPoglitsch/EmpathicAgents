@@ -1,7 +1,7 @@
 from sentence_transformers import util
 
 from LLM_Character.llm_comms.llm_api import LLM_API
-from LLM_Character.persona.memory_structures.associative_memory.associative_memory import (
+from LLM_Character.persona.memory_structures.associative_memory.associative_memory import (  # noqa: E501
     AssociativeMemory,
     ConceptNode,
 )
@@ -11,7 +11,6 @@ from LLM_Character.persona.memory_structures.scratch.persona_scratch import (
 
 
 def retrieve_recent_sorted_nodes(a_mem: AssociativeMemory):
-    # FIXME: WHY NOT RETRIEVE FROM SEQ_CHAT ?
     nodes = []
     for i in a_mem.seq_thought + a_mem.seq_event:
         if "idle" not in i.embedding_key:
@@ -25,14 +24,14 @@ def retrieve_recent_sorted_nodes(a_mem: AssociativeMemory):
 def extract_recency(scratch: PersonaScratch, nodes: list[ConceptNode]):
     recency_vals = [scratch.recency_decay**i for i in range(1, len(nodes) + 1)]
 
-    recency_out = dict()
+    recency_out = {}
     for count, node in enumerate(nodes):
         recency_out[node.node_id] = recency_vals[count]
     return recency_out
 
 
 def extract_importance(nodes: list[ConceptNode]):
-    importance_out = dict()
+    importance_out = {}
     for _, node in enumerate(nodes):
         importance_out[node.node_id] = node.poignancy
     return importance_out
@@ -42,7 +41,7 @@ def extract_relevance(
     a_mem: AssociativeMemory, nodes: list[ConceptNode], focal_pt: str, model: LLM_API
 ):
     focal_embedding = model.get_embedding(focal_pt)
-    relevance_out = dict()
+    relevance_out = {}
     for _, node in enumerate(nodes):
         node_embedding = a_mem.embeddings[node.embedding_key]
         relevance_out[node.node_id] = cos_sim(node_embedding, focal_embedding)
@@ -51,7 +50,6 @@ def extract_relevance(
 
 def cos_sim(a: list[float], b: list[float]):
     return util.pytorch_cos_sim(a, b)
-    # return dot(a, b)/(norm(a)*norm(b))
 
 
 def normalize_dict_floats(d: dict, target_min: float, target_max: float):
@@ -61,7 +59,7 @@ def normalize_dict_floats(d: dict, target_min: float, target_max: float):
         range_val = max_val - min_val
 
         if range_val == 0:
-            for key, val in d.items():
+            for key, _ in d.items():
                 d[key] = (target_max - target_min) / 2
         else:
             for key, val in d.items():

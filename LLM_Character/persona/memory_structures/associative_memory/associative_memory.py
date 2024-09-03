@@ -10,19 +10,19 @@ from LLM_Character.persona.memory_structures.associative_memory.concept_node imp
 
 class AssociativeMemory:
     def __init__(self):
-        self.id_to_node: dict[str, ConceptNode] = dict()
+        self.id_to_node: dict[str, ConceptNode] = {}
 
         self.seq_event: list[ConceptNode] = []
         self.seq_thought: list[ConceptNode] = []
         self.seq_chat: list[ConceptNode] = []
 
-        self.kw_to_event: dict[str, list[ConceptNode]] = dict()
-        self.kw_to_thought: dict[str, list[ConceptNode]] = dict()
-        self.kw_to_chat: dict[str, list[ConceptNode]] = dict()
+        self.kw_to_event: dict[str, list[ConceptNode]] = {}
+        self.kw_to_thought: dict[str, list[ConceptNode]] = {}
+        self.kw_to_chat: dict[str, list[ConceptNode]] = {}
 
-        self.kw_strength_event: dict[str, int] = dict()
-        self.kw_strength_thought: dict[str, int] = dict()
-        self.embeddings: dict[str, list[float]] = dict()
+        self.kw_strength_event: dict[str, int] = {}
+        self.kw_strength_thought: dict[str, int] = {}
+        self.embeddings: dict[str, list[float]] = {}
 
     def load_from_file(self, f_saved: str):
         self.load(f_saved)
@@ -239,7 +239,10 @@ class AssociativeMemory:
     def get_str_seq_thoughts(self):
         ret_str = ""
         for count, event in enumerate(self.seq_thought):
-            ret_str += f'{"Thought", len(self.seq_thought) - count, ": ", event.spo_summary(), " -- ", event.description}'
+            ret_str += (
+                f'{"Thought"} {len(self.seq_thought) - count}: '
+                f'{event.spo_summary()} -- {event.description}'
+            )
         return ret_str
 
     def get_str_seq_chats(self):
@@ -277,10 +280,10 @@ class AssociativeMemory:
             node_details = nodes_load[node_id]
 
             # NOTE is not used?
-            node_count = node_details["node_count"]
-            type_count = node_details["type_count"]
+            # node_count = node_details["node_count"]
+            # type_count = node_details["type_count"]
             node_type = node_details["type"]
-            depth = node_details["depth"]
+            # depth = node_details["depth"]
 
             created = datetime.datetime.strptime(
                 node_details["created"], "%Y-%m-%d %H:%M:%S"
@@ -340,12 +343,12 @@ class AssociativeMemory:
     def save(self, out_json):
         os.makedirs(os.path.dirname(out_json), exist_ok=True)
 
-        r = dict()
+        r = {}
         for count in range(len(self.id_to_node.keys()), 0, -1):
             node_id = f"node_{str(count)}"
             node = self.id_to_node[node_id]
 
-            r[node_id] = dict()
+            r[node_id] = {}
             r[node_id]["node_count"] = node.node_count
             r[node_id]["type_count"] = node.type_count
             r[node_id]["type"] = node.type
@@ -369,7 +372,7 @@ class AssociativeMemory:
         with open(out_json + "nodes.json", "w") as outfile:
             json.dump(r, outfile)
 
-        r = dict()
+        r = {}
         r["kw_strength_event"] = self.kw_strength_event
         r["kw_strength_thought"] = self.kw_strength_thought
         with open(out_json + "kw_strength.json", "w") as outfile:

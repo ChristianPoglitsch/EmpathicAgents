@@ -3,22 +3,22 @@ from typing import Union
 
 from LLM_Character.llm_comms.llm_api import LLM_API
 from LLM_Character.persona.cognitive_modules.retrieve import retrieve_focal_points
-from LLM_Character.persona.memory_structures.associative_memory.associative_memory import (
+from LLM_Character.persona.memory_structures.associative_memory.associative_memory import (  # noqa: E501
     AssociativeMemory,
 )
 from LLM_Character.persona.memory_structures.scratch.persona_scratch import (
     PersonaScratch,
 )
-from LLM_Character.persona.prompt_modules.planning_prompts.long_term_planning.daily_plan import (
+from LLM_Character.persona.prompt_modules.planning_prompts.long_term_planning.daily_plan import (  # noqa: E501
     run_prompt_daily_plan,
 )
-from LLM_Character.persona.prompt_modules.planning_prompts.long_term_planning.hourly_schedule import (
+from LLM_Character.persona.prompt_modules.planning_prompts.long_term_planning.hourly_schedule import (  # noqa: E501
     run_prompt_hourly_schedule,
 )
-from LLM_Character.persona.prompt_modules.planning_prompts.long_term_planning.revise_identity import (
+from LLM_Character.persona.prompt_modules.planning_prompts.long_term_planning.revise_identity import (  # noqa: E501
     run_prompt_revise_identity,
 )
-from LLM_Character.persona.prompt_modules.planning_prompts.long_term_planning.wake_up import (
+from LLM_Character.persona.prompt_modules.planning_prompts.long_term_planning.wake_up import (  # noqa: E501
     run_prompt_wake_up,
 )
 
@@ -30,7 +30,6 @@ def _long_term_planning(
     model: LLM_API,
 ):
     wake_up_hour = generate_wake_up_hour(scratch, model)
-
     if new_day == "First day":
         scratch.daily_req = generate_first_daily_plan(scratch, wake_up_hour, model)
 
@@ -42,10 +41,8 @@ def _long_term_planning(
     scratch.f_daily_schedule = make_hourly_schedule(scratch, model, wake_up_hour)
     scratch.f_daily_schedule_hourly_org = scratch.f_daily_schedule[:]
 
-    # FIXME: dictionary instead of tuple.
-    # dont want add_thought inside generate_thought_plan for readability.
-    c, e, s, p, o, t, k, tp, tep = generate_thought_plan(scratch, model)
-    a_mem.add_thought(c, e, s, p, o, t, k, tp, tep, None)
+    data = generate_thought_plan(scratch, model)
+    a_mem.add_thought(**data)
 
 
 def revise_identity(scratch: PersonaScratch, a_mem: AssociativeMemory, model: LLM_API):
@@ -62,9 +59,7 @@ def revise_identity(scratch: PersonaScratch, a_mem: AssociativeMemory, model: LL
     return new_currently, new_daily_req
 
 
-# FIXME: try to make the code more readable instead of adding comments.
-
-
+# FIXME try to make the code more readable instead of adding comments.
 def make_hourly_schedule(scratch: PersonaScratch, model: LLM_API, wake_up_hour):
     hour_str = [
         "00:00 AM",
@@ -79,7 +74,7 @@ def make_hourly_schedule(scratch: PersonaScratch, model: LLM_API, wake_up_hour):
     ]
     n_m1_activity = []
     diversity_repeat_count = 3
-    for i in range(diversity_repeat_count):
+    for _ in range(diversity_repeat_count):
         n_m1_activity_set = set(n_m1_activity)
         if len(n_m1_activity_set) < 5:
             n_m1_activity = []
@@ -124,20 +119,21 @@ def generate_thought_plan(scratch: PersonaScratch, model: LLM_API):
     created = scratch.curr_time
     expiration = scratch.curr_time + datetime.timedelta(days=30)
     s, p, o = (scratch.name, "plan", scratch.curr_time.strftime("%A %B %d"))
-    keywords = set(["plan"])
+    keywords = {"plan"}
     thought_poignancy = 5
     thought_embedding_pair = (thought, model.get_embedding(thought))
-    return (
-        created,
-        expiration,
-        s,
-        p,
-        o,
-        thought,
-        keywords,
-        thought_poignancy,
-        thought_embedding_pair,
-    )
+    return {
+        "created": created,
+        "expiration": expiration,
+        "s": s,
+        "p": p,
+        "o": o,
+        "description": thought,
+        "keywords": keywords,
+        "poignancy": thought_poignancy,
+        "embedding_pair": thought_embedding_pair,
+        "filling": None,
+    }
 
 
 def generate_wake_up_hour(scratch: PersonaScratch, model):
