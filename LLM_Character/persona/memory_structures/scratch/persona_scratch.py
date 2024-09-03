@@ -7,6 +7,7 @@ from typing import Tuple, Union
 
 from LLM_Character.communication.incoming_messages import (
     FullPersonaScratchData,
+    OneLocationData,
     PersonaScratchData,
 )
 from LLM_Character.messages_dataclass import AIMessages
@@ -24,6 +25,7 @@ class PersonaScratch:
         self.first_name = None
         self.last_name = None
         self.age = None
+        self.look = None
         self.innate = None
         self.learned = None
         self.currently = None
@@ -32,7 +34,7 @@ class PersonaScratch:
 
         # EMOTIONAL STATE
         self.curr_emotion: str = None
-        self.curr_trust: dict[str, int] = dict()
+        self.curr_trust: dict[str, int] = {}
 
         # PERCEIVE VARIABLES
         self.retention = 5
@@ -63,7 +65,7 @@ class PersonaScratch:
 
         self.chatting_with = None
         self.chat = AIMessages()
-        self.chatting_with_buffer = dict()
+        self.chatting_with_buffer = {}
         self.chatting_end_time = None
 
     # --- SETTERS -----
@@ -121,16 +123,16 @@ class PersonaScratch:
         today_min_elapsed += advance
 
         x = 0
-        for task, duration in self.f_daily_schedule:
+        for _, duration in self.f_daily_schedule:
             x += duration
         x = 0
-        for task, duration in self.f_daily_schedule_hourly_org:
+        for _, duration in self.f_daily_schedule_hourly_org:
             x += duration
 
         # We then calculate the current index based on that.
         curr_index = 0
         elapsed = 0
-        for task, duration in self.f_daily_schedule:
+        for _, duration in self.f_daily_schedule:
             elapsed += duration
             if elapsed > today_min_elapsed:
                 return curr_index
@@ -163,7 +165,7 @@ class PersonaScratch:
         # We then calculate the current index based on that.
         curr_index = 0
         elapsed = 0
-        for task, duration in self.f_daily_schedule_hourly_org:
+        for _, duration in self.f_daily_schedule_hourly_org:
             elapsed += duration
             if elapsed > today_min_elapsed:
                 return curr_index
@@ -182,7 +184,9 @@ class PersonaScratch:
         commonset += f"Currently: {self.currently}\n"
         commonset += f"Lifestyle: {self.lifestyle}\n"
         commonset += f"Daily plan requirement: {self.daily_plan_req}\n"
-        commonset += f"Current Date: {self.curr_time.strftime('%A %B %d') if self.curr_time else None}\n"
+
+        date_str = self.curr_time.strftime("%A %B %d") if self.curr_time else None
+        commonset += f"Current Date: {date_str}\n"
         return commonset
 
     def get_str_name(self):
@@ -217,9 +221,6 @@ class PersonaScratch:
 
     def get_str_daily_plan_req(self):
         return self.daily_plan_req
-
-    def get_str_curr_date_str(self):
-        return self.curr_time.strftime("%A %B %d")
 
     def get_curr_event(self):
         if not self.act_address:
@@ -256,8 +257,8 @@ class PersonaScratch:
         return ret
 
     def get_info(self) -> FullPersonaScratchData:
-        return FullPersonaScratchData(
-            curr_location=self.curr_location,
+        nice = FullPersonaScratchData(
+            curr_location=OneLocationData(**self.curr_location),
             first_name=self.first_name,
             last_name=self.last_name,
             age=self.age,
@@ -265,7 +266,8 @@ class PersonaScratch:
             learned=self.learned,
             currently=self.currently,
             lifestyle=self.lifestyle,
-            living_area=self.living_area,
+            look=self.look,
+            living_area=OneLocationData(**self.living_area),
             recency_w=self.recency_w,
             relevance_w=self.relevance_w,
             importance_w=self.importance_w,
@@ -274,6 +276,7 @@ class PersonaScratch:
             importance_trigger_curr=self.importance_trigger_curr,
             importance_ele_n=self.importance_ele_n,
         )
+        return nice
 
     # LOADING AND SAVING
     def update(self, data: PersonaScratchData):
@@ -289,6 +292,7 @@ class PersonaScratch:
         self.learned = data.learned or self.learned
         self.currently = data.currently or self.learned
         self.lifestyle = data.lifestyle or self.lifestyle
+        self.look = data.look or self.look
         self.living_area = (
             data.living_area.model_dump() if data.living_area else self.living_area
         )
@@ -326,6 +330,7 @@ class PersonaScratch:
             self.learned = scratch_load["learned"]
             self.currently = scratch_load["currently"]
             self.lifestyle = scratch_load["lifestyle"]
+            self.look = scratch_load["look"]
             self.living_area = scratch_load["living_area"]
 
             self.curr_emotion = scratch_load["curr_emotion"]
@@ -370,7 +375,7 @@ class PersonaScratch:
     def save(self, out_json):
         os.makedirs(os.path.dirname(out_json), exist_ok=True)
 
-        scratch = dict()
+        scratch = {}
         scratch["curr_time"] = (
             self.curr_time.strftime("%B %d, %Y, %H:%M:%S") if self.curr_time else None
         )
@@ -386,6 +391,7 @@ class PersonaScratch:
         scratch["currently"] = self.currently
         scratch["lifestyle"] = self.lifestyle
         scratch["living_area"] = self.living_area
+        scratch["look"] = self.look
         scratch["curr_emotion"] = self.curr_emotion
         scratch["curr_trust"] = self.curr_trust
 

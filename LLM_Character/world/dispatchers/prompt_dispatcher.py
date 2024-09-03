@@ -16,14 +16,12 @@ class PromptDispatcher(BaseDispatcher):
     def handler(
         self,
         socket: UdpComms,
-        serverM: ReverieServerManager,
+        serverm: ReverieServerManager,
         model: LLM_API,
         data: PromptMessage,
     ):
-        # FIXME: ibrahim: obviously the client-id should be automatically
-        # extracted from the connection
         client_id = socket.udpIP + str(socket.udpSendPort)
-        server = serverM.get_server(client_id)
+        server = serverm.get_server(client_id)
         if server and server.is_loaded():
             pd = data.data
             utt, emotion, trust, end = server.prompt_processor(
@@ -34,18 +32,15 @@ class PromptDispatcher(BaseDispatcher):
                 utt=utt, emotion=emotion, trust_level=str(trust), end=end
             )
             response_message = PromptReponse(
-                type=ResponseType.PROMPTRESPONSE,
+                type=ResponseType.PROMPT_RESPONSE,
                 status=StatusType.SUCCESS,
                 data=response_data,
             )
             sending_str = response_message.model_dump_json()
-
-            print("Done")
             socket.SendData(sending_str)
         else:
-            print("Error: Select a saved game first or start a new game.")
             response_message = StartResponse(
-                type=ResponseType.STARTRESPONSE,
+                type=ResponseType.START_RESPONSE,
                 status=StatusType.FAIL,
                 data="Select a saved game first or start a new game.",
             )

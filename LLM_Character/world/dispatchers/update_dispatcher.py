@@ -3,6 +3,14 @@ from LLM_Character.communication.incoming_messages import (
     UpdatePersonaMessage,
     UpdateUserMessage,
 )
+from LLM_Character.communication.outgoing_messages import (
+    ResponseType,
+    StartResponse,
+    StatusType,
+    UpdateMetaResponse,
+    UpdatePersonaResponse,
+    UpdateUserResponse,
+)
 from LLM_Character.communication.reverieserver_manager import ReverieServerManager
 from LLM_Character.communication.udp_comms import UdpComms
 from LLM_Character.llm_comms.llm_api import LLM_API
@@ -13,52 +21,87 @@ class UpdateMetaDispatcher(BaseDispatcher):
     def handler(
         self,
         socket: UdpComms,
-        serverM: ReverieServerManager,
+        serverm: ReverieServerManager,
         model: LLM_API,
         data: UpdateMetaMessage,
     ):
         client_id = socket.udpIP + str(socket.udpSendPort)
-        server = serverM.get_server(client_id)
+        server = serverm.get_server(client_id)
         if server and server.is_loaded():
             server.update_meta_processor(data.data)
-            print("Done")
-            socket.SendData("Done")
+
+            response_message = UpdateMetaResponse(
+                type=ResponseType.UPDATE_META_RESPONSE,
+                status=StatusType.SUCCESS,
+                data="Successfully updated the meta data.",
+            )
+            sending_str = response_message.model_dump_json()
+            socket.SendData(sending_str)
         else:
-            # FIXME: have proper error messages.
-            socket.SendData("Error: Select a saved game first or start a new game.")
+            response_message = StartResponse(
+                type=ResponseType.START_RESPONSE,
+                status=StatusType.FAIL,
+                data="Select a saved game first or start a new game.",
+            )
+            sending_str = response_message.model_dump_json()
+            socket.SendData(sending_str)
 
 
 class UpdatePersonaDispatcher(BaseDispatcher):
     def handler(
         self,
         socket: UdpComms,
-        serverM: ReverieServerManager,
+        serverm: ReverieServerManager,
         model: LLM_API,
         data: UpdatePersonaMessage,
     ):
         client_id = socket.udpIP + str(socket.udpSendPort)
-        server = serverM.get_server(client_id)
+        server = serverm.get_server(client_id)
         if server and server.is_loaded():
             server.update_persona_processor(data.data)
-            print("Done")
-            socket.SendData("Done")
+
+            response_message = UpdatePersonaResponse(
+                type=ResponseType.UPDATE_PERSONA_RESPONSE,
+                status=StatusType.SUCCESS,
+                data="Successfully updated the persona data.",
+            )
+            sending_str = response_message.model_dump_json()
+            socket.SendData(sending_str)
         else:
-            socket.SendData("Error: Select a saved game first or start a new game.")
+            response_message = StartResponse(
+                type=ResponseType.START_RESPONSE,
+                status=StatusType.FAIL,
+                data="Select a saved game first or start a new game.",
+            )
+            sending_str = response_message.model_dump_json()
+            socket.SendData(sending_str)
 
 
 class UpdateUserDispatcher(BaseDispatcher):
     def handler(
         self,
         socket: UdpComms,
-        serverM: ReverieServerManager,
+        serverm: ReverieServerManager,
         model: LLM_API,
         data: UpdateUserMessage,
     ):
         client_id = socket.udpIP + str(socket.udpSendPort)
-        server = serverM.get_server(client_id)
+        server = serverm.get_server(client_id)
         if server and server.is_loaded():
             server.update_user_processor(data.data)
-            print("Done")
-            socket.SendData("Done")
+
+            response_message = UpdateUserResponse(
+                type=ResponseType.UPDATE_USER_RESPONSE,
+                status=StatusType.SUCCESS,
+                data="Successfully updated the user data.",
+            )
+            sending_str = response_message.model_dump_json()
+            socket.SendData(sending_str)
         else:
-            socket.SendData("Error: Select a saved game first or start a new game.")
+            response_message = StartResponse(
+                type=ResponseType.START_RESPONSE,
+                status=StatusType.FAIL,
+                data="Select a saved game first or start a new game.",
+            )
+            sending_str = response_message.model_dump_json()
+            socket.SendData(sending_str)

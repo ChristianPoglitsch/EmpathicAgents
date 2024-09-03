@@ -16,28 +16,26 @@ class MoveDispatcher(BaseDispatcher):
     def handler(
         self,
         socket: UdpComms,
-        serverM: ReverieServerManager,
+        serverm: ReverieServerManager,
         model: LLM_API,
         data: MoveMessage,
     ):
         client_id = socket.udpIP + str(socket.udpSendPort)
-        server = serverM.get_server(client_id)
+        server = serverm.get_server(client_id)
         if server and server.is_loaded():
             movements = server.move_processor(data.data, model)
 
             move_response_data = MoveResponseData(**movements)
             move_response = MoveResponse(
-                type=ResponseType.MOVERESPONSE,
+                type=ResponseType.MOVE_RESPONSE,
                 status=StatusType.SUCCESS,
                 data=move_response_data,
             )
             move_str = move_response.model_dump_json()
-            print("Done")
             socket.SendData(move_str)
         else:
-            print("Error: Select a saved game first or start a new game.")
             response_message = StartResponse(
-                type=ResponseType.STARTRESPONSE,
+                type=ResponseType.START_RESPONSE,
                 status=StatusType.FAIL,
                 data="Select a saved game first or start a new game.",
             )

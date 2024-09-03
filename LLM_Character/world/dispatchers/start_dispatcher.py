@@ -15,24 +15,29 @@ class StartDispatcher(BaseDispatcher):
     def handler(
         self,
         socket: UdpComms,
-        serverM: ReverieServerManager,
+        serverm: ReverieServerManager,
         model: LLM_API,
         data: StartMessage,
     ):
         clientid = socket.udpIP + str(socket.udpSendPort)
 
         sd = data.data
-        if serverM.get_server(clientid):
-            print("error, client alreasy exists??")
+        if serverm.get_server(clientid):
+            response_message = StartResponse(
+                type=ResponseType.START_RESPONSE,
+                status=StatusType.FAIL,
+                data="Client is already connected and the game is already loaded",
+            )
+            sending_str = response_message.model_dump_json()
+            socket.SendData(sending_str)
             return None
 
-        server = ReverieServer(sd.fork_sim_code, sd.sim_code, clientid)
-        serverM.add_connection(clientid, server)
+        server = ReverieServer(sd.sim_code, clientid, sd.fork_sim_code)
+        serverm.add_connection(clientid, server)
         server.start_processor()
-        print("Done")
 
         response_message = StartResponse(
-            type=ResponseType.STARTRESPONSE,
+            type=ResponseType.START_RESPONSE,
             status=StatusType.SUCCESS,
             data="SuccessFully started the game",
         )
