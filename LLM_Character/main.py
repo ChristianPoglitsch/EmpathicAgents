@@ -3,7 +3,7 @@ import time
 
 from LLM_Character.communication.message_processor import MessageProcessor
 from LLM_Character.communication.reverieserver_manager import ReverieServerManager
-from LLM_Character.communication.udp_comms import UdpComms
+from LLM_Character.communication.udp_comms import CommMedium
 from LLM_Character.llm_comms.llm_api import LLM_API
 from LLM_Character.util import LOGGER_NAME
 
@@ -17,7 +17,7 @@ logger = logging.getLogger(LOGGER_NAME)
 
 
 def start_server(
-    sock: UdpComms,
+    sock: CommMedium,
     serverm: ReverieServerManager,
     dispatcher: MessageProcessor,
     model: LLM_API,

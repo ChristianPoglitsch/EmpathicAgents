@@ -1,11 +1,12 @@
 import logging
 
+from LLM_Character.communication import CommMedium
 from LLM_Character.util import LOGGER_NAME
 
 logger = logging.getLogger(LOGGER_NAME)
 
 
-class UdpComms:
+class UdpComms(CommMedium):
     def __init__(
         self, udp_ip, port_tx, port_rx, enable_rx=False, suppress_warnings=True
     ):
