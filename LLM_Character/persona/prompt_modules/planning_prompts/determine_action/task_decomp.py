@@ -45,7 +45,8 @@ def _get_curr_time_and_summary(
     summ_str = f"Today is {time}. From "
     for index in all_indices:
         start_time_str, end_time_str = _find_start_and_end_time(index, f_daily_schedule)
-        summ_str += f"{start_time_str} ~ {end_time_str}, {fullname} is planning on {f_daily_schedule[index][0]}, "
+        summ_str += f"{start_time_str} ~ {end_time_str}, {fullname}\
+        is planning on {f_daily_schedule[index][0]}, "
         if curr_f_org_index + 1 == index:
             curr_time_range = f"{start_time_str} ~ {end_time_str}"
     summ_str = summ_str[:-2] + "."
@@ -81,7 +82,7 @@ def _create_prompt_input(scratch: PersonaScratch, task, duration):
 # FIXME: check if you can rewrite this peice of junk.
 
 
-def _clean_up_response(prompt: str, response: str):
+def _clean_up_response(prompt: str, response: str):  # noqa: C901
     temp = [i.strip() for i in response.split("\n")]
     _cr = []
     cr = []
@@ -90,7 +91,7 @@ def _clean_up_response(prompt: str, response: str):
             _cr += [" ".join([j.strip() for j in i.split(" ")][3:])]
         else:
             _cr += [i]
-    for count, i in enumerate(_cr):
+    for _, i in enumerate(_cr):
         k = [j.strip() for j in i.split("(duration in minutes:")]
         task = k[0]
         if task[-1] == ".":
@@ -113,7 +114,7 @@ def _clean_up_response(prompt: str, response: str):
 
         i_duration -= i_duration % 5
         if i_duration > 0:
-            for j in range(i_duration):
+            for _ in range(i_duration):
                 curr_min_slot += [(i_task, count)]
     curr_min_slot = curr_min_slot[1:]
 
@@ -123,13 +124,13 @@ def _clean_up_response(prompt: str, response: str):
             curr_min_slot[-1 * i] = last_task
     elif len(curr_min_slot) < total_expected_min:
         last_task = curr_min_slot[-1]
-        for i in range(total_expected_min - len(curr_min_slot)):
+        for _ in range(total_expected_min - len(curr_min_slot)):
             curr_min_slot += [last_task]
 
     cr_ret = [
         ["dummy", -1],
     ]
-    for task, task_index in curr_min_slot:
+    for task, _ in curr_min_slot:
         if task != cr_ret[-1][0]:
             cr_ret += [[task, 1]]
         else:
@@ -148,7 +149,9 @@ def _validate_response(prompt: str, response: str):
 
 
 def _get_fail_safe():
-    fs = ["asleep"]
+    # FIXME this needs to be changed,
+    # repo where this is forked from gave wrong faile safe...
+    fs = [("asleep", 1)]
     return fs
 
 
@@ -186,7 +189,7 @@ def run_prompt_task_decomp(
         else:
             break
     ftime_sum = 0
-    for fi_task, fi_duration in fin_output:
+    for _, fi_duration in fin_output:
         ftime_sum += fi_duration
 
     # print ("for debugging... line 365", fin_output)

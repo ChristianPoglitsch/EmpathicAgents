@@ -3,7 +3,7 @@ from typing import Union
 
 from LLM_Character.llm_comms.llm_api import LLM_API
 from LLM_Character.messages_dataclass import AIMessage, AIMessages
-from LLM_Character.persona.memory_structures.associative_memory.associative_memory import (
+from LLM_Character.persona.memory_structures.associative_memory.associative_memory import (  # noqa: E501
     AssociativeMemory,
 )
 from LLM_Character.persona.memory_structures.associative_memory.concept_node import (
@@ -19,7 +19,7 @@ from LLM_Character.util import BASE_DIR
 COUNTER_LIMIT = 5
 
 
-def _create_prompt_input_1(
+def _create_prompt_input_1(  # noqa: C901
     uscratch: UserScratch,
     cscratch: PersonaScratch,
     ca_mem: AssociativeMemory,
@@ -33,7 +33,9 @@ def _create_prompt_input_1(
         for i in ca_mem.seq_chat:
             if i.object == uscratch.name:
                 v1 = int((cscratch.curr_time - i.created).total_seconds() / 60)
-                prev_convo_insert += f"{str(v1)} minutes ago, {cscratch.name} and {uscratch.name} were already {i.description} This context takes place after that conversation."
+                prev_convo_insert += f"{str(v1)} minutes ago, {cscratch.name} and \
+                {uscratch.name} were already {i.description} \
+                This context takes place after that conversation."
                 break
     if prev_convo_insert == "\n":
         prev_convo_insert = "You don't know each other"
@@ -100,7 +102,7 @@ def _clean_up_response_1(response: str) -> Union[None, dict[str, str]]:
     obj = extract_first_json_dict(response)
     if not obj:
         return None
-    cleaned_dict = dict()
+    cleaned_dict = {}
     cleaned = []
     for _, val in obj.items():
         cleaned += [val]
@@ -115,7 +117,7 @@ def _clean_up_response_2(response: str) -> Union[None, dict[str, str]]:
     obj = extract_first_json_dict(response)
     if not obj:
         return None
-    cleaned_dict = dict()
+    cleaned_dict = {}
     cleaned = []
     for _, val in obj.items():
         cleaned += [val]
@@ -181,7 +183,6 @@ def run_prompt_iterative_chat(
     am = AIMessages()
     am.add_message(prompt, None, "user", "system")
     output2 = _get_valid_output(model, am, _clean_up_response_2, COUNTER_LIMIT)
-
     prompt_template = (
         BASE_DIR + "/LLM_Character/persona/prompt_modules/templates/iterative_convo.txt"
     )
@@ -195,43 +196,3 @@ def run_prompt_iterative_chat(
     output1 = _get_valid_output(model, am, _clean_up_response_1, COUNTER_LIMIT)
 
     return output1, output2
-
-
-if __name__ == "__main__":
-    import datetime
-
-    import torch
-
-    from LLM_Character.llm_comms.llm_local import LocalComms
-    from LLM_Character.persona.persona import Persona
-    from LLM_Character.persona.user import User
-
-    # Set HF_HOME for cache folder
-    # CUDA recommended!
-    print("CUDA found " + str(torch.cuda.is_available()))
-
-    model_id = "mistralai/Mistral-7B-Instruct-v0.2"
-    modelc = LocalComms()
-    # model_id = "gpt-4"
-    # modelc = OpenAIComms()
-    modelc.init(model_id)
-    model = LLM_API(modelc)
-
-    person = Persona("Florian")
-    person.load_from_file(
-        BASE_DIR + "/LLM_Character/storage/localhost/default/personas/Florian"
-    )
-
-    user = User("Louis")
-
-    user_scratch = user.scratch
-    # message = "hi!!"
-    message = "bye, see you later"
-    curr_time = datetime.datetime.strptime(
-        "July 25, 2024, 09:15:45", "%B %d, %Y, %H:%M:%S"
-    )
-    y = person.open_convo_session(user_scratch, message, curr_time, model)
-    print(y)
-
-    # x = run_prompt_iterative_chat(user_scratch, person.scratch, person.a_mem, model, {}, "", [])
-    # print(x)
