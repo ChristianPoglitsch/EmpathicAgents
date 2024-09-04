@@ -66,7 +66,7 @@ def running_examples(client_sock: UdpComms):
     )
 
     json1 = start_mess.model_dump_json()
-    client_sock.SendData(json1)
+    client_sock.send_data(json1)
     response = receive(client_sock)
     logger.info(response)
     assert response is not None
@@ -79,7 +79,7 @@ def running_examples(client_sock: UdpComms):
         data=PromptData(persona_name="Camila", user_name="Louis", message="hi"),
     )
     json2 = prompt_mess.model_dump_json()
-    client_sock.SendData(json2)
+    client_sock.send_data(json2)
     response = receive(client_sock)
     logger.info(response)
     assert response is not None
@@ -135,7 +135,7 @@ def running_examples(client_sock: UdpComms):
     )
 
     json3 = move_mess.model_dump_json()
-    client_sock.SendData(json3)
+    client_sock.send_data(json3)
     response = receive(client_sock)
     logger.info(response)
     assert response is not None
@@ -151,7 +151,7 @@ def running_examples(client_sock: UdpComms):
     )
 
     json4 = update_meta_mess.model_dump_json()
-    client_sock.SendData(json4)
+    client_sock.send_data(json4)
     response = receive(client_sock)
     logger.info(response)
     assert response is not None
@@ -161,7 +161,7 @@ def running_examples(client_sock: UdpComms):
 
     # send move again.
     gson = move_mess.model_dump_json()
-    client_sock.SendData(gson)
+    client_sock.send_data(gson)
     response = receive(client_sock)
     logger.info(response)
     assert response is not None
@@ -188,7 +188,7 @@ def running_examples(client_sock: UdpComms):
     )
 
     json5 = update_persona_mess.model_dump_json()
-    client_sock.SendData(json5)
+    client_sock.send_data(json5)
     response = receive(client_sock)
     logger.info(response)
     assert response is not None
@@ -202,7 +202,7 @@ def running_examples(client_sock: UdpComms):
     )
 
     json6 = update_user_mess.model_dump_json()
-    client_sock.SendData(json6)
+    client_sock.send_data(json6)
     response = receive(client_sock)
     logger.info(response)
     assert response is not None
@@ -281,7 +281,7 @@ def running_examples(client_sock: UdpComms):
     )
 
     json7 = add_persona_mess.model_dump_json()
-    client_sock.SendData(json7)
+    client_sock.send_data(json7)
     response = receive(client_sock)
     logger.info(response)
     assert response is not None
@@ -293,7 +293,7 @@ def running_examples(client_sock: UdpComms):
         type=MessageType.GET_PERSONAS_MESSAGE, data=None
     )
     json8 = get_personas_mess.model_dump_json()
-    client_sock.SendData(json8)
+    client_sock.send_data(json8)
     response = receive(client_sock)
     logger.info(response)
     assert response is not None
@@ -303,7 +303,7 @@ def running_examples(client_sock: UdpComms):
 
     get_users_mess = GetUsersMessage(type=MessageType.GET_USERS_MESSAGE, data=None)
     json9 = get_users_mess.model_dump_json()
-    client_sock.SendData(json9)
+    client_sock.send_data(json9)
     response = receive(client_sock)
     logger.info(response)
     assert response is not None
@@ -315,7 +315,7 @@ def running_examples(client_sock: UdpComms):
         type=MessageType.GET_PERSONA_MESSAGE, data=PersonID(name="Camila")
     )
     json10 = get_persona_mess.model_dump_json()
-    client_sock.SendData(json10)
+    client_sock.send_data(json10)
     response = receive(client_sock)
     logger.info(response)
     assert response is not None
@@ -328,7 +328,7 @@ def running_examples(client_sock: UdpComms):
     )
 
     json11 = get_saved_games_mes.model_dump_json()
-    client_sock.SendData(json11)
+    client_sock.send_data(json11)
     response = receive(client_sock)
     logger.info(response)
     assert response is not None
@@ -338,7 +338,7 @@ def running_examples(client_sock: UdpComms):
 
     get_meta_message = GetMetaMessage(type=MessageType.GET_META_MESSAGE, data=None)
     json12 = get_meta_message.model_dump_json()
-    client_sock.SendData(json12)
+    client_sock.send_data(json12)
     response = receive(client_sock)
     logger.info(response)
     assert response is not None
@@ -347,7 +347,7 @@ def running_examples(client_sock: UdpComms):
     # ------------------------------------------
 
     error_message = "KAMARADEN,  Deutschland ist nun erwacht."
-    client_sock.SendData(error_message)
+    client_sock.send_data(error_message)
     response = receive(client_sock)
     logger.info(response)
     assert response is not None
@@ -370,7 +370,7 @@ if __name__ == "__main__":
     model_id1 = "gpt-4"
     model_id2 = "mistralai/Mistral-7B-Instruct-v0.2"
 
-    udpIP = "127.0.0.1"
+    udp_ip = "127.0.0.1"
     port1 = 8080
     port2 = 9090
     models = [(modela, model_id1, port1)]  # , (modelb, model_id2, port2)]
@@ -379,19 +379,19 @@ if __name__ == "__main__":
         portRX = port + 1
 
         server_sock = UdpComms(
-            udpIP=udpIP,
-            portTX=portTX,
-            portRX=portRX,
-            enableRX=True,
-            suppressWarnings=True,
+            udp_ip=udp_ip,
+            port_tx=portTX,
+            port_rx=portRX,
+            enable_rx=True,
+            suppress_warnings=True,
         )
 
         client_sock = UdpComms(
-            udpIP=udpIP,
-            portTX=portRX,
-            portRX=portTX,
-            enableRX=True,
-            suppressWarnings=True,
+            udp_ip=udp_ip,
+            port_tx=portRX,
+            port_rx=portTX,
+            enable_rx=True,
+            suppress_warnings=True,
         )
 
         model.init(model_id)

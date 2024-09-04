@@ -20,7 +20,7 @@ class MoveDispatcher(BaseDispatcher):
         model: LLM_API,
         data: MoveMessage,
     ):
-        client_id = socket.udpIP + str(socket.udpSendPort)
+        client_id = socket.udp_ip + str(socket.udp_send_port)
         server = serverm.get_server(client_id)
         if server and server.is_loaded():
             movements = server.move_processor(data.data, model)
@@ -32,7 +32,7 @@ class MoveDispatcher(BaseDispatcher):
                 data=move_response_data,
             )
             move_str = move_response.model_dump_json()
-            socket.SendData(move_str)
+            socket.send_data(move_str)
         else:
             response_message = StartResponse(
                 type=ResponseType.START_RESPONSE,
@@ -40,4 +40,4 @@ class MoveDispatcher(BaseDispatcher):
                 data="Select a saved game first or start a new game.",
             )
             sending_str = response_message.model_dump_json()
-            socket.SendData(sending_str)
+            socket.send_data(sending_str)

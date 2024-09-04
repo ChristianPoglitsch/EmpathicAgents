@@ -10,7 +10,7 @@ class UdpComms:
         self, udp_ip, port_tx, port_rx, enable_rx=False, suppress_warnings=True
     ):
         """
-        udpIP: Must be string e.g. "127.0.0.1"
+        udp_ip: Must be string e.g. "127.0.0.1"
         portTX: integer number e.g. 8000.
         Port to transmit from i.e From Python to other application
         portRX: integer number e.g. 8001.
@@ -34,28 +34,30 @@ class UdpComms:
         self.udp_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         # allows the address/port to be reused immediately instead of it being
         # stuck in the TIME_WAIT state waiting for late packets to arrive.
-        self.udpSock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.udpSock.bind((udp_ip, port_rx))
+        self.udp_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.udp_sock.bind((udp_ip, port_rx))
 
         # Create Receiving thread if required
         if enable_rx:
             import threading
 
             self.rx_thread = threading.Thread(
-                target=self.ReadUdpThreadFunc, daemon=True
+                target=self.read_udp_thread_func, daemon=True
             )
-            self.rxThread.start()
+            self.rx_thread.start()
 
     def __del__(self):
-        self.CloseSocket()
+        self.close_socket()
 
     def close_socket(self):
         # Function to close socket
-        self.udpSock.close()
+        self.udp_sock.close()
 
     def send_data(self, str_to_send):
         # Use this function to send string to C#
-        self.udpSock.sendto(bytes(str_to_send, "utf-8"), (self.udpIP, self.udpSendPort))
+        self.udp_sock.sendto(
+            bytes(str_to_send, "utf-8"), (self.udp_ip, self.udp_send_port)
+        )
 
     def receive_data(self):
         """
@@ -69,7 +71,7 @@ class UdpComms:
             - Error: If user attempts to use this without enabling RX
         :return: returns None on failure or the received string on success
         """
-        if not self.enableRX:  # if RX is not enabled, raise error
+        if not self.enable_rx:  # if RX is not enabled, raise error
             raise ValueError(
                 "Attempting to receive data without enabling this setting.\
                              Ensure this is enabled from the constructor"
@@ -77,11 +79,11 @@ class UdpComms:
 
         data = None
         try:
-            data, _ = self.udpSock.recvfrom(5024)
+            data, _ = self.udp_sock.recvfrom(5024)
             data = data.decode("utf-8")
         except WindowsError as e:
             if e.winerror == 10054:
-                if not self.suppressWarnings:
+                if not self.suppress_warnings:
                     logger.info(
                         "Are You connected to the other application? Connect to it!"
                     )
@@ -107,7 +109,7 @@ class UdpComms:
         while True:
             # Blocks (in thread) until data is returned (OR MAYBE UNTIL SOME
             # TIMEOUT AS WELL)
-            data = self.ReceiveData()
+            data = self.receive_data()
             self.data_rx = data  # Populate AFTER new data is received
             self.is_data_received = True
             # When it reaches here, data received is available
@@ -122,8 +124,8 @@ class UdpComms:
 
         data = None
 
-        if self.isDataReceived:  # if data has been received
+        if self.is_data_received:  # if data has been received
             self.is_data_received = False
-            data = self.dataRX
+            data = self.data_rx
             self.data_rx = None  # Empty receive buffer
         return data

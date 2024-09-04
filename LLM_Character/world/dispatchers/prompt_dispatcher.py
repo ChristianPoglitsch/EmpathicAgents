@@ -20,7 +20,7 @@ class PromptDispatcher(BaseDispatcher):
         model: LLM_API,
         data: PromptMessage,
     ):
-        client_id = socket.udpIP + str(socket.udpSendPort)
+        client_id = socket.udp_ip + str(socket.udp_send_port)
         server = serverm.get_server(client_id)
         if server and server.is_loaded():
             pd = data.data
@@ -37,7 +37,7 @@ class PromptDispatcher(BaseDispatcher):
                 data=response_data,
             )
             sending_str = response_message.model_dump_json()
-            socket.SendData(sending_str)
+            socket.send_data(sending_str)
         else:
             response_message = StartResponse(
                 type=ResponseType.START_RESPONSE,
@@ -45,4 +45,4 @@ class PromptDispatcher(BaseDispatcher):
                 data="Select a saved game first or start a new game.",
             )
             sending_str = response_message.model_dump_json()
-            socket.SendData(sending_str)
+            socket.send_data(sending_str)

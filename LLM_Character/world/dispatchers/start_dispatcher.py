@@ -19,7 +19,7 @@ class StartDispatcher(BaseDispatcher):
         model: LLM_API,
         data: StartMessage,
     ):
-        clientid = socket.udpIP + str(socket.udpSendPort)
+        clientid = socket.udp_ip + str(socket.udp_send_port)
 
         sd = data.data
         if serverm.get_server(clientid):
@@ -29,7 +29,7 @@ class StartDispatcher(BaseDispatcher):
                 data="Client is already connected and the game is already loaded",
             )
             sending_str = response_message.model_dump_json()
-            socket.SendData(sending_str)
+            socket.send_data(sending_str)
             return None
 
         server = ReverieServer(sd.sim_code, clientid, sd.fork_sim_code)
@@ -42,4 +42,4 @@ class StartDispatcher(BaseDispatcher):
             data="SuccessFully started the game",
         )
         sending_str = response_message.model_dump_json()
-        socket.SendData(sending_str)
+        socket.send_data(sending_str)

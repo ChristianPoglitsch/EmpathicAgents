@@ -138,7 +138,7 @@ class MessageProcessor:
             type=ResponseType.ERROR_RESPONSE, status=StatusType.FAIL, data=data
         )
         sending_str = response_message.model_dump_json()
-        socket.SendData(sending_str)
+        socket.send_data(sending_str)
         return None
 
     def _validate_data(self, data: str) -> Union[BaseMessage, str]:

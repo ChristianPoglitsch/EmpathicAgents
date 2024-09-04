@@ -29,7 +29,7 @@ def run_server(model: LLM_API, sock: UdpComms, messages: AIMessages):
             pm._message = response
 
             obj = json.dumps(pm.__dict__)
-            sock.SendData(obj)
+            sock.send_data(obj)
 
         time.sleep(1)
 

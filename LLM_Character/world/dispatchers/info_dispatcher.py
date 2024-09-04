@@ -29,7 +29,7 @@ class GetMetaDataDispatcher(BaseDispatcher):
         model: LLM_API,
         data: GetMetaMessage,
     ):
-        client_id = socket.udpIP + str(socket.udpSendPort)
+        client_id = socket.udp_ip + str(socket.udp_send_port)
         server = serverm.get_server(client_id)
         if server and server.is_loaded():
             info = server.get_meta_data()
@@ -39,7 +39,7 @@ class GetMetaDataDispatcher(BaseDispatcher):
                 data=info,
             )
             sending_str = response_message.model_dump_json()
-            socket.SendData(sending_str)
+            socket.send_data(sending_str)
         else:
             response_message = StartResponse(
                 type=ResponseType.START_RESPONSE,
@@ -47,7 +47,7 @@ class GetMetaDataDispatcher(BaseDispatcher):
                 data="Select a saved game first or start a new game.",
             )
             sending_str = response_message.model_dump_json()
-            socket.SendData(sending_str)
+            socket.send_data(sending_str)
 
 
 class GetPersonaDetailsDispatcher(BaseDispatcher):
@@ -58,7 +58,7 @@ class GetPersonaDetailsDispatcher(BaseDispatcher):
         model: LLM_API,
         data: GetPersonaMessage,
     ):
-        client_id = socket.udpIP + str(socket.udpSendPort)
+        client_id = socket.udp_ip + str(socket.udp_send_port)
         server = serverm.get_server(client_id)
         if server and server.is_loaded():
             info = server.get_persona_info(data.data)
@@ -69,7 +69,7 @@ class GetPersonaDetailsDispatcher(BaseDispatcher):
                     data=info,
                 )
                 sending_str = response_message.model_dump_json()
-                socket.SendData(sending_str)
+                socket.send_data(sending_str)
             else:
                 response_message = GetPersonaResponse(
                     type=ResponseType.GET_PERSONA_RESPONSE,
@@ -77,7 +77,7 @@ class GetPersonaDetailsDispatcher(BaseDispatcher):
                     data="Persona name doesn't exist.",
                 )
                 sending_str = response_message.model_dump_json()
-                socket.SendData(sending_str)
+                socket.send_data(sending_str)
         else:
             response_message = StartResponse(
                 type=ResponseType.START_RESPONSE,
@@ -85,7 +85,7 @@ class GetPersonaDetailsDispatcher(BaseDispatcher):
                 data="Select a saved game first or start a new game.",
             )
             sending_str = response_message.model_dump_json()
-            socket.SendData(sending_str)
+            socket.send_data(sending_str)
 
 
 class GetPersonasDispatcher(BaseDispatcher):
@@ -96,7 +96,7 @@ class GetPersonasDispatcher(BaseDispatcher):
         model: LLM_API,
         data: GetPersonasMessage,
     ):
-        client_id = socket.udpIP + str(socket.udpSendPort)
+        client_id = socket.udp_ip + str(socket.udp_send_port)
         server = serverm.get_server(client_id)
         if server and server.is_loaded():
             info = server.get_personas()
@@ -106,7 +106,7 @@ class GetPersonasDispatcher(BaseDispatcher):
                 data=info,
             )
             sending_str = response_message.model_dump_json()
-            socket.SendData(sending_str)
+            socket.send_data(sending_str)
         else:
             response_message = StartResponse(
                 type=ResponseType.START_RESPONSE,
@@ -114,7 +114,7 @@ class GetPersonasDispatcher(BaseDispatcher):
                 data="Select a saved game first or start a new game.",
             )
             sending_str = response_message.model_dump_json()
-            socket.SendData(sending_str)
+            socket.send_data(sending_str)
 
 
 class GetUsersDispatcher(BaseDispatcher):
@@ -125,7 +125,7 @@ class GetUsersDispatcher(BaseDispatcher):
         model: LLM_API,
         data: GetSavedGamesMessage,
     ):
-        client_id = socket.udpIP + str(socket.udpSendPort)
+        client_id = socket.udp_ip + str(socket.udp_send_port)
         server = serverm.get_server(client_id)
         if server and server.is_loaded():
             info = server.get_saved_games()
@@ -135,7 +135,7 @@ class GetUsersDispatcher(BaseDispatcher):
                 data=info,
             )
             sending_str = response_message.model_dump_json()
-            socket.SendData(sending_str)
+            socket.send_data(sending_str)
         else:
             response_message = StartResponse(
                 type=ResponseType.STARTRESPONSE,
@@ -143,7 +143,7 @@ class GetUsersDispatcher(BaseDispatcher):
                 data="Select a saved game first or start a new game.",
             )
             sending_str = response_message.model_dump_json()
-            socket.SendData(sending_str)
+            socket.send_data(sending_str)
 
 
 class GetSavedGamesDispatcher(BaseDispatcher):
@@ -154,7 +154,7 @@ class GetSavedGamesDispatcher(BaseDispatcher):
         model: LLM_API,
         data: GetUsersMessage,
     ):
-        client_id = socket.udpIP + str(socket.udpSendPort)
+        client_id = socket.udp_ip + str(socket.udp_send_port)
         server = serverm.get_server(client_id)
         if server and server.is_loaded():
             info = server.get_users()
@@ -165,7 +165,7 @@ class GetSavedGamesDispatcher(BaseDispatcher):
             )
             sending_str = response_message.model_dump_json()
 
-            socket.SendData(sending_str)
+            socket.send_data(sending_str)
         else:
             response_message = StartResponse(
                 type=ResponseType.STARTRESPONSE,
@@ -173,4 +173,4 @@ class GetSavedGamesDispatcher(BaseDispatcher):
                 data="Select a saved game first or start a new game.",
             )
             sending_str = response_message.model_dump_json()
-            socket.SendData(sending_str)
+            socket.send_data(sending_str)

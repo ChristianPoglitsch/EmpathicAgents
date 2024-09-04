@@ -45,7 +45,7 @@ def receive(s) -> str:
     byte_data = None
     while True:
         time.sleep(1)
-        byte_data = s.ReadReceivedData()
+        byte_data = s.read_received_data()
         if not byte_data:
             continue
         break

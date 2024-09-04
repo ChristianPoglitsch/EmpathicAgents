@@ -19,7 +19,7 @@ class AddPersonaDispatcher(BaseDispatcher):
         model: LLM_API,
         data: AddPersonaMessage,
     ):
-        client_id = socket.udpIP + str(socket.udpSendPort)
+        client_id = socket.udp_ip + str(socket.udp_send_port)
         server = serverm.get_server(client_id)
         if server and server.is_loaded():
             server.add_persona_processor(data.data)
@@ -30,7 +30,7 @@ class AddPersonaDispatcher(BaseDispatcher):
                 data="Successfully updated the persona data.",
             )
             sending_str = response_message.model_dump_json()
-            socket.SendData(sending_str)
+            socket.send_data(sending_str)
         else:
             response_message = StartResponse(
                 type=ResponseType.START_RESPONSE,
@@ -38,4 +38,4 @@ class AddPersonaDispatcher(BaseDispatcher):
                 data="Select a saved game first or start a new game.",
             )
             sending_str = response_message.model_dump_json()
-            socket.SendData(sending_str)
+            socket.send_data(sending_str)

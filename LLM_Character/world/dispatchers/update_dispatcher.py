@@ -25,7 +25,7 @@ class UpdateMetaDispatcher(BaseDispatcher):
         model: LLM_API,
         data: UpdateMetaMessage,
     ):
-        client_id = socket.udpIP + str(socket.udpSendPort)
+        client_id = socket.udp_ip + str(socket.udp_send_port)
         server = serverm.get_server(client_id)
         if server and server.is_loaded():
             server.update_meta_processor(data.data)
@@ -36,7 +36,7 @@ class UpdateMetaDispatcher(BaseDispatcher):
                 data="Successfully updated the meta data.",
             )
             sending_str = response_message.model_dump_json()
-            socket.SendData(sending_str)
+            socket.send_data(sending_str)
         else:
             response_message = StartResponse(
                 type=ResponseType.START_RESPONSE,
@@ -44,7 +44,7 @@ class UpdateMetaDispatcher(BaseDispatcher):
                 data="Select a saved game first or start a new game.",
             )
             sending_str = response_message.model_dump_json()
-            socket.SendData(sending_str)
+            socket.send_data(sending_str)
 
 
 class UpdatePersonaDispatcher(BaseDispatcher):
@@ -55,7 +55,7 @@ class UpdatePersonaDispatcher(BaseDispatcher):
         model: LLM_API,
         data: UpdatePersonaMessage,
     ):
-        client_id = socket.udpIP + str(socket.udpSendPort)
+        client_id = socket.udp_ip + str(socket.udp_send_port)
         server = serverm.get_server(client_id)
         if server and server.is_loaded():
             server.update_persona_processor(data.data)
@@ -66,7 +66,7 @@ class UpdatePersonaDispatcher(BaseDispatcher):
                 data="Successfully updated the persona data.",
             )
             sending_str = response_message.model_dump_json()
-            socket.SendData(sending_str)
+            socket.send_data(sending_str)
         else:
             response_message = StartResponse(
                 type=ResponseType.START_RESPONSE,
@@ -74,7 +74,7 @@ class UpdatePersonaDispatcher(BaseDispatcher):
                 data="Select a saved game first or start a new game.",
             )
             sending_str = response_message.model_dump_json()
-            socket.SendData(sending_str)
+            socket.send_data(sending_str)
 
 
 class UpdateUserDispatcher(BaseDispatcher):
@@ -85,7 +85,7 @@ class UpdateUserDispatcher(BaseDispatcher):
         model: LLM_API,
         data: UpdateUserMessage,
     ):
-        client_id = socket.udpIP + str(socket.udpSendPort)
+        client_id = socket.udp_ip + str(socket.udp_send_port)
         server = serverm.get_server(client_id)
         if server and server.is_loaded():
             server.update_user_processor(data.data)
@@ -96,7 +96,7 @@ class UpdateUserDispatcher(BaseDispatcher):
                 data="Successfully updated the user data.",
             )
             sending_str = response_message.model_dump_json()
-            socket.SendData(sending_str)
+            socket.send_data(sending_str)
         else:
             response_message = StartResponse(
                 type=ResponseType.START_RESPONSE,
@@ -104,4 +104,4 @@ class UpdateUserDispatcher(BaseDispatcher):
                 data="Select a saved game first or start a new game.",
             )
             sending_str = response_message.model_dump_json()
-            socket.SendData(sending_str)
+            socket.send_data(sending_str)

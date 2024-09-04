@@ -25,7 +25,7 @@ def start_server(
     logger.info("listening ...")
     while True:
         time.sleep(1)
-        byte_data = sock.ReadReceivedData()
+        byte_data = sock.read_received_data()
         if not byte_data:
             continue
 
