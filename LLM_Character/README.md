@@ -3,19 +3,19 @@
 ## Python API
 This is the API offered by the python endpoint (server) which the unity endpoint (client) is calling. 
 
->StartMessage: Initialize a new game from a saved game or start a new game.
->PromptMessage: Send a prompt (chatting) to a persona.
->MoveMessage: Update the location and events related to a persona.
->UpdateMetaMessage: Update metadata, such as the current time within the game.
->UpdatePersonaMessage: Update the details of a persona, such as their name, age, and location.
->UpdateUserMessage: Change user information (name).
->AddPersonaMessage: Add a new persona to the simulation with specified attributes.
->GetPersonasMessage: Retrieve all personas currently in the game.
->GetUsersMessage: Retrieve all users in the game.
->GetPersonaMessage: Retrieve specific details about a single persona.
->GetSavedGamesMessage: Retrieve a list of saved games.
->GetMetaMessage: Retrieve metadata related to the game.
->ErrorResponse: Handle error scenarios.
+>StartMessage: Initialize a new game from a saved game or start a new game.  
+>PromptMessage: Send a prompt (chatting) to a persona.  
+>MoveMessage: Update the location and events related to a persona.  
+>UpdateMetaMessage: Update metadata, such as the current time within the game.  
+>UpdatePersonaMessage: Update the details of a persona, such as their name, age, and location.  
+>UpdateUserMessage: Change user information (name).  
+>AddPersonaMessage: Add a new persona to the simulation with specified attributes.  
+>GetPersonasMessage: Retrieve all personas currently in the game.  
+>GetUsersMessage: Retrieve all users in the game.  
+>GetPersonaMessage: Retrieve specific details about a single persona.  
+>GetSavedGamesMessage: Retrieve a list of saved games.  
+>GetMetaMessage: Retrieve metadata related to the game.  
+>ErrorResponse: Handle error scenarios.  
 
 ## Server Setup and Communication:
 
