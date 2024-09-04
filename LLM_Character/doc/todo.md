@@ -7,6 +7,10 @@
 * instead of deciding wether a conversation is ended by the LLM agent solely, let the user at unity decide when to stop the conversation as well. 
 so if one of the two wishes to end it, it ends completly and is not one-sided like now with all the issues attached 
 
+* Use Json schema to define the API, and do not rely on incoming_messages.py and ougoing_messages.py
+use some code generation that automatically generates these pydantic classes from the json schema. 
+The same holds over at the unity end point. 
+
 # emotional state
 
 there exists 6 emotions. An amotional state is stored in each Persona which is initialised to neutral.  

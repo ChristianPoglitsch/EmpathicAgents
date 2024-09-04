@@ -6,7 +6,7 @@ it demonstrates how the entry point to the python server works,
 that entry point being `start_server`.
 
 The script serves as an end-to-end example of setting up the python server,
-sending various types of messages to the server, and handling the responses.
+sending various types of messages to the python server, and handling the responses.
 """
 
 import json
@@ -71,6 +71,13 @@ from LLM_Character.util import BASE_DIR, LOGGER_NAME, receive, setup_logging
 
 
 def running_examples(client_sock: UdpComms):
+    """
+    The sending and receiving operations described here 
+    are normally performed by the Unity endpoint. 
+    Therefore, wherever you see client_sock.receive or client_sock.send, 
+    it indicates that the Unity endpoint is receiving or sending data 
+    to the Python endpoint.
+    """ 
     start_mess = StartMessage(
         type=MessageType.STARTMESSAGE,
         data=StartData(fork_sim_code="FORK123", sim_code="SIM456"),
@@ -413,6 +420,7 @@ if __name__ == "__main__":
         dispatcher = MessageProcessor()
         server_manager = ReverieServerManager()
 
+        # The python server is set up here.
         server_thread = threading.Thread(
             target=start_server,
             args=(server_sock, server_manager, dispatcher, wrapper_model),
@@ -420,4 +428,5 @@ if __name__ == "__main__":
         server_thread.daemon = True
         server_thread.start()
 
+        # Unity endpoint is going to send some messages to the python server
         running_examples(client_sock)
