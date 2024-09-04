@@ -1,3 +1,7 @@
+"""
+this script is an example of using the plan function.
+"""
+
 import datetime
 import logging
 

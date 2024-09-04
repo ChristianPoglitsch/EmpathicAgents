@@ -1,3 +1,14 @@
+"""
+The code primarily demonstrates how to use structured message types
+(like StartMessage, PromptMessage, MoveMessage, etc.)
+for interacting with the python server,
+it demonstrates how the entry point to the python server works,
+that entry point being `start_server`.
+
+The script serves as an end-to-end example of setting up the python server,
+sending various types of messages to the server, and handling the responses.
+"""
+
 import json
 import logging
 import shutil

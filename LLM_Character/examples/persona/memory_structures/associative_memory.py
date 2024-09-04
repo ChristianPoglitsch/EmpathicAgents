@@ -1,3 +1,11 @@
+"""
+This script demonstrates the use of the `AssociativeMemory` class.
+The script showcases various operations including adding
+thoughts, chats, and events to the memory, as well as retrieving
+and summarizing relevant memories. Additionally, it illustrates
+how to load and save the associative memory to and from a file.
+"""
+
 import datetime
 import logging
 

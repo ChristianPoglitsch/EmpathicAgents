@@ -1,3 +1,10 @@
+"""
+This script demonstrates the usage of the `PersonaScratch` class.
+The script illustrates how to create a persona's scratch memory,
+add new actions, check the status of these actions, update persona data,
+and finally save and load the persona's scratch memory to and from a file.
+"""
+
 import datetime
 import logging
 

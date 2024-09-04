@@ -1,3 +1,10 @@
+"""
+This script demonstrates the usage of the `MemoryTree` class
+It shows how to load a memory tree from a file, update it with
+new location data, save the modified tree, and retrieve information
+about accessible locations within the tree.
+"""
+
 import logging
 
 from LLM_Character.communication.incoming_messages import OneLocationData
@@ -17,11 +24,9 @@ if __name__ == "__main__":
     location_data = OneLocationData(world="World3", sector="City3", arena="Arena1")
     memory_tree.update_oloc(location_data)
 
-    memory_tree.save(
-        BASE_DIR
-        + "/LLM_Character/examples/persona/\
-        memory_structures/temp/Florian/spatial_mem1.json"
-    )
+    path = "/LLM_Character/examples/persona/memory_structures/temp/Florian/"
+    fname = "spatial_mem1.json"
+    memory_tree.save(BASE_DIR + path + fname)
 
     info = memory_tree.get_info()
     logger.info("Memory Tree Data:")
@@ -53,11 +58,9 @@ if __name__ == "__main__":
     }
     memory_tree.load_from_data(data)
 
-    memory_tree.save(
-        BASE_DIR
-        + "/LLM_Character/examples/persona/\
-        memory_structures/temp/Florian/spatial_mem2.json"
-    )
+    path = "/LLM_Character/examples/persona/memory_structures/temp/Florian/"
+    fname = "spatial_mem2.json"
+    memory_tree.save(BASE_DIR + path + fname)
 
     info = memory_tree.get_info()
     logger.info("Memory Tree Data:")

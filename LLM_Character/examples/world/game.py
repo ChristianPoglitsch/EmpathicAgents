@@ -1,3 +1,10 @@
+"""
+This script demonstrates an end-to-end example of
+interacting with the `ReverieServer`,
+The script showcases how to load the server,
+and send messages.
+"""
+
 import logging
 
 from LLM_Character.llm_comms.llm_api import LLM_API
@@ -40,6 +47,8 @@ if __name__ == "__main__":
         assert a is False
         assert out1 is None
 
+        logger.info(out1)
+
         r.start_processor()
 
         a = r.is_loaded()
@@ -48,3 +57,5 @@ if __name__ == "__main__":
         )
         assert a
         assert out1 is not None
+
+        logger.info(out1)

@@ -1,3 +1,10 @@
+"""
+This script demonstrates how to use the retrieval functionalities,
+specifically the `retrieve_focal_points` and `retrieve_contextual_events` methods.
+These methods are part of the cognitive modules for
+querying associative memory and handling perceived events.
+"""
+
 import datetime
 import logging
 

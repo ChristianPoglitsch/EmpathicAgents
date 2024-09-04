@@ -1,3 +1,7 @@
+"""
+This script demonstrates how to use both `chatting` and `reflect` functions.
+"""
+
 import datetime
 import logging
 

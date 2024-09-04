@@ -1,3 +1,10 @@
+"""
+This script demonstrates how to use the `perceive` function.
+It involves loading a persona, setting its context,
+and then using different LLM models to process perceived
+events by the persona.
+"""
+
 import datetime
 import logging
 

@@ -1,3 +1,10 @@
+"""
+This script demonstrates how to use the `chatting` functionality
+to interact with a persona.
+The script loads two different language models (OpenAI's GPT-4 and a local model),
+initializes them, and runs a series of chat interactions with a predefined persona.
+"""
+
 import datetime
 import logging
 
