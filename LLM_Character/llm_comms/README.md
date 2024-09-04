@@ -2,7 +2,7 @@
 
 ## Overview
 
-This folder contains the code for interacting with both OpenAI and local language models (LLMs). It provides abstractions for sending text prompts and retrieving embeddings from models. The system is divided into two primary communication modules: one for interacting with OpenAI's API and another for working with locally hosted models.
+This folder contains the code for interacting with both OpenAI and local language models (LLMs). It provides abstractions for sending text prompts and retrieving embeddings from models. 
 
 ## Modules
 

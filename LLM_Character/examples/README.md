@@ -5,3 +5,4 @@ It is provided as documentation in order to understand the codebase a little bit
 The developper is still advised to go through the original repository in order to look up 
 documentation for certain (most) functions. 
 
+[Link to repository of the research paper](https://github.com/joonspk-research/generative_agents)
