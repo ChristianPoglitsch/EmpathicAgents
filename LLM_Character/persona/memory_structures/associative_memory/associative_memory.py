@@ -351,7 +351,7 @@ class AssociativeMemory:
             r[node_id] = {}
             r[node_id]["node_count"] = node.node_count
             r[node_id]["type_count"] = node.type_count
-            r[node_id]["type"] = node.type
+            r[node_id]["type"] = node.node_type
             r[node_id]["depth"] = node.depth
 
             r[node_id]["created"] = node.created.strftime("%Y-%m-%d %H:%M:%S")
