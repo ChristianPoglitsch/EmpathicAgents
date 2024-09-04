@@ -8,7 +8,7 @@ import logging
 from LLM_Character.llm_comms.llm_api import LLM_API
 from LLM_Character.llm_comms.llm_local import LocalComms
 from LLM_Character.llm_comms.llm_openai import OpenAIComms
-from LLM_Character.messages_dataclass import AIMessage, AIMessages
+from LLM_Character.messages_dataclass import AIMessages
 from LLM_Character.util import LOGGER_NAME, setup_logging
 
 if __name__ == "__main__":
@@ -34,26 +34,21 @@ if __name__ == "__main__":
         hf = LLM_API(model)
 
         messages = AIMessages()
-        m1 = AIMessage("Jarek", "Hello, how are you?", "user", "MessageAI")
-        m2 = AIMessage(
+        messages.add_message("Jarek", "Hello, how are you?", "user", "MessageAI")
+        messages.add_message(
             "Camila",
             "I'm fine, thank you! How can I assist you today?",
             "assistant",
             "MessageAI",
         )
-        m3 = AIMessage("Jarek", "Can you tell me a joke?", "user", "MessageAI")
-        m4 = AIMessage(
+        messages.add_message("Jarek", "Can you tell me a joke?", "user", "MessageAI")
+
+        messages.add_message(
             "Camila",
-            "Why don't scientists trust atoms?\
-                    Because they make up everything!",
+            "Why don't scientists trust atoms? Because they make up everything!",
             "assistant",
             "MessageAI",
         )
-        messages.add_message(m1)
-        messages.add_message(m2)
-        messages.add_message(m3)
-        messages.add_message(m4)
-
         response = hf.query_text(messages)
 
         logger.info("Model response:")
@@ -63,4 +58,4 @@ if __name__ == "__main__":
         embedding = hf.get_embedding(text)
 
         logger.info("Model embedding of text:")
-        logger.info(embedding)
+        logger.info(len(embedding))

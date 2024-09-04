@@ -357,7 +357,9 @@ def running_examples(client_sock: UdpComms):
 
     # ------------------------------------------
 
-    error_message = "KAMARADEN,  Deutschland ist nun erwacht."
+    error_message = "this is an invalid json, \
+    so the server should return an error message back."
+
     client_sock.send_data(error_message)
     response = receive(client_sock)
     logger.info(response)
