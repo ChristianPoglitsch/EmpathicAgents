@@ -18,6 +18,10 @@ since the problem is that you dont know the sentence generated and if that gener
 
 * every open() function can rasie an exception, exception handling needs to be upgraded, since it is non existent at this moment. 
 
+* instead of end conversation by the LLM agent, let the user at unity decide when to stop the conversation as well. 
+so if one of the two wishes to end it, it ends completly and is not one-sided like now.
+with all the issues attached 
+
 # emotional state
 
 6 emotions, store in the persona. attached to persona, 

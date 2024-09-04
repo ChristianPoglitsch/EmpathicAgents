@@ -50,7 +50,6 @@ class OneLocationData(BaseModel):
     world: str
     sector: str
     arena: Optional[str] = None
-    obj: Optional[str] = None
 
 
 class EventData(BaseModel):
@@ -90,7 +89,7 @@ class PersonaScratchData(BaseModel):
     recency_w: Optional[int] = None
     relevance_w: Optional[int] = None
     importance_w: Optional[int] = None
-    recency_decay: Optional[int] = None
+    recency_decay: Optional[float] = None
     importance_trigger_max: Optional[int] = None
     importance_trigger_curr: Optional[int] = None
     importance_ele_n: Optional[int] = None

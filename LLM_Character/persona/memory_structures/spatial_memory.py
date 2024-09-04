@@ -67,16 +67,3 @@ class MemoryTree:
         except BaseException:
             x = ", ".join(list(self.tree[world][sector][arena.lower()]))
         return x
-
-
-if __name__ == "__main__":
-    f = "..\\..\\storage\\initial\\personas\\Isabella\\spatial_memory.json"
-    x = MemoryTree(f)
-
-    print(x.get_str_accessible_sectors("Kortrijk"))
-    print(x.get_str_accessible_sector_arenas("Kortrijk", "Beguinage of Courtrai"))
-    print(
-        x.get_str_accessible_arena_game_objects(
-            "Kortrijk", "Beguinage of Courtrai", "supply store"
-        )
-    )

@@ -3,27 +3,26 @@ from LLM_Character.persona.memory_structures.scratch.persona_scratch import (
     PersonaScratch,
 )
 from LLM_Character.persona.memory_structures.spatial_memory import MemoryTree
-from LLM_Character.persona.prompt_modules.planning_prompts.determine_action.action_arena import (
+from LLM_Character.persona.prompt_modules.planning_prompts.determine_action.action_arena import (  # noqa: E501
     run_prompt_action_arena,
 )
-from LLM_Character.persona.prompt_modules.planning_prompts.determine_action.action_game_object import (
+from LLM_Character.persona.prompt_modules.planning_prompts.determine_action.action_game_object import (  # noqa: E501
     run_prompt_action_game_object,
 )
-from LLM_Character.persona.prompt_modules.planning_prompts.determine_action.action_sector import (
+from LLM_Character.persona.prompt_modules.planning_prompts.determine_action.action_sector import (  # noqa: E501
     run_prompt_action_sector,
 )
-from LLM_Character.persona.prompt_modules.planning_prompts.determine_action.event_triple import (
+from LLM_Character.persona.prompt_modules.planning_prompts.determine_action.event_triple import (  # noqa: E501
     run_prompt_event_triple,
 )
-from LLM_Character.persona.prompt_modules.planning_prompts.determine_action.task_decomp import (
+from LLM_Character.persona.prompt_modules.planning_prompts.determine_action.task_decomp import (  # noqa: E501
     run_prompt_task_decomp,
 )
 
 
-def _determine_action(scratch: PersonaScratch, s_mem: MemoryTree, model: LLM_API):
+def _determine_action(scratch: PersonaScratch, s_mem: MemoryTree, model: LLM_API):  # noqa: C901
     curr_index = scratch.get_f_daily_schedule_index()
     curr_index_60 = scratch.get_f_daily_schedule_index(advance=60)
-
     if curr_index == 0:
         act_desp, act_dura = scratch.f_daily_schedule[curr_index]
         if act_dura >= 60:
