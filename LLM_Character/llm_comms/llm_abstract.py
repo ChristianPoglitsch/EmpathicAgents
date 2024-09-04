@@ -9,7 +9,7 @@ class LLMComms(ABC):
         pass
 
     @abstractmethod
-    def send_text(self, prompt: AIMessages, max_length=100):
+    def send_text(self, prompt: AIMessages) -> str:
         pass
 
     @abstractmethod
