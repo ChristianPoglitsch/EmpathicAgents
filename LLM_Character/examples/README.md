@@ -1,3 +1,7 @@
 # Info
 
-Some examples in order to understand the codebase. 
+This folder gives some examples how to call certain methods.
+It is provided as documentation in order to understand the codebase a little bit better.
+The developper is still advised to go through the original repository in order to look up 
+documentation for certain (most) functions. 
+
