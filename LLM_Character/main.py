@@ -5,7 +5,7 @@ from LLM_Character.communication.comm_medium import CommMedium
 from LLM_Character.communication.message_processor import MessageProcessor
 from LLM_Character.communication.reverieserver_manager import ReverieServerManager
 from LLM_Character.llm_comms.llm_api import LLM_API
-from LLM_Character.util import LOGGER_NAME
+from LLM_Character.util import LOGGER_NAME, setup_logging
 
 # NOTE: ibrahim: temporary function that will be replaced in the future
 # by the hungarian team ?
@@ -40,7 +40,7 @@ def start_server(
 
 
 if __name__ == "__main__":
-    logger = logging.getLogger("python_server_endpoint")
+    setup_logging("python_server_endpoint")
     import torch
 
     from LLM_Character.communication.udp_comms import UdpComms
