@@ -1,4 +1,5 @@
 import datetime
+import logging
 from typing import Union
 
 from LLM_Character.llm_comms.llm_api import LLM_API
@@ -21,6 +22,9 @@ from LLM_Character.persona.prompt_modules.planning_prompts.long_term_planning.re
 from LLM_Character.persona.prompt_modules.planning_prompts.long_term_planning.wake_up import (  # noqa: E501
     run_prompt_wake_up,
 )
+from LLM_Character.util import LOGGER_NAME
+
+logger = logging.getLogger(LOGGER_NAME)
 
 
 def _long_term_planning(
@@ -31,16 +35,20 @@ def _long_term_planning(
 ):
     wake_up_hour = generate_wake_up_hour(scratch, model)
     if new_day == "First day":
+        logger.info("Generating first daily plan")
         scratch.daily_req = generate_first_daily_plan(scratch, wake_up_hour, model)
 
     elif new_day == "New day":
+        logger.info("Revising Idenity")
         new_currently, new_daily_req = revise_identity(scratch, a_mem, model)
         scratch.currently = new_currently
         scratch.daily_plan_req = new_daily_req
 
+    logger.info("Making hourly schedule")
     scratch.f_daily_schedule = make_hourly_schedule(scratch, model, wake_up_hour)
     scratch.f_daily_schedule_hourly_org = scratch.f_daily_schedule[:]
 
+    logger.info("Generating thought plan")
     data = generate_thought_plan(scratch, model)
     a_mem.add_thought(**data)
 
@@ -60,6 +68,7 @@ def revise_identity(scratch: PersonaScratch, a_mem: AssociativeMemory, model: LL
 
 
 # FIXME try to make the code more readable instead of adding comments.
+# also more performant, because this is really a bottleneck...
 def make_hourly_schedule(scratch: PersonaScratch, model: LLM_API, wake_up_hour):
     hour_str = [
         "00:00 AM",
@@ -67,10 +76,25 @@ def make_hourly_schedule(scratch: PersonaScratch, model: LLM_API, wake_up_hour):
         "02:00 AM",
         "03:00 AM",
         "04:00 AM",
-        # "05:00 AM", "06:00 AM", "07:00 AM", "08:00 AM", "09:00 AM",
-        # "10:00 AM", "11:00 AM", "12:00 PM", "01:00 PM", "02:00 PM",
-        # "03:00 PM", "04:00 PM", "05:00 PM", "06:00 PM", "07:00 PM",
-        # "08:00 PM", "09:00 PM", "10:00 PM", "11:00 PM"
+        "05:00 AM",
+        "06:00 AM",
+        "07:00 AM",
+        "08:00 AM",
+        "09:00 AM",
+        "10:00 AM",
+        "11:00 AM",
+        "12:00 PM",
+        "01:00 PM",
+        "02:00 PM",
+        "03:00 PM",
+        "04:00 PM",
+        "05:00 PM",
+        "06:00 PM",
+        "07:00 PM",
+        "08:00 PM",
+        "09:00 PM",
+        "10:00 PM",
+        "11:00 PM",
     ]
     n_m1_activity = []
     diversity_repeat_count = 3

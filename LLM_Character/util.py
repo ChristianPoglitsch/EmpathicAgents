@@ -14,12 +14,12 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 LOGGER_NAME = "LLM_Character"
 
 
-def setup_logging(filename: str):
+def setup_logging(name: str):
     # very rudimentary, upgrade.
     log_dir = BASE_DIR + "/LLM_Character/logs"
     os.makedirs(log_dir, exist_ok=True)
 
-    log_file = os.path.join(log_dir, f"{filename}.log")
+    log_file = os.path.join(log_dir, f"{name}.log")
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s - %(filename)s - %(funcName)s - %(message)s",

@@ -1,3 +1,4 @@
+import logging
 from typing import Tuple
 
 from LLM_Character.llm_comms.llm_api import LLM_API
@@ -6,10 +7,9 @@ from LLM_Character.persona.cognitive_modules.conversing.ending import _end_conve
 from LLM_Character.persona.cognitive_modules.conversing.reacting import (
     _generate_response,
 )
-from LLM_Character.persona.memory_structures.associative_memory.\
-    associative_memory import (
-        AssociativeMemory,
-    )
+from LLM_Character.persona.memory_structures.associative_memory.associative_memory import (  # noqa: E501
+    AssociativeMemory,
+)
 from LLM_Character.persona.memory_structures.scratch.persona_scratch import (
     PersonaScratch,
 )
@@ -20,6 +20,9 @@ from LLM_Character.persona.prompt_modules.converse_prompts.poignancy_chat import
 from LLM_Character.persona.prompt_modules.converse_prompts.poignancy_event import (
     run_prompt_poignancy_event,
 )
+from LLM_Character.util import LOGGER_NAME
+
+logger = logging.getLogger(LOGGER_NAME)
 
 
 def chatting(
@@ -32,26 +35,29 @@ def chatting(
     if len(user_scratch.chat) == 0:
         user_scratch.start_time_chatting = character_scratch.curr_time
 
-    user_scratch.chat.add_message(
-        message, user_scratch.name, "user", "MessageAI")
+    user_scratch.chat.add_message(message, user_scratch.name, "user", "MessageAI")
+
+    logger.info("generating response")
     utt, emotion, trust, end = _generate_response(
         user_scratch, character_scratch, character_mem, message, model
     )
-    user_scratch.chat.add_message(
-        utt, character_scratch.name, "assistant", "MessageAI")
 
-    character_scratch.curr_emotion = emotion
+    user_scratch.chat.add_message(utt, character_scratch.name, "assistant", "MessageAI")
+
+    character_scratch.curr_emotion = emotion.lower()
     character_scratch.curr_trust[user_scratch.name] = int(trust)
 
     if end:
+        logger.info("ending conversation")
         _end_conversation(user_scratch, character_scratch, model)
         p_event = character_scratch.get_curr_event_and_desc()
+
+        logger.info("remembering chat")
         nodeid, keywords = _remember_chat(
             character_scratch, character_mem, p_event, model
         )
         _prepare_reflect_chat(
-            character_scratch, character_mem, p_event, keywords, [
-                nodeid], model
+            character_scratch, character_mem, p_event, keywords, [nodeid], model
         )
 
         user_scratch.chat = AIMessages()
@@ -60,10 +66,10 @@ def chatting(
         # reset
         character_scratch.chatting_with = None
         character_scratch.chat = AIMessages()
-        character_scratch.chatting_with_buffer = None
+        character_scratch.chatting_with_buffer = {}
         character_scratch.chatting_end_time = None
 
-    return utt, emotion, trust, end
+    return utt, emotion.lower(), trust, end
 
 
 def _remember_chat(
@@ -124,16 +130,14 @@ def _prepare_reflect_chat(
     s, p, o, desc = event
     desc_embedding_in = desc
     if "(" in desc:
-        desc_embedding_in = desc_embedding_in.split("(")[1].split(")")[
-            0].strip()
+        desc_embedding_in = desc_embedding_in.split("(")[1].split(")")[0].strip()
     if desc_embedding_in in a_mem.embeddings:
         event_embedding = a_mem.embeddings[desc_embedding_in]
     else:
         event_embedding = model.get_embedding(desc_embedding_in)
     event_embedding_pair = (desc_embedding_in, event_embedding)
 
-    event_poignancy = generate_event_poig_score(
-        scratch, desc_embedding_in, model)
+    event_poignancy = generate_event_poig_score(scratch, desc_embedding_in, model)
     a_mem.add_event(
         scratch.curr_time,
         None,
