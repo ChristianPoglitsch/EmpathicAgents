@@ -1,6 +1,6 @@
 import logging
 
-from LLM_Character.communication import CommMedium
+from LLM_Character.communication.comm_medium import CommMedium
 from LLM_Character.util import LOGGER_NAME
 
 logger = logging.getLogger(LOGGER_NAME)
