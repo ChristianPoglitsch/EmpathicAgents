@@ -24,21 +24,24 @@ if __name__ == "__main__":
     )
 
     info = memory_tree.get_info()
-    logger.info("Memory Tree Data:", info)
+    logger.info("Memory Tree Data:")
+    logger.info(info)
 
-    accessible_sectors = memory_tree.get_str_accessible_sectors("World1")
-    logger.info("Accessible Sectors in World1:", accessible_sectors)
+    accessible_sectors = memory_tree.get_str_accessible_sectors("World3")
+    logger.info("Accessible Sectors in World3:")
+    logger.info(accessible_sectors)
 
-    accessible_arenas = memory_tree.get_str_accessible_sector_arenas("World1", "City1")
-    logger.info("Accessible Arenas in City1 of World1:", accessible_arenas)
+    accessible_arenas = memory_tree.get_str_accessible_sector_arenas("World3", "City3")
+    logger.info("Accessible Arenas in City3 of World3:")
+    logger.info(accessible_arenas)
 
     accessible_game_objects = memory_tree.get_str_accessible_arena_game_objects(
-        "World1", "City1", "Location1"
+        "World3", "City3", "Arena1"
     )
-    logger.info(
-        "Accessible Game Objects in Location1 of City1 in World1:",
-        accessible_game_objects,
-    )
+    logger.info("Accessible Game Objects in Arena1 of City3 in World3:")
+    logger.info(accessible_game_objects)
+
+    # ----------------------------------------------------------------------------------
 
     memory_tree = MemoryTree()
     data = {
@@ -50,28 +53,26 @@ if __name__ == "__main__":
     }
     memory_tree.load_from_data(data)
 
-    location_data = OneLocationData(world="World3", sector="City3", arena="Arena1")
-    memory_tree.update_oloc(location_data)
-
     memory_tree.save(
         BASE_DIR
         + "/LLM_Character/examples/persona/\
-        memory_structures/temp/Florian/spatial_mem1.json"
+        memory_structures/temp/Florian/spatial_mem2.json"
     )
 
     info = memory_tree.get_info()
-    logger.info("Memory Tree Data:", info)
+    logger.info("Memory Tree Data:")
+    logger.info(info)
 
     accessible_sectors = memory_tree.get_str_accessible_sectors("World1")
-    logger.info("Accessible Sectors in World1:", accessible_sectors)
+    logger.info("Accessible Sectors in World1:")
+    logger.info(accessible_sectors)
 
     accessible_arenas = memory_tree.get_str_accessible_sector_arenas("World1", "City1")
-    logger.info("Accessible Arenas in City1 of World1:", accessible_arenas)
+    logger.info("Accessible Arenas in City1 of World1:")
+    logger.info(accessible_arenas)
 
     accessible_game_objects = memory_tree.get_str_accessible_arena_game_objects(
         "World1", "City1", "Location1"
     )
-    logger.info(
-        "Accessible Game Objects in Location1 of City1 in World1:",
-        accessible_game_objects,
-    )
+    logger.info("Accessible Game Objects in Location1 of City1 in World1: ")
+    logger.info(accessible_game_objects)
