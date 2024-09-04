@@ -36,3 +36,10 @@ Run the main.py script to start the Python endpoint:
 ```bash
     python main.py
 ```
+
+## Authors
+
+- Ibrahim El Kaddouri
+- Christian Poglitsch
+
+   
