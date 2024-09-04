@@ -215,7 +215,7 @@ if __name__ == "__main__":
     load_and_train_mistral_example()
 
     # load_and_train_mistral_example()
-    # load_mistral_example()
+    load_mistral_example()
 
     model_id = "openlm-research/open_llama_7b_v2"
     # trained_path = "thisserand/health_care_german"

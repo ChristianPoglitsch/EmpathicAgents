@@ -35,6 +35,7 @@ def train_mistral(model, tokenizer, instruct_tune_dataset) -> SFTTrainer:
         # per batch); method to increase batch size in a memory-efficient
         # manner.
         # num_train_epochs=5,
+
         max_steps=500,  # comment out this line if you want to train in epochs - 100+ recommended
         save_strategy="epoch",
         # evaluation_strategy="epoch",
@@ -198,7 +199,8 @@ if __name__ == "__main__":
 
     model, tokenizer = load_mistral_instr_model()
 
-    instruct_tune_dataset = load_dataset("mwitiderrick/lamini_mistral", split="train")
+    #instruct_tune_dataset = load_dataset("mwitiderrick/lamini_mistral", split="train")
+    instruct_tune_dataset = generate_additional_data()
     train_mistral(model, tokenizer, instruct_tune_dataset)
 
     # FIXME:
