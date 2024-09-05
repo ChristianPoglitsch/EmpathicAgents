@@ -413,7 +413,8 @@ class PersonaScratch:
             if self.act_start_time
             else None
         )
-        scratch["act_duration"] = self.act_duration
+        scratch["act_duration"] = str(self.act_duration) if self.act_duration else None
+
         scratch["act_description"] = self.act_description
         scratch["act_event"] = self.act_event
 

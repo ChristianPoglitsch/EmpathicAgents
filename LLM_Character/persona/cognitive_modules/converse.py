@@ -108,7 +108,7 @@ def _remember_chat(
             keywords,
             chat_poignancy,
             chat_embedding_pair,
-            cscratch.chat,
+            cscratch.chat.get_sender_message_format(),
         )
 
         # FIXME: add this to a_mem with add_event.

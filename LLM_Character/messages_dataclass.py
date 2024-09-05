@@ -204,6 +204,17 @@ class AIMessages:
         finally:
             return messages_ai
 
+    def get_sender_message_format(self) -> List[List[str]]:
+        """
+        Represents the messages of this chat as a list of lists,
+        with each message containing only the `sender` and the `message`.
+
+        Returns:
+            List[List[str]]:
+            A list of lists where each list is in the format [sender, message].
+        """
+        return [[item.sender, item.message] for item in self.messages]
+
     def __len__(self):
         return len(self.messages)
 
