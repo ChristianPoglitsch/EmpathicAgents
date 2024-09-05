@@ -1,0 +1,6 @@
+[tool.ruff]
+target-version = "py39"
+fix = true
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "C", "B", "I", "T"]

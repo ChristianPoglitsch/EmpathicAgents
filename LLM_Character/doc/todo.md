@@ -1,32 +1,23 @@
-* make sure the LlmTraining.py and Main.py work when upgrading `transformers` due to some bug, see bug.md
-issue needs to be fixed.
+# tasks
 
-* make sure the destination of writing the chat is redirected to the dialogues folder. (change also needed for data folder)
+* convert from udp sockets to a REST api.  
 
-* See QUESTION in huggingface.py (why only summarize from user messages?) 
+* every open() function can rasie an exception, exception handling needs to be upgraded, since it is non existent at this moment. 
 
->[user] Summerize the chat: Hello, how are you?Can you tell me a joke?   
->[assistant]  In this interaction, the AI greets the user with a standard salutation, "Hello, how are you?" The user then makes a request for a joke to be shared. However, the AI does not provide a joke in response. Instead, the conversation ends with the initial greeting. Thus, the chat summary would be: The user asked for a joke, but the AI did not provide one.  
+* instead of deciding wether a conversation is ended by the LLM agent solely, let the user at unity decide when to stop the conversation as well. 
+so if one of the two wishes to end it, it ends completly and is not one-sided like now with all the issues attached 
 
+* Use Json schema to define the API, and do not rely on incoming_messages.py and ougoing_messages.py
+use some code generation that automatically generates these pydantic classes from the json schema. 
+The same holds over at the unity end point. 
 
-* refactor train_model method. 
+# emotional state
 
-* add project file py for author chris
+there exists 6 emotions. An amotional state is stored in each Persona which is initialised to neutral.  
+the emotional state is updated after each conversation with a user. (not other persona's yet.) 
+So each person has a personality based on the 5 factor model. 
+The facial expression of the persona in unity is updated based on the emotionanal state. 
 
-* why does the LLM return the response as well as the structured response? I dont think that this is the intention. 
-    possible solutions could be mentioning in the prompt to not do this. or in the system background/information to not do this. 
-    otherwise, finetuning the model on a dataset in which such occurance does not happen.
-    see finetuning/generate_data.py 
+# inspiration 
 
-> I'm sorry, I'm still not able to understand that response. Could you please provide some more context or clarify what you meant by "hzefzf"? I'm here to chat and learn more about you!
-> {"Message": "I'm sorry, I'm still not able to understand that response. Could you please provide some more context or clarify what you meant by 'hzefzf'? I'm here to chat and learn more about you!", "Trust": "6", "Time": "11 AM", "Location": "Graz",
-
-
-* run python files in LLM_Character folder in order to avoid relative paths errors.
-
-* look at soulmachines as well. 
-
-* check if pip env has the same dependencies as written in requirements.txt
-
-> as a matter of fact, delete venv, try re-installing, see if everything works. 
-> if it does, start pull request. 
+* soulmachines 

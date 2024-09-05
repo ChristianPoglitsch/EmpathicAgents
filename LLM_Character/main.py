@@ -1,120 +1,72 @@
-import openai
-import time
-import torch
-import os
-import json
+import logging
 import time
 
-from transformers import AutoModel, AutoModelForCausalLM, AutoTokenizer
-from gpt4all import GPT4All
+from LLM_Character.communication.comm_medium import CommMedium
+from LLM_Character.communication.message_processor import MessageProcessor
+from LLM_Character.communication.reverieserver_manager import ReverieServerManager
+from LLM_Character.llm_comms.llm_api import LLM_API
+from LLM_Character.util import LOGGER_NAME, setup_logging
 
-from udp_comms import UdpComms
-from huggingface import HuggingFace
-from speach import speech
-from dataclass import AIMessages, PromptMessage
-from cognitive_modules.summary import summary
+# NOTE: ibrahim: temporary function that will be replaced in the future
+# by the hungarian team ?
+# which will use grpc, for multi client - (multi server?) architecture?
+# somehow a manager will be needed to link the differnt clients to the
+# right available servers, which is now implemented by the ReverieServerManager
 
-def run_server(model:HuggingFace, sock:UdpComms, messages:AIMessages):
-    messages = messages.read_messages_from_json("dialogues/messages.json") # --> previous messages.
-    print("Running Server... \n")
+logger = logging.getLogger(LOGGER_NAME)
+
+
+def start_server(
+    sock: CommMedium,
+    serverm: ReverieServerManager,
+    dispatcher: MessageProcessor,
+    model: LLM_API,
+):
+    logger.info("listening ...")
     while True:
-        byte_data = sock.ReadReceivedData() # non blocking read data
-        if byte_data != None: # if NEW data has been received since last ReadReceivedData function call
-            obj = json.loads(byte_data)
-            pm = PromptMessage(**obj)
-    
-            # Reload if necessary            
-            if pm._message == 'n':
-                print("--- reset chat ---")
-                messages = messages.read_messages_from_json("dialogues/background.json")
-            else:
-                messages.add_message(messages.create_message(pm._message, "user"))
-                messages, response = model.query(messages)
-                
-                pm._value = pm._value + 1
-                pm._message = response
-                
-                obj = json.dumps(pm.__dict__)
-                sock.SendData(obj)
-    
         time.sleep(1)
+        byte_data = sock.read_received_data()
+        if not byte_data:
+            continue
 
-def run_interaction():
-    model = GPT4All("mistral-7b-instruct-v0.1.Q4_0.gguf", n_threads=19, device='gpu')
-    #model = GPT4All("mistral-7b-v0.1.Q3_K_M.gguf", n_threads=19, device='gpu')
-    while True:
-        message = input("Message: ")
-        speech(model, message)
+        logger.info(f"Received some juicy data : {byte_data}")
+        value = dispatcher.validate_data(sock, str(byte_data))
+        if value is None:
+            continue
 
-def run_template():
-    # TODO: convert your downloaded weights to Hugging Face Transformers format 
-    model = AutoModelForCausalLM.from_pretrained("TheBloke/Mistral-7B-OpenOrca-GGUF", model_file="mistral-7b-openorca.Q4_K_M.gguf", model_type="mistral", 
-                gpu_layers=50,
-                hf=True,
-                temperature=0.7,
-                top_p=0.7,
-                top_k=50,
-                repetition_penalty=1.2,
-                context_length=8096,
-                max_new_tokens=2048,
-                threads=os.cpu_count() - 1)
-    tokenizer = AutoTokenizer.from_pretrained(model)
-
-    messages = [
-        {"role": "system", "content": "You are a friendly chatbot who always responds in the style of a pirate",},
-        {"role": "user", "content": "How many helicopters can a human eat in one sitting?"},
-    ]
-    tokenized_chat = tokenizer.apply_chat_template(messages, tokenize=True, add_generation_prompt=True, return_tensors="pt")
-    # print(tokenizer.decode(tokenized_chat[0]))
-
-    outputs = model.generate(tokenized_chat, max_new_tokens=128) 
-    print(tokenizer.decode(outputs[0]))
-
-def run_chat(model:HuggingFace):
-    messages = AIMessages.read_messages_from_json("dialogues/messages.json")
-    while True:
-        message = input("Message: ")
-        if message == 'q':
-            break
-        elif message == 's':
-            print(messages.prints_messages())
-        elif message == 'n':
-            print("--- reset chat ---")
-            messages = messages.read_messages_from_json("dialogues/background.json")
-        elif message == 'r':
-            print("--- reload chat ---")
-            messages = messages.read_messages_from_json("dialogues/messages.json")           
-        else:
-            messages.add_message(messages.create_message(message, "user"))
-            messages, response = model.query(messages)
-            print(response.split('{"Message')[0])
-            messages.write_messages_to_json("dialogues/messages.json")
-
+        # NOTE: should be disptached in a seperate thread, but as python has the GIL,
+        # true multithreading won't work. pub-sub mechanism will be needed.
+        dispatcher.dispatch(sock, serverm, model, value)
 
 
 if __name__ == "__main__":
-    # Set HF_HOME for cache folder
-    # CUDA recommended!
-    print("CUDA found " + str(torch.cuda.is_available()))
+    setup_logging("python_server_endpoint")
+    import torch
 
-    # model_id = "meta-llama/Meta-Llama-3-8B"
-    # model_id = "mistralai/Mixtral-8x7B-Instruct-v0.1" 
-    # model_id = "google/gemma-7b"
-    model_id = "mistralai/Mistral-7B-Instruct-v0.2"
-    model = HuggingFace()
+    from LLM_Character.communication.udp_comms import UdpComms
+    from LLM_Character.llm_comms.llm_openai import OpenAIComms
+
+    logger.info("CUDA found " + str(torch.cuda.is_available()))
+
+    # model = LocalComms()
+    # model_id = "mistralai/Mistral-7B-Instruct-v0.2"
+
+    model = OpenAIComms()
+    model_id = "gpt-4"
+
     model.init(model_id)
+    wrapped_model = LLM_API(model)
 
-    # Create UDP socket to use for sending (and receiving)
-    sock = UdpComms(udpIP="127.0.0.1", portTX=8000, portRX=8001, enableRX=True, suppressWarnings=True)
-    messages = AIMessages()
-    
-    run_server(model, sock, messages)
+    sock = UdpComms(
+        udp_ip="127.0.0.1",
+        port_tx=9090,
+        port_rx=9091,
+        enable_rx=True,
+        suppress_warnings=True,
+    )
+    dispatcher = MessageProcessor()
 
-    # run_chat(model)
-
-    # run_interaction()
-
-    # #FIXME: OSError: TheBloke/Mistral-7B-OpenOrca-GGUF does not appear to have a file named pytorch_model.bin, model.safetensors, tf_model.h5, model.ckpt or flax_model.msgpack.
-    # run_template()
-
-    # summary(model)
+    # FIXME for example, for each new incoming socket,
+    # new process/thread that executes start_server,
+    server_manager = ReverieServerManager()
+    start_server(sock, server_manager, dispatcher, wrapped_model)
