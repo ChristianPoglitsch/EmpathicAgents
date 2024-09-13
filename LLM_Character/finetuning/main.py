@@ -55,6 +55,7 @@ def load_and_train_mistral_example():
     trainer = train_mistral(model, tokenizer, instruct_tune_dataset2)
     model = trainer.model
     tokenizer = trainer.tokenizer
+    # pipe = load_pipeline(model, tokenizer, max_length)
 
     text1 = generate_pipe_text(pipe, f"<s>[INST] {prompt} [/INST]")
     text2 = generate_text(prompt, model, tokenizer, generation_config, max_length)
@@ -213,11 +214,10 @@ if __name__ == "__main__":
     l_files = os.listdir(path)
 
     load_and_train_mistral_example()
-
-    # load_and_train_mistral_example()
     load_mistral_example()
 
     model_id = "openlm-research/open_llama_7b_v2"
+    model_id = "mistralai/Mistral-7B-Instruct-v0.2"
     # trained_path = "thisserand/health_care_german"
 
     run_formatting_example(model_id)
