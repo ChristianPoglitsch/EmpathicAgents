@@ -66,6 +66,9 @@ def load_and_train_mistral_example():
 
         print_generated_text("\n after fine tuning", prompt, text1, text2)
 
+    del tokenizer
+    torch.cuda.empty_cache()
+
 
 def load_mistral_example():
     model, tokenizer = load_mistral_instr_model()
@@ -78,6 +81,9 @@ def load_mistral_example():
 
     text1 = generate_text(question, model, tokenizer, generation_config, 50)
     print_generated_text("\n after fine tuning", question, text1, "")
+    
+    del tokenizer
+    torch.cuda.empty_cache()
 
 
 def run_formatting_example(model_id):
@@ -121,6 +127,9 @@ def run_formatting_example(model_id):
     # inputs = tokenizer(formatted_prompt, return_tensors="pt").to(model.device)
     # outputs = model.generate(inputs=inputs.input_ids, max_new_tokens=60)
     # print(tokenizer.decode(outputs[0], skip_special_tokens=True))
+
+    del tokenizer
+    torch.cuda.empty_cache()
 
 
 def run_train_model_example(model_id, trained_path):
