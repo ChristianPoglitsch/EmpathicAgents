@@ -190,14 +190,11 @@ def run_train_model_example(model_id, trained_path):
     )
     model.config.torch_dtype = torch.bfloat16
 
-    trainer = train_model(model, tokenizer, trained_path)
+    _ = train_model(model, tokenizer, dataset, trained_path)
+    
+    del tokenizer
+    torch.cuda.empty_cache()
 
-    prompt = "Ich habe extreme Schmerzen im unteren Rücken."
-    formatted_prompt = get_formatted_prompt(prompt)
-
-    inputs = tokenizer(formatted_prompt, return_tensors="pt").to(model.device)
-    outputs = model.generate(inputs=inputs.input_ids, max_new_tokens=300)
-    print(tokenizer.decode(outputs[0], skip_special_tokens=True))
 
 
 def run_trained_model(model_id, trained_path):
@@ -227,9 +224,9 @@ if __name__ == "__main__":
 
     model_id = "openlm-research/open_llama_7b_v2"
     model_id = "mistralai/Mistral-7B-Instruct-v0.2"
-    # trained_path = "thisserand/health_care_german"
+    trained_path = "trained\\Mistral-7b-v2-finetune"
+    trained_path = "trained/health_care_german"
 
-    run_formatting_example(model_id)
-    # FIXME:
+    # run_formatting_example(model_id)
     # run_train_model_example(model_id, trained_path)
     # run_trained_model(model_id, trained_path)

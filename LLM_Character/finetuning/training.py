@@ -188,7 +188,7 @@ def train_model(model, tokenizer, dataset, trained_path):
 
     # Saving the fine-tuned Low-Rank Adapters
     trainer.save_model()
-    return trainer
+    return trainer.model
 
 
 if __name__ == "__main__":
