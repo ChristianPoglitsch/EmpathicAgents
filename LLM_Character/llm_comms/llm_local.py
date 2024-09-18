@@ -65,9 +65,7 @@ class LocalComms(LLMComms):
             self._model, self._tokenizer = self._load_model_hf(base_model_id)
 
         # FIXME: cannot use mistral, since it is not an embedding model.
-        self._embedding_model = SentenceTransformer(
-            "sentence-transformers/all-MiniLM-L6-v2"
-        )
+        self._embedding_model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
 
     def send_text(self, prompt: AIMessages, max_length=100) -> Optional[str]:
         """

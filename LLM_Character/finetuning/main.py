@@ -224,10 +224,10 @@ if __name__ == "__main__":
 
     model_id = "openlm-research/open_llama_7b_v2"
     model_id = "mistralai/Mistral-7B-Instruct-v0.2"
-    model_id = "jphme/em_german_7b_v01"
+    model_id = "genericgod/GerMerge-em-leo-mistral-v0.2-SLERP"
     trained_path = "trained\\Mistral-7b-v2-finetune"
     trained_path = "trained/health_care_german"
 
     # run_formatting_example(model_id)
-    run_train_model_example(model_id, trained_path)
+    # run_train_model_example(model_id, trained_path)
     run_trained_model(model_id, trained_path)
