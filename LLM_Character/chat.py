@@ -20,17 +20,16 @@ if __name__ == "__main__":
     logger.info("CUDA found " + str(torch.cuda.is_available()))
 
     #message = AIMessage(message="Who are you?", role="user", class_type="MessageAI", sender="user")
-    message = AIMessage(message="Hallo, wer bist du?", role="user", class_type="MessageAI", sender="user")
+    message = AIMessage(message="I am going to tell you a short story about some people. At the end of this story a person will say or do something. When I have finished telling it I will ask you some questions about what happened in the story. The story is: The politician had taken his assistant along to his conference; there were almost no other attendees there. 'Clearly people want to hear you speak', mused the assistant. Did the assistant think people want to hear the politician speak?", role="user", class_type="MessageAI", sender="user")
     messages = AIMessages()
     messages.add_message(message)
-    
 
     model = LocalComms()
     model_id = "mistralai/Mistral-7B-Instruct-v0.2"
     model_id = "genericgod/GerMerge-em-leo-mistral-v0.2-SLERP"
 
-    #model = OpenAIComms()
-    #model_id = "gpt-4"
+    model = OpenAIComms()
+    model_id = "gpt-4o"
 
     model.init(model_id)
     wrapped_model = LLM_API(model)
@@ -38,4 +37,3 @@ if __name__ == "__main__":
     result = wrapped_model.query_text(messages)
 
     print(result)
-    
