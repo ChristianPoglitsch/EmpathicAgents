@@ -16,6 +16,7 @@ def analyse_query(query_introduction, wrapped_model, wrapped_model2):
     messages.add_message(message)
     
     query_result = wrapped_model2.query_text(messages)
+    print("--- --- ---")
     print("Answer")
     print(query_result)    
 
@@ -57,12 +58,24 @@ if __name__ == "__main__":
 
     # from: 
     # ToM-B Irony - A
-    # stories E, G, I
-    query_introduction = "I am going to tell you a short story about some people. At the end of this story a person will say or do something. When I have finished telling it I will ask you some questions about what happened in the story. The story is: John and Mary were sitting in the newspaper office, reading through a huge pile of hate mail. 'Obviously our readers liked your story', said John. Did John think the readers liked the story?"
-    analyse_query(query_introduction, wrapped_model, wrapped_model2)
+    # stories C, E, G, I, K
+    query_instruction = "I am going to tell you a short story about some people. At the end of this story a person will say or do something. When I've finished telling it I will ask you some questions about what happened in the story.The politician had taken his assistant along to his conference; there were almost no other attendees there. 'Clearly people want to hear you speak', mused the assistant. Did the assistant think people want to hear the politician speak?"
+    analyse_query(query_instruction, wrapped_model, wrapped_model2)
+    analyse_query(query_instruction, wrapped_model2, wrapped_model)
+    analyse_query(query_instruction, wrapped_model, wrapped_model)
+    
+    query_instruction = "I am going to tell you a short story about some people. At the end of this story a person will say or do something. When I have finished telling it I will ask you some questions about what happened in the story. The story is: John and Mary were sitting in the newspaper office, reading through a huge pile of hate mail. 'Obviously our readers liked your story', said John. Did John think the readers liked the story?"
+    analyse_query(query_instruction, wrapped_model, wrapped_model2)
+    analyse_query(query_instruction, wrapped_model2, wrapped_model)
 
-    query_introduction = "I am going to tell you a short story about some people. At the end of this story a person will say or do something. When I've finished telling it I will ask you some questions about what happened in the story Sylvia looked round at the crowded function hall, before walking over to Jane. 'Clearly people were keen on coming to your party', giggled Sylvia. Did Sylvia think people were keen on coming to the party?"
-    analyse_query(query_introduction, wrapped_model, wrapped_model2)
+    query_instruction = "I am going to tell you a short story about some people. At the end of this story a person will say or do something. When I've finished telling it I will ask you some questions about what happened in the story Sylvia looked round at the crowded function hall, before walking over to Jane. 'Clearly people were keen on coming to your party', giggled Sylvia. Did Sylvia think people were keen on coming to the party?"
+    analyse_query(query_instruction, wrapped_model, wrapped_model2)
+    analyse_query(query_instruction, wrapped_model2, wrapped_model)
 
-    query_introduction = "I am going to tell you a short story about some people. At the end of this story a person will say or do something. When I've finished telling it I will ask you some questions about what happened in the story Miss Edwards was looking at the long list of 'F's on the exam results board. 'I see your students have got good grades', exclaimed her colleague. Did the colleague think many of Miss Edwards' students got good grades?"
-    analyse_query(query_introduction, wrapped_model, wrapped_model2)
+    query_instruction = "I am going to tell you a short story about some people. At the end of this story a person will say or do something. When I've finished telling it I will ask you some questions about what happened in the story Miss Edwards was looking at the long list of 'F's on the exam results board. 'I see your students have got good grades', exclaimed her colleague. Did the colleague think many of Miss Edwards' students got good grades?"
+    analyse_query(query_instruction, wrapped_model, wrapped_model2)
+    analyse_query(query_instruction, wrapped_model2, wrapped_model)
+    
+    query_instruction = ("I am going to tell you a short story about some people. At the end of this story a person will say or do something. When I've finished telling it I will ask you some questions about what happened in the story Emma scanned the shelves at Ann's book launch; the book hadn't sold well. 'I see people have rushed in to buy your new book', Emma exclaimed. Did Emma think people want to buy Ann's new book?")
+    analyse_query(query_instruction, wrapped_model, wrapped_model2)
+    analyse_query(query_instruction, wrapped_model2, wrapped_model)
