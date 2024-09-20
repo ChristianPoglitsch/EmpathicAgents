@@ -10,6 +10,25 @@ from LLM_Character.util import LOGGER_NAME, setup_logging
 logger = logging.getLogger(LOGGER_NAME)
 
 
+def analyse_query(query_introduction, wrapped_model, wrapped_model2):
+    message = AIMessage(message=query_introduction, role="user", class_type="MessageAI", sender="user")
+    messages = AIMessages()
+    messages.add_message(message)
+    
+    query_result = wrapped_model2.query_text(messages)
+    print("Answer")
+    print(query_result)    
+
+    query_instruction_analye = "Is the answer for this question correct. Question:'" + query_introduction + "' Answer:'" + query_result + "'"
+    message = AIMessage(message=query_instruction_analye, role="user", class_type="MessageAI", sender="user")
+    messages = AIMessages()
+    messages.add_message(message)    
+    query_result_analyse = wrapped_model.query_text(messages)
+
+    print("Analysed answer")
+    print(query_result_analyse)
+
+
 if __name__ == "__main__":
     setup_logging("python_server_endpoint")
     import torch
@@ -18,13 +37,6 @@ if __name__ == "__main__":
     from LLM_Character.llm_comms.llm_local import LocalComms
 
     logger.info("CUDA found " + str(torch.cuda.is_available()))
-
-    query_introduction = "I am going to tell you a short story about some people. At the end of this story a person will say or do something. When I have finished telling it I will ask you some questions about what happened in the story. The story is: John and Mary were sitting in the newspaper office, reading through a huge pile of hate mail. 'Obviously our readers liked your story', said John. Did John think the readers liked the story?"
-    
-    
-    message = AIMessage(message=query_introduction, role="user", class_type="MessageAI", sender="user")
-    messages = AIMessages()
-    messages.add_message(message)
 
     model = LocalComms()
     model_id = "mistralai/Mistral-7B-Instruct-v0.2"
@@ -42,16 +54,15 @@ if __name__ == "__main__":
     model2.init(model_id2)
     wrapped_model2 = LLM_API(model2)
     model2.max_tokens = 100
-    
-    query_result = wrapped_model2.query_text(messages)
-    print("Answer")
-    print(query_result)    
 
-    query_instruction_analye = "Is the answer for this question correct. Question:'" + query_introduction + "' Answer:'" + query_result + "'"
-    message = AIMessage(message=query_instruction_analye, role="user", class_type="MessageAI", sender="user")
-    messages = AIMessages()
-    messages.add_message(message)    
-    query_result_analyse = wrapped_model.query_text(messages)
+    # from: 
+    # ToM-B Irony - A
+    # stories E, G, I
+    query_introduction = "I am going to tell you a short story about some people. At the end of this story a person will say or do something. When I have finished telling it I will ask you some questions about what happened in the story. The story is: John and Mary were sitting in the newspaper office, reading through a huge pile of hate mail. 'Obviously our readers liked your story', said John. Did John think the readers liked the story?"
+    analyse_query(query_introduction, wrapped_model, wrapped_model2)
 
-    print("Analysed answer")
-    print(query_result_analyse)
+    query_introduction = "I am going to tell you a short story about some people. At the end of this story a person will say or do something. When I've finished telling it I will ask you some questions about what happened in the story Sylvia looked round at the crowded function hall, before walking over to Jane. 'Clearly people were keen on coming to your party', giggled Sylvia. Did Sylvia think people were keen on coming to the party?"
+    analyse_query(query_introduction, wrapped_model, wrapped_model2)
+
+    query_introduction = "I am going to tell you a short story about some people. At the end of this story a person will say or do something. When I've finished telling it I will ask you some questions about what happened in the story Miss Edwards was looking at the long list of 'F's on the exam results board. 'I see your students have got good grades', exclaimed her colleague. Did the colleague think many of Miss Edwards' students got good grades?"
+    analyse_query(query_introduction, wrapped_model, wrapped_model2)
