@@ -10,6 +10,7 @@ class LLM_API:
 
     def __init__(self, LLMComms: LLMComms):
         self._model = LLMComms
+        self._model_name = LLMComms.get_model_name()
 
     def query_text(self, message: AIMessages) -> str:
         return self._model.send_text(message)
@@ -19,3 +20,6 @@ class LLM_API:
         retrieves the text embedding.
         """
         return self._model.send_embedding(text)
+
+    def get_model_name(self) -> str:
+        return self._model.get_model_name()

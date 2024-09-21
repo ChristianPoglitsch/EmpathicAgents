@@ -38,10 +38,11 @@ class LocalComms(LLMComms):
         self._model: PreTrainedModel = None
         self._tokenizer: PreTrainedTokenizer = None
         self._embedding_model: SentenceTransformer = None
+        self._model_name = ''
 
         self.max_tokens = 100
         self.temperature = 0.8
-        self.top_p = 1
+        self.top_p = 1        
 
     def init(self, base_model_id: str, finetuned_model_id: str = None):
         """
@@ -66,6 +67,15 @@ class LocalComms(LLMComms):
 
         # FIXME: cannot use mistral, since it is not an embedding model.
         self._embedding_model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
+        self._model_name = base_model_id
+
+    def get_model_name(self) -> str:
+        """Get model name/id
+
+        Returns:
+            str: model name
+        """
+        return self._model_name
 
     def send_text(self, prompt: AIMessages, max_length=100) -> Optional[str]:
         """

@@ -10,14 +10,14 @@ from LLM_Character.util import LOGGER_NAME, setup_logging
 logger = logging.getLogger(LOGGER_NAME)
 
 
-def analyse_query(query_introduction, wrapped_model, wrapped_model2):
+def analyse_query(query_introduction : str, wrapped_model : LLM_API, wrapped_model2 : LLM_API):
     message = AIMessage(message=query_introduction, role="user", class_type="MessageAI", sender="user")
     messages = AIMessages()
     messages.add_message(message)
     
     query_result = wrapped_model2.query_text(messages)
     print("--- --- ---")
-    print("Answer")
+    print("Answer (" + wrapped_model2.get_model_name() + ")")
     print(query_result)    
 
     query_instruction_analye = "Is the answer for this question correct. Question:'" + query_introduction + "' Answer:'" + query_result + "'"
@@ -26,7 +26,7 @@ def analyse_query(query_introduction, wrapped_model, wrapped_model2):
     messages.add_message(message)    
     query_result_analyse = wrapped_model.query_text(messages)
 
-    print("Analysed answer")
+    print("Analysed answer (" + wrapped_model.get_model_name() + ")")
     print(query_result_analyse)
 
 
