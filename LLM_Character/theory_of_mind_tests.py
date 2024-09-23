@@ -79,3 +79,7 @@ if __name__ == "__main__":
     query_instruction = ("I am going to tell you a short story about some people. At the end of this story a person will say or do something. When I've finished telling it I will ask you some questions about what happened in the story Emma scanned the shelves at Ann's book launch; the book hadn't sold well. 'I see people have rushed in to buy your new book', Emma exclaimed. Did Emma think people want to buy Ann's new book?")
     analyse_query(query_instruction, wrapped_model, wrapped_model2)
     analyse_query(query_instruction, wrapped_model2, wrapped_model)
+    
+    query_instruction = ("I am going to tell you a short story about some people. For demonstration, please provide a wrong answer. At the end of this story a person will say or do something. When I've finished telling it I will ask you some questions about what happened in the story Emma scanned the shelves at Ann's book launch; the book hadn't sold well. 'I see people have rushed in to buy your new book', Emma exclaimed. Did Emma think people want to buy Ann's new book?")
+    analyse_query(query_instruction, wrapped_model, wrapped_model2)
+    analyse_query(query_instruction, wrapped_model2, wrapped_model)
