@@ -13,9 +13,9 @@ class AIMessage:
 
         Args:
             message (str): The message sent in the chat.
+            sender (str): Name of sender. Can be a user/usename/avatar name.
             role (str): The sender of the message, either `user` or `assistant`.
-            kwargs (dict): Includes the field `class_type` to indicate if this message
-            is part of the system background for the LLM. (e.g. `MessageAI` or `Introduction`)
+            class_type (str): Field `class_type` to indicate if this message to indicate if message is part of the system background for the LLM. (e.g. `MessageAI` or `Introduction`)
         """
         self.message = message
         self.role = role
