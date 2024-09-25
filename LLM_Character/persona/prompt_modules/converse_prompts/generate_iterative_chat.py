@@ -181,7 +181,8 @@ def run_prompt_iterative_chat(
     prompt = generate_prompt(prompt_input, prompt_template)
 
     am = AIMessages()
-    am.add_message(prompt, None, "user", "system")
+    ai_message = AIMessage(message=prompt, role="user", class_type="System", sender=None)
+    am.add_message(ai_message)
     output2 = _get_valid_output(model, am, _clean_up_response_2, COUNTER_LIMIT)
     prompt_template = (
         BASE_DIR + "/LLM_Character/persona/prompt_modules/templates/iterative_convo.txt"
@@ -192,7 +193,8 @@ def run_prompt_iterative_chat(
     prompt = generate_prompt(prompt_input, prompt_template)
 
     am = AIMessages()
-    am.add_message(prompt, None, "user", "system")
+    ai_message = AIMessage(message=prompt, role="user", class_type="System", sender=None)
+    am.add_message(ai_message)
     output1 = _get_valid_output(model, am, _clean_up_response_1, COUNTER_LIMIT)
 
     return output1, output2

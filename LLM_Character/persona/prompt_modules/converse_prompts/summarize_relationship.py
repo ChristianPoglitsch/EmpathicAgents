@@ -1,7 +1,7 @@
 from typing import Union
 
 from LLM_Character.llm_comms.llm_api import LLM_API
-from LLM_Character.messages_dataclass import AIMessages
+from LLM_Character.messages_dataclass import AIMessage, AIMessages
 from LLM_Character.persona.memory_structures.scratch.persona_scratch import (
     PersonaScratch,
 )
@@ -61,8 +61,9 @@ def run_prompt_summarize_relationship(
     )
     prompt_input = _create_prompt_input(iscratch, tscratch, statements)
     prompt = generate_prompt(prompt_input, prompt_template)
+    ai_message = AIMessage(message=prompt, role="user", class_type="System", sender=None)
     am = AIMessages()
-    am.add_message(prompt, None, "user", "system")
+    am.add_message(ai_message)
     output = _get_valid_output(model, am, COUNTER_LIMIT)
 
     return output, [output, prompt, prompt_input]
