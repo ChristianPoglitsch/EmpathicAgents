@@ -116,13 +116,13 @@ def generate_one_utterance_user(
 
 
 if __name__ == "__main__":
-    from llm_comms.llm_local import LocalComms
+    from LLM_Character.llm_comms.llm_local import LocalComms
 
     from LLM_Character.persona.persona import Persona
     from LLM_Character.persona.user import User
 
-    person = Persona("MIKE", "nice")
-    user = User("MIKE", "nice")
+    person = Persona("MIKE")
+    user = User("MIKE")
     modelc = LocalComms()
 
     model_id = "mistralai/Mistral-7B-Instruct-v0.2"
@@ -130,4 +130,5 @@ if __name__ == "__main__":
 
     model = LLM_API(modelc)
     message = "hi"
-    _generate_response(user.scratch, person.scratch, person.a_mem, message, model)
+    utt, emotion, trust, end = _generate_response(user.scratch, person.scratch, person.a_mem, message, model)
+    print(utt)

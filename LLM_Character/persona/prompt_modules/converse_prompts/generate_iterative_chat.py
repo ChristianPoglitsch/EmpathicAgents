@@ -46,9 +46,11 @@ def _create_prompt_input_1(  # noqa: C901
         ):
             prev_convo_insert = "You know each other"
 
-    curr_sector = f"{cscratch.get_curr_location()['sector']}"
-    curr_arena = f"{cscratch.get_curr_location()['arena']}"
-    curr_location = f"{curr_arena} in {curr_sector}"
+    curr_location = None
+    if(cscratch.get_curr_location() != None):
+        curr_sector = f"{cscratch.get_curr_location()['sector']}"
+        curr_arena = f"{cscratch.get_curr_location()['arena']}"
+        curr_location = f"{curr_arena} in {curr_sector}"
 
     retrieved_str = ""
     for _, vals in retrieved.items():
