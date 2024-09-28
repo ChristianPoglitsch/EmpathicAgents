@@ -1,3 +1,4 @@
+from xmlrpc.client import boolean
 from LLM_Character.llm_comms.llm_abstract import LLMComms
 from LLM_Character.messages_dataclass import AIMessages
 
@@ -8,11 +9,16 @@ class LLM_API:
     including loading models, querying models
     """
 
-    def __init__(self, LLMComms: LLMComms):
+    def __init__(self, LLMComms: LLMComms, debug : boolean = False):
         self._model = LLMComms
         self._model_name = LLMComms.get_model_name()
+        self._debug = debug
 
     def query_text(self, message: AIMessages) -> str:
+        if self._debug:
+            print('--- --- ---')
+            print(message.get_formatted())
+            print('--- --- ---')
         return self._model.send_text(message)
 
     def get_embedding(self, text: str) -> list[float]:

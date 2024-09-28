@@ -36,6 +36,10 @@ def _create_prompt_input_1(  # noqa: C901
                 prev_convo_insert += f"{str(v1)} minutes ago, {cscratch.name} and \
                 {uscratch.name} were already {i.description} \
                 This context takes place after that conversation."
+                for _, vals in retrieved.items():
+                    for v in vals:
+                        for row in v.filling:
+                            prev_convo_insert += f"{row[0]}: {row[1]}\n"
                 break
     if prev_convo_insert == "\n":
         prev_convo_insert = "You don't know each other"

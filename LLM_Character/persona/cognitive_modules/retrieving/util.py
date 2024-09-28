@@ -12,7 +12,7 @@ from LLM_Character.persona.memory_structures.scratch.persona_scratch import (
 
 def retrieve_recent_sorted_nodes(a_mem: AssociativeMemory):
     nodes = []
-    for i in a_mem.seq_thought + a_mem.seq_event:
+    for i in a_mem.seq_thought + a_mem.seq_event + a_mem.seq_chat:
         if "idle" not in i.embedding_key:
             nodes += [[i.last_accessed, i]]
 

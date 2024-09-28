@@ -79,7 +79,7 @@ class LocalComms(LLMComms):
 
     def send_text(self, prompt: AIMessages, max_length=100) -> Optional[str]:
         """
-        send a prompt to openAI endpoint for chat completions.
+        send a prompt to local endpoint for chat completions.
         """
         if len(prompt) == 0:
             return None

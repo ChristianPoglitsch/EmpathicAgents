@@ -53,10 +53,10 @@ def _generate_response(
         ]
 
     # NOTE add message as focal point
-    focal_points = [f"{user_scratch.name}", message]
-    retrieved = retrieve_focal_points(
-        character_scratch, character_mem, focal_points, model, 15
-    )
+    # focal_points = [f"{user_scratch.name}", message]
+    #retrieved = retrieve_focal_points(
+    #    character_scratch, character_mem, focal_points, model, 15
+    #)
     utt, emotion, trust, end = generate_one_utterance_user(
         user_scratch, character_scratch, character_mem, model, retrieved, curr_chat[-8:]
     )

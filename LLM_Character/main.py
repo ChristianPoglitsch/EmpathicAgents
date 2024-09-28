@@ -56,7 +56,7 @@ if __name__ == "__main__":
     #model_id = "gpt-4"
 
     model.init(model_id)
-    wrapped_model = LLM_API(model)
+    wrapped_model = LLM_API(model, debug = True)
 
     sock = UdpComms(
         udp_ip="127.0.0.1",
