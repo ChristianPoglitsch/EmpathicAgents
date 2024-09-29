@@ -19,7 +19,12 @@ class LLM_API:
             print('--- --- ---')
             print(message.get_formatted())
             print('--- --- ---')
-        return self._model.send_text(message)
+        result = self._model.send_text(message)
+        if self._debug:
+            print('*** *** ***')
+            print(result)
+            print('*** *** ***')
+        return result
 
     def get_embedding(self, text: str) -> list[float]:
         """
