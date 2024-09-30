@@ -32,6 +32,12 @@ if __name__ == "__main__":
     wrapped_model = LLM_API(model)    
     model.max_tokens = 100
     
+    # role
+    message = AIMessage(message='You are a pirate chatbot who always responds in pirate speak!', role="user", class_type="Introduction", sender="user")
+    messages.add_message(message)
+    message = AIMessage(message='hi', role="assistant", class_type="MessageAI", sender="assistant")
+    messages.add_message(message)
+
     while True:
         query_introduction = input("Chat: ")
         if query_introduction == "q":
