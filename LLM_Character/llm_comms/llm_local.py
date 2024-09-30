@@ -199,7 +199,7 @@ class LocalComms(LLMComms):
         model = AutoModelForCausalLM.from_pretrained(  # device_map="auto"
             model_id,
             quantization_config=quantization_config,
-            torch_dtype=torch.bfloat16,
+            torch_dtype=torch.bfloat16, # token=' '
         )
 
         model.config.sliding_window = 4096
