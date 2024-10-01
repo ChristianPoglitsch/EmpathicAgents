@@ -131,6 +131,36 @@ class EmotionDecorator(MessageProcessing):
         self._llm_api.set_max_tokens(100)
         return message_processing
 
+class ActionDecorator(MessageProcessing):
+    
+    def __init__(self, decorator : MessageProcessing, llm_api : LLM_API):
+        super(ActionDecorator, self).__init__(decorator)      
+        self._llm_api = llm_api
+
+    def get_messages(self) -> MessageStruct:
+        message_processing = self._decorator.get_messages()        
+        messages = message_processing.get_history().get_messages()
+        
+        message = 'Your role is an AI bot. Based on the Instruction and the Message plan what is best for the future. Next steps, where to go. What to do. \n'
+        message = message + 'Instruction:\n' + message_processing.get_instruction().get_message() + '\n'    
+        message = message + 'Message:\n' + messages[-1].message + '\n' 
+        
+        ai_message = AIMessage(message=message, role="user", class_type="MessageAI", sender="user")
+        ai_messages = AIMessages()
+        ai_messages.add_message(ai_message)
+        
+        self._llm_api.set_max_tokens(10)
+        reply = self._llm_api.query_text(ai_messages)
+        print('--- ---')
+        print('Plan: ' + reply)
+        print('--- ---')
+        m = message_processing.get_instruction()
+        m.message = m.message + '\nYour plans for the future:' + reply
+        message_processing.set_instruction(m)
+
+        self._llm_api.set_max_tokens(100)
+        return message_processing
+
 # ---
 
 
@@ -164,6 +194,7 @@ if __name__ == "__main__":
 
     importance_decorator = ImportanceDecorator(message_decorator, wrapped_model)
     emotion_decorator = EmotionDecorator(importance_decorator, wrapped_model)
+    action_decorator = ActionDecorator(emotion_decorator, wrapped_model)
 
     while True:
         query_introduction = input("Chat: ")
@@ -172,7 +203,7 @@ if __name__ == "__main__":
         
         message = AIMessage(message=query_introduction, role="user", class_type="MessageAI", sender="user")
         message_manager.add_message(message)
-        query = emotion_decorator.get_messages().get_instruction_and_history()
+        query = action_decorator.get_messages().get_instruction_and_history()
         
         print('--- ---')
         print(query.prints_messages_role())
