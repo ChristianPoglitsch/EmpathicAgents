@@ -34,3 +34,6 @@ class LLM_API:
 
     def get_model_name(self) -> str:
         return self._model.get_model_name()
+    
+    def set_max_tokens(self, value: int):
+        self._model.max_tokens = value

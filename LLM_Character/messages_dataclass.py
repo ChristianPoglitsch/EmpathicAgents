@@ -112,6 +112,13 @@ class AIMessages:
         """
         return self.messages
 
+    def remove_item(self, index : int):
+        """
+        Remove item at index from list
+
+        """
+        self.messages.pop(index)
+
     def get_formatted(self) -> List[dict]:
         """
         Represents the messages of this chat as a list of
