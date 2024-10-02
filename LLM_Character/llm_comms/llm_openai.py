@@ -57,6 +57,14 @@ class OpenAIComms(LLMComms):
         self.model_name = model
         self.client = OpenAI(api_key=API_KEY)
 
+    def get_model_name(self) -> str:
+        """Get model name/id
+
+        Returns:
+            str: model name
+        """
+        return self.model_name
+
     # FIXME: use dict as arguments for gpt model instead of positional
     # arguments.
     def send_text(self, aimessages: AIMessages) -> Optional[str]:

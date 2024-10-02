@@ -1,5 +1,5 @@
 from LLM_Character.llm_comms.llm_api import LLM_API
-from LLM_Character.messages_dataclass import AIMessages
+from LLM_Character.messages_dataclass import AIMessage, AIMessages
 from LLM_Character.persona.memory_structures.scratch.persona_scratch import (
     PersonaScratch,
 )
@@ -49,7 +49,8 @@ def run_prompt_poignancy_event(
     #   special_instruction = "The output should ONLY contain ONE integer valu
     prompt = generate_prompt(prompt_input, prompt_template)
     am = AIMessages()
-    am.add_message(prompt, None, "user", "system")  # NOTE: not really user btw
+    ai_message = AIMessage(message=prompt, role="user", class_type="System", sender=None)  # NOTE: not really user btw
+    am.add_message(ai_message)
     output = _get_valid_output(model, am, COUNTER_LIMIT)
 
     return output, [output, prompt, prompt_input]
@@ -59,11 +60,11 @@ if __name__ == "__main__":
     from LLM_Character.llm_comms.llm_local import LocalComms
     from LLM_Character.persona.persona import Persona
 
-    person = Persona("FRERO", "nice")
+    person = Persona("FRERO")
 
     modelc = LocalComms()
     model_id = "mistralai/Mistral-7B-Instruct-v0.2"
     modelc.init(model_id)
 
     model = LLM_API(modelc)
-    run_prompt_poignancy_event(person.scratch, model)
+    run_prompt_poignancy_event(person.scratch, 'desc', model)

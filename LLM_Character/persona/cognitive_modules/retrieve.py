@@ -81,15 +81,15 @@ def retrieve_focal_points(
         importance_out = extract_importance(nodes)
         importance_out = normalize_dict_floats(importance_out, 0, 1)
 
-        relevance_out = extract_relevance(a_mem, nodes, focal_pt, model)
-        relevance_out = normalize_dict_floats(relevance_out, 0, 1)
+        #relevance_out = extract_relevance(a_mem, nodes, focal_pt, model)
+        #relevance_out = normalize_dict_floats(relevance_out, 0, 1)
 
         gw = [0.5, 3, 2]
         master_out = {}
         for key in recency_out.keys():
             master_out[key] = (
                 scratch.recency_w * recency_out[key] * gw[0]
-                + scratch.relevance_w * relevance_out[key] * gw[1]
+                #+ scratch.relevance_w * relevance_out[key] * gw[1]
                 + scratch.importance_w * importance_out[key] * gw[2]
             )
 

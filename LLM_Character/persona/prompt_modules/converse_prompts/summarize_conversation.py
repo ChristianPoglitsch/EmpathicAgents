@@ -1,6 +1,6 @@
 # run_prompt_summarize_conversation
 from LLM_Character.llm_comms.llm_api import LLM_API
-from LLM_Character.messages_dataclass import AIMessages
+from LLM_Character.messages_dataclass import AIMessage, AIMessages
 from LLM_Character.persona.prompt_modules.prompt import generate_prompt
 from LLM_Character.util import BASE_DIR
 
@@ -65,8 +65,8 @@ def run_prompt_summarize_conversation(model: LLM_API, conversation: str, verbose
     # example_output = "conversing about what to eat for lunch" ########
     # special_instruction = "The output must continue the sentence above by fi
     am = AIMessages()
-    am.add_message(prompt, None, "user", "system")
-    #this lets the LLM summarise the convo
+    ai_message = AIMessage(message=prompt, role="user", class_type="System", sender=None)
+    am.add_message(ai_message)
     output = _get_valid_output(model, am, COUNTER_LIMIT)
 
     return output, [output, prompt, prompt_input]
@@ -76,7 +76,7 @@ if __name__ == "__main__":
     from LLM_Character.llm_comms.llm_local import LocalComms
     from LLM_Character.persona.persona import Persona
 
-    person = Persona("FRERO", "nice")
+    person = Persona("FRERO")
 
     modelc = LocalComms()
     model_id = "mistralai/Mistral-7B-Instruct-v0.2"

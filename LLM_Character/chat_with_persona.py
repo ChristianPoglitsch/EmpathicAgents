@@ -23,14 +23,23 @@ def start_server(
     model: LLM_API,
 ):
     logger.info("listening ...")
+
+    # Load game
+    query_introduction = '{"data":{"fork_sim_code":"FORK123","sim_code":"SIM456"},"type":"StartMessage"}'
+    logger.info(f"Received some juicy data : {query_introduction}")
+    value = dispatcher.validate_data(sock, str(query_introduction))
+    dispatcher.dispatch(sock, serverm, model, value)
+
     while True:
         time.sleep(1)
-        byte_data = sock.read_received_data()
-        if not byte_data:
-            continue
+        query = input("Chat: ")
+        if query == "q":
+            break
 
-        logger.info(f"Received some juicy data : {byte_data}")
-        value = dispatcher.validate_data(sock, str(byte_data))
+        query_introduction = '{"data":{"persona_name":"Camila","user_name":"Chris","message":"' + query + '"},"type":"PromptMessage"}'
+
+        logger.info(f"Received some juicy data : {query_introduction}")
+        value = dispatcher.validate_data(sock, str(query_introduction))
         if value is None:
             continue
 

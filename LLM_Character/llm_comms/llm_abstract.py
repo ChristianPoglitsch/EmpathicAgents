@@ -19,3 +19,7 @@ class LLMComms(ABC):
     @abstractmethod
     def set_params():
         pass
+
+    @abstractmethod
+    def get_model_name():
+        pass

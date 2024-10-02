@@ -46,6 +46,7 @@ class ReverieServer:
         self, user_name: str, persona_name: str, message: str, model: LLM_API
     ) -> Union[None, Tuple[str, str, int, bool]]:
         if self.loaded:
+            # TODO: What should happen if a new user is added?
             user = self.users[user_name]
             out = self.personas[persona_name].open_convo_session(
                 user.scratch, message, self.curr_time, model

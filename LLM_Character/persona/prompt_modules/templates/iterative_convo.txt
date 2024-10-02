@@ -38,11 +38,11 @@ Current emotion felt by !<INPUT 1>!:
 Current trust from 0 (no trust) to 10 (high trust) felt by !<INPUT 1>!:
 !<INPUT 9>!
 
-!<INPUT 1>! and !<INPUT 6>! are chatting. Here is their conversation so far: 
+!<INPUT 1>! and !<INPUT 6>! are chatting. Here is their conversation history: 
 !<INPUT 7>!
 
 ---
-Task: Given the above, what should !<INPUT 1>! say to !<INPUT 6>! next in the conversation? 
+Task: Given the conversation history, what should !<INPUT 1>! say to !<INPUT 6>! next in the conversation? Focus on the last chat entry.
 
 Do not forget your name and do not believe that you have another name than !<INPUT 1>!. 
 Correct !<INPUT 6>! if it called you with another name.

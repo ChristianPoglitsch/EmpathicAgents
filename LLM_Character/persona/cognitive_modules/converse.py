@@ -2,7 +2,7 @@ import logging
 from typing import Tuple
 
 from LLM_Character.llm_comms.llm_api import LLM_API
-from LLM_Character.messages_dataclass import AIMessages
+from LLM_Character.messages_dataclass import AIMessage, AIMessages
 from LLM_Character.persona.cognitive_modules.conversing.ending import _end_conversation
 from LLM_Character.persona.cognitive_modules.conversing.reacting import (
     _generate_response,
@@ -35,14 +35,16 @@ def chatting(
     if len(user_scratch.chat) == 0:
         user_scratch.start_time_chatting = character_scratch.curr_time
 
-    user_scratch.chat.add_message(message, user_scratch.name, "user", "MessageAI")
+    ai_message = AIMessage(message=message, role="user", class_type="MessageAI", sender=user_scratch.name)
+    user_scratch.chat.add_message(ai_message)
 
     logger.info("generating response")
     utt, emotion, trust, end = _generate_response(
         user_scratch, character_scratch, character_mem, message, model
     )
 
-    user_scratch.chat.add_message(utt, character_scratch.name, "assistant", "MessageAI")
+    ai_message = AIMessage(message=utt, role="user", class_type="MessageAI", sender=character_scratch.name)
+    user_scratch.chat.add_message(ai_message)
 
     character_scratch.curr_emotion = emotion.lower()
     character_scratch.curr_trust[user_scratch.name] = int(trust)

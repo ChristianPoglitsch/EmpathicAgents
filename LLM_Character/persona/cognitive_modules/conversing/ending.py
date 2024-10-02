@@ -16,8 +16,7 @@ from LLM_Character.persona.prompt_modules.converse_prompts.summarize_conversatio
 def _end_conversation(
     user_scratch: UserScratch, character_scratch: PersonaScratch, model: LLM_API
 ):
-    convo = user_scratch.chat
-    convo_summary = generate_convo_summary(convo, model)
+    convo_summary = generate_convo_summary(user_scratch.chat.prints_messages_sender(), model)
 
     inserted_act = convo_summary
     inserted_act_dur = character_scratch.curr_time - user_scratch.start_time_chatting
@@ -39,7 +38,7 @@ def _end_conversation(
         act_address,
         act_event,
         chatting_with,
-        convo,
+        user_scratch.chat,
         chatting_with_buffer,
         chatting_end_time,
         act_start_time,
