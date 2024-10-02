@@ -11,14 +11,6 @@ def _create_prompt_input(convo_str: str):
     prompt_input = [convo_str]
     return prompt_input
 
-def _create_prompt_input_alt(convo_str: AIMessages):
-    messages = convo_str.get_messages()
-    prompt_input = []
-    for msg in messages:
-        prompt_input.append(msg.print_message_role())
-    # prompt_input = convo_str.get_messages()
-    return prompt_input
-
 
 def _clean_up_response(response: str):
     return "conversing about " + response.strip()
@@ -54,12 +46,6 @@ def run_prompt_summarize_conversation(model: LLM_API, conversation: str, verbose
     )
     prompt_input = _create_prompt_input(conversation)
     prompt = generate_prompt(prompt_input, prompt_template)
-
-    #alt version
-    #!!!!Generate prompt gets used often in program, either do a sepertae version or change the params outside of it!!!!
-    #set a breakpoint in prompt.py to see how a good version of it looks, then adapt that
-    pi = _create_prompt_input_alt(conversation)
-    prompt2 = generate_prompt(pi, prompt_template)
 
     # FIXME:
     # example_output = "conversing about what to eat for lunch" ########

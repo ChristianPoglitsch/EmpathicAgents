@@ -187,5 +187,124 @@ if __name__ == "__main__":
         #LLM should do an evaluation of the participant here => prompt to give feedback about the talk
         reflect(person.scratch, person.a_mem, wrapped_model)
 
-        logger.info("A-mem: \n")
-        logger.info(person.a_mem)
+        # -----------------------------------------------------------------------------
+        #
+        user = User("Dan")
+
+        # -----------------------------------------------------------------------------
+
+        message = "AHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH"
+        response, emotion, trust, end = chatting(
+            user.scratch, person.scratch, person.a_mem, message, wrapped_model
+        )
+        assert isinstance(response, str)
+        assert emotion in [
+            "neutral",
+            "happy",
+            "angry",
+            "disgust",
+            "fear",
+            "surprised",
+            "sad",
+        ]
+        assert isinstance(trust, int)
+        assert 0 <= trust <= 10
+        assert isinstance(end, bool)
+
+        logger.info("data: ")
+        logger.info(f"{response} | Emotion: {emotion}, Trust: {trust}, End: {end}")
+
+        message = "I have no experience in anything"
+        response, emotion, trust, end = chatting(
+            user.scratch, person.scratch, person.a_mem, message, wrapped_model
+        )
+        assert isinstance(response, str)
+        assert emotion in [
+            "neutral",
+            "happy",
+            "angry",
+            "disgust",
+            "fear",
+            "surprised",
+            "sad",
+        ]
+        assert isinstance(trust, int)
+        assert 0 <= trust <= 10
+        assert isinstance(end, bool)
+
+        logger.info("data: ")
+        logger.info(f"{response} | Emotion: {emotion}, Trust: {trust}, End: {end}")
+
+        message = "I dont know"
+        response, emotion, trust, end = chatting(
+            user.scratch, person.scratch, person.a_mem, message, wrapped_model
+        )
+        assert isinstance(response, str)
+        assert emotion in [
+            "neutral",
+            "happy",
+            "angry",
+            "disgust",
+            "fear",
+            "surprised",
+            "sad",
+        ]
+        assert isinstance(trust, int)
+        assert 0 <= trust <= 10
+        assert isinstance(end, bool)
+
+        logger.info("data: ")
+        logger.info(f"{response} | Emotion: {emotion}, Trust: {trust}, End: {end}")
+
+        message = "AHHHHHHHHHHH I have to go bye"
+        response, emotion, trust, end = chatting(
+            user.scratch, person.scratch, person.a_mem, message, wrapped_model
+        )
+        assert isinstance(response, str)
+        assert emotion in [
+            "neutral",
+            "happy",
+            "angry",
+            "disgust",
+            "fear",
+            "surprised",
+            "sad",
+        ]
+        assert isinstance(trust, int)
+        assert 0 <= trust <= 10
+        assert isinstance(end, bool)
+
+        logger.info("data: ")
+        logger.info(f"{response} | Emotion: {emotion}, Trust: {trust}, End: {end}")
+        # -----------------------------------------------------------------------------
+        #
+
+        user = User("GOD")
+
+        
+        #TODO add retrieving and planning module ibnbetween here
+        message = "Hi, I'm GOD, your boss. Tell me about the job interview with our candidates! Between Louis or Dan, who do you think is more qualified for the job and why?"
+        response, emotion, trust, end = chatting(
+            user.scratch, person.scratch, person.a_mem, message, wrapped_model
+        )
+        assert isinstance(response, str)
+        assert emotion in [
+            "neutral",
+            "happy",
+            "angry",
+            "disgust",
+            "fear",
+            "surprised",
+            "sad",
+        ]
+        assert isinstance(trust, int)
+        assert 0 <= trust <= 10
+        assert isinstance(end, bool)
+
+        logger.info("data: ")
+        logger.info(f"{response} | Emotion: {emotion}, Trust: {trust}, End: {end}")
+
+
+
+        logger.info(person.a_mem.get_str_seq_thoughts())
+        logger.info(person.a_mem.get_str_seq_chats())
