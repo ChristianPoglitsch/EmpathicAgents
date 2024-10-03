@@ -22,7 +22,7 @@ if __name__ == "__main__":
     messages = AIMessages()
 
     model = LocalComms()
-    model_id = "mistralai/Mistral-7B-Instruct-v0.2"
+    model_id = "mistralai/Mistral-7B-Instruct-v0.3"
     # model_id = "genericgod/GerMerge-em-leo-mistral-v0.2-SLERP"
 
     # model = OpenAIComms()
