@@ -71,12 +71,13 @@ class ImportanceDecorator(MessageProcessing):
         message_processing = self._decorator.get_messages()
         messages = message_processing.get_history().get_messages()
         
-        if len(messages) < 3:
+        num_messages = 10
+        if len(messages) < num_messages:
             return message_processing
         
         message = 'Based on the Instruction, the message and location extract the importance of the message. Score the importance in range of [0, 10]. First, determine the importance. Second, format your answer exactly like this: {"Importance": "<Your importance>"}. Answer only with this structure. \n'
         message = message + 'Instruction: ' + message_processing.get_instruction().get_message() + '\n'    
-        message = message + 'Message: ' + messages[-3].message + '\n' 
+        message = message + 'Message: ' + messages[-num_messages].message + '\n' 
         
         ai_message = AIMessage(message=message, role="user", class_type="MessageAI", sender="user")
         ai_messages = AIMessages()
@@ -86,9 +87,9 @@ class ImportanceDecorator(MessageProcessing):
         
         importance = re.findall(r'\d+', reply)
         importance = int(importance[-1])        
-        if importance > 3:
-            self._important_message.add_message(messages[-3])
-            self._important_message.add_message(messages[-2])            
+        if importance > 6:
+            self._important_message.add_message(messages[-num_messages])
+            self._important_message.add_message(messages[-num_messages+1])            
 
         print('--- ---')
         print('Importance: ' + reply)
@@ -210,7 +211,7 @@ if __name__ == "__main__":
     logger.info("CUDA found " + str(torch.cuda.is_available()))
 
     # AI role
-    message = AIMessage(message='You are playing a role. Answer according to your character. You are a 22-year-old woman named Ana. You are from Graz. Followe your action plan. Only reveal your action plan if it fits naturally into the conversation. Keep your response short. ', role="user", class_type="Introduction", sender="user")
+    message = AIMessage(message='You are playing a role. Answer according to your character. You are a 22-year-old woman named Ana. You are from Graz and you have a physical body. Follow your action plan. Keep your response short. ', role="user", class_type="Introduction", sender="user")
     message_manager = MessageStruct(message)    
     message = AIMessage(message='hi', role="assistant", class_type="MessageAI", sender="assistant")
     message_manager.add_message(message)
