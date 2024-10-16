@@ -1,5 +1,5 @@
 from LLM_Character.llm_comms.llm_api import LLM_API
-from LLM_Character.messages_dataclass import AIMessages
+from LLM_Character.messages_dataclass import AIMessage, AIMessages
 from LLM_Character.persona.prompt_modules.prompt import generate_prompt
 from LLM_Character.util import BASE_DIR
 
@@ -52,7 +52,7 @@ def run_prompt_generate_focal_pt(model: LLM_API, n: int, all_utt: str, verbose=F
     # example_output = '["What should Jane do for lunch", "Does Jane like stra
     # special_instruction = "Output must be a list of str." ########
     am = AIMessages()
-    am.add_message(prompt, None, "user", "system")  # NOTE: not really user btw
+    am.add_message(AIMessage(prompt, None, "user", "system"))  # NOTE: not really user btw
     output = _get_valid_output(model, am, n, COUNTER_LIMIT)
 
     return output, [output, prompt, prompt_input]

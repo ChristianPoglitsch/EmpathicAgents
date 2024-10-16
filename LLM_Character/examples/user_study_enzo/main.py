@@ -81,8 +81,12 @@ from LLM_Character.llm_comms.llm_api import LLM_API
 from LLM_Character.llm_comms.llm_local import LocalComms
 from LLM_Character.llm_comms.llm_openai import OpenAIComms
 from LLM_Character.persona.cognitive_modules.converse import chatting
-from LLM_Character.persona.cognitive_modules.reflect import reflect
+from LLM_Character.persona.cognitive_modules.reflect import generate_focal_points, generate_insights_and_evidence, reflect, reset_reflection_counter, run_reflect
+from LLM_Character.persona.cognitive_modules.retrieve import retrieve_focal_points
 from LLM_Character.persona.persona import Persona
+from LLM_Character.persona.prompt_modules.converse_prompts.summarize_conversation import run_prompt_summarize_conversation
+from LLM_Character.persona.prompt_modules.reflect_prompts.insight_and_guidance import run_prompt_insight_and_evidence
+from LLM_Character.persona.prompt_modules.reflect_prompts.memo_convo import run_prompt_memo_convo
 from LLM_Character.persona.user import User
 from LLM_Character.util import BASE_DIR, LOGGER_NAME, setup_logging
 
@@ -139,7 +143,7 @@ if __name__ == "__main__":
         logger.info("data: ")
         logger.info(f"{response} | Emotion: {emotion}, Trust: {trust}, End: {end}")
 
-        message = input()
+        message = "I have years of experience in game development"
         response, emotion, trust, end = chatting(
             user.scratch, person.scratch, person.a_mem, message, wrapped_model
         )
@@ -161,8 +165,11 @@ if __name__ == "__main__":
         logger.info(f"{response} | Emotion: {emotion}, Trust: {trust}, End: {end}")
 
         end_flag = False
+        msg_count = 0
+        temp_messages = ["I worked as a Lead Programmer on Street Fighter 6.", "I cant talk about this because of NDA. Bye!"]
         while not end_flag:
-            message = input()
+            message = temp_messages[msg_count]
+            msg_count += 1
             response, emotion, trust, end = chatting(
                 user.scratch, person.scratch, person.a_mem, message, wrapped_model
             )
@@ -279,32 +286,68 @@ if __name__ == "__main__":
         # -----------------------------------------------------------------------------
         #
 
+
+        logger.info("Start reflecting and make decision")
         user = User("GOD")
 
         
         #TODO add retrieving and planning module ibnbetween here
-        message = "Hi, I'm GOD, your boss. Tell me about the job interview with our candidates! Between Louis or Dan, who do you think is more qualified for the job and why?"
-        response, emotion, trust, end = chatting(
-            user.scratch, person.scratch, person.a_mem, message, wrapped_model
-        )
-        assert isinstance(response, str)
-        assert emotion in [
-            "neutral",
-            "happy",
-            "angry",
-            "disgust",
-            "fear",
-            "surprised",
-            "sad",
-        ]
-        assert isinstance(trust, int)
-        assert 0 <= trust <= 10
-        assert isinstance(end, bool)
+        #start reflection
+        run_reflect(person.scratch, person.a_mem, wrapped_model)
+        reset_reflection_counter(person.scratch)
+        
+
+        #TODO from reflect.py run_reflect get everything up tp line 121 to get output of convo
+        focal_points = generate_focal_points(person.scratch, person.a_mem, wrapped_model, 3)
+        retrieved = retrieve_focal_points(person.scratch, person.a_mem, focal_points, wrapped_model)
+        thoughts = []
+        for _, nodes in retrieved.items():
+            statements = ""
+            for count, node in enumerate(nodes):
+                statements += f"{str(count)}. {node.embedding_key}\n"
+
+            ret = run_prompt_insight_and_evidence(wrapped_model, 5, statements)[0]
+            thoughts.append(ret)
+        logger.info(thoughts)
+        #validation I am hungry problem def run_prompt_insight_and_evidence(
+        #create prompt for run_prompt_memo_convo
+
+
+        run_prompt_summarize_conversation(wrapped_model, person.a_mem.get_summarized_latest_events())
+
+        #TODO implement and add to run prompt memo convo
+        # run_prompt_summarize_relationship(
+        # iscratch: UserScratch,
+        # tscratch: PersonaScratch,
+        # model: LLM_API,
+        # statements: str,
+
+
+            
+
+        logger.info(run_prompt_memo_convo(person.scratch, wrapped_model, "Which of the two participants would you hire?"))
+        # message = "Hi, I'm GOD, your boss. Tell me about the job interview with our candidates! Between Louis or Dan, who do you think is more qualified for the job and why?"
+        # response, emotion, trust, end = chatting(
+        #     user.scratch, person.scratch, person.a_mem, message, wrapped_model
+        # )
+        # assert isinstance(response, str)
+        # assert emotion in [
+        #     "neutral",
+        #     "happy",
+        #     "angry",
+        #     "disgust",
+        #     "fear",
+        #     "surprised",
+        #     "sad",
+        # ]
+        # assert isinstance(trust, int)
+        # assert 0 <= trust <= 10
+        # assert isinstance(end, bool)
 
         logger.info("data: ")
         logger.info(f"{response} | Emotion: {emotion}, Trust: {trust}, End: {end}")
 
 
-
+        #TODO mabe use this stuff too
         logger.info(person.a_mem.get_str_seq_thoughts())
         logger.info(person.a_mem.get_str_seq_chats())

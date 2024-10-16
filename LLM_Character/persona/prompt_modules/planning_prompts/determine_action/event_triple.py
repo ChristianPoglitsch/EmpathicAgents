@@ -4,7 +4,7 @@ return the suitable tuple (subject, predicate, object) of the action description
 """
 
 from LLM_Character.llm_comms.llm_api import LLM_API
-from LLM_Character.messages_dataclass import AIMessages
+from LLM_Character.messages_dataclass import AIMessage, AIMessages
 from LLM_Character.persona.memory_structures.scratch.persona_scratch import (
     PersonaScratch,
 )
@@ -65,7 +65,7 @@ def run_prompt_event_triple(
     prompt = generate_prompt(prompt_input, prompt_template)
 
     am = AIMessages()
-    am.add_message(prompt, None, "user", "system")
+    am.add_message(AIMessage(prompt, None, "user", "system"))
 
     output = _get_valid_output(scratch, model, am, COUNTER_LIMIT)
 
